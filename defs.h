@@ -5,6 +5,8 @@
 
 #define len(p) (p)[-1]
 
+#define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
+
 extern int ec_malloc_count;
 
 struct point {

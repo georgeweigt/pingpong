@@ -1,2 +1,2 @@
-a.out: defs.h ec.c pingpong.c
-	gcc pingpong.c
+pingpong: defs.h ec.c pingpong.c
+	gcc -o pingpong pingpong.c
