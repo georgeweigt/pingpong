@@ -1,7 +1,10 @@
-#include <stdio.h> // printf
-#include <stdlib.h> // abs, exit, free, malloc
-#include <string.h> // strlen
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <poll.h>
 
 #define len(p) (p)[-1]
 

@@ -1,7 +1,12 @@
 #include "defs.h"
 #include "ec.c"
 
+#define TIMEOUT 1000 // poll timeout in milliseconds
+
 // Sepolia boot node geth
+
+#define DEST_PORT 12345
+#define DEST_IP "127.0.0.1"
 
 #define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
 #define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
@@ -20,13 +25,57 @@ uint32_t *bignum_q;
 uint32_t *bignum_gx;
 uint32_t *bignum_gy;
 
+char buf[1000];
+
 int
 main()
 {
+	int err, fd, len, n;
+	struct sockaddr_in addr;
+	struct pollfd pollfd;
+	socklen_t addrlen;
+
 	bignum_x = ec_hexstr_to_bignum(X);
 	bignum_y = ec_hexstr_to_bignum(Y);
 	bignum_p = ec_hexstr_to_bignum(P);
 	bignum_q = ec_hexstr_to_bignum(Q);
 	bignum_gx = ec_hexstr_to_bignum(GX);
 	bignum_gy = ec_hexstr_to_bignum(GY);
+
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(DEST_PORT);
+	addr.sin_addr.s_addr = inet_addr(DEST_IP);
+
+	fd = socket(PF_INET, SOCK_DGRAM, 0);
+
+	if (fd < 0) {
+		printf("socket?\n");
+		exit(1);
+	}
+
+	strcpy(buf, "hello");
+	len = strlen(buf);
+
+	n = sendto(fd, buf, len, 0, (struct sockaddr *) &addr, sizeof addr);
+
+	if (n < len) {
+		printf("sendto?\n");
+		exit(1);
+	}
+
+	pollfd.fd = fd;
+	pollfd.events = POLLIN;
+
+	n = poll(&pollfd, 1, TIMEOUT);
+
+	if (n < 1 || (pollfd.revents & POLLIN) == 0) {
+		printf("pollfd?\n");
+		exit(1);
+	}
+
+	addrlen = sizeof addr;
+
+	n = recvfrom(fd, buf, sizeof buf, 0, (struct sockaddr *) &addr, &addrlen);
+
+	printf("%s\n", buf);
 }
