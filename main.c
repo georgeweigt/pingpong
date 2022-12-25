@@ -6,8 +6,9 @@
 // Sepolia boot node geth
 // see https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go
 
-#define DEST_PORT 30303
-#define DEST_IP "127.0.0.1" // loopback for now instead of "18.168.182.86"
+#define DST_IP "127.0.0.1" // loopback for now instead of "18.168.182.86"
+#define DST_PORT 30303
+#define SRC_PORT 30303
 
 #define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
 #define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
@@ -43,9 +44,7 @@ main()
 	bignum_gx = ec_hexstr_to_bignum(GX);
 	bignum_gy = ec_hexstr_to_bignum(GY);
 
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(DEST_PORT);
-	addr.sin_addr.s_addr = inet_addr(DEST_IP);
+	// get socket
 
 	fd = socket(PF_INET, SOCK_DGRAM, 0);
 
@@ -53,6 +52,23 @@ main()
 		perror("socket");
 		exit(1);
 	}
+
+	// set src port
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_port = htons(SRC_PORT);
+
+	err = bind(fd, (struct sockaddr *) &addr, sizeof addr);
+
+	if (err) {
+		perror("bind");
+		exit(1);
+	}
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr(DST_IP);
+	addr.sin_port = htons(DST_PORT);
 
 	strcpy(buf, "hello");
 	len = strlen(buf);
@@ -92,4 +108,8 @@ main()
 		perror("recvfrom");
 		exit(1);
 	}
+
+	buf[n] = '\0';
+
+	printf("%s\n", buf);
 }
