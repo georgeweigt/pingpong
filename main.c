@@ -49,7 +49,7 @@ main()
 	fd = socket(PF_INET, SOCK_DGRAM, 0);
 
 	if (fd < 0) {
-		printf("socket?\n");
+		perror("socket");
 		exit(1);
 	}
 
@@ -57,6 +57,11 @@ main()
 	len = strlen(buf);
 
 	n = sendto(fd, buf, len, 0, (struct sockaddr *) &addr, sizeof addr);
+
+	if (n < 0) {
+		perror("sendto");
+		exit(1);
+	}
 
 	if (n < len) {
 		printf("sendto?\n");
@@ -67,6 +72,11 @@ main()
 	pollfd.events = POLLIN;
 
 	n = poll(&pollfd, 1, TIMEOUT);
+
+	if (n < 0) {
+		perror("poll");
+		exit(1);
+	}
 
 	if (n < 1 || (pollfd.revents & POLLIN) == 0) {
 		printf("pollfd?\n");
