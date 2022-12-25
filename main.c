@@ -4,9 +4,10 @@
 #define TIMEOUT 1000 // poll timeout in milliseconds
 
 // Sepolia boot node geth
+// see https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go
 
-#define DEST_PORT 12345
-#define DEST_IP "127.0.0.1"
+#define DEST_PORT 30303
+#define DEST_IP "127.0.0.1" // loopback for now instead of "18.168.182.86"
 
 #define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
 #define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
@@ -87,5 +88,8 @@ main()
 
 	n = recvfrom(fd, buf, sizeof buf, 0, (struct sockaddr *) &addr, &addrlen);
 
-	printf("%s\n", buf);
+	if (n < 0) {
+		perror("recvfrom");
+		exit(1);
+	}
 }
