@@ -248,8 +248,8 @@ sponge(uint8_t *N, int len) // len is length in bytes
 	for (i = 0; i < k; i++)
 		S[i] ^= N[RATE * n + i];
 
-	S[k] = 0x01;
-	S[RATE - 1] |= 0x80; // bitwise OR in case k == RATE - 1
+	S[k] ^= 0x01;
+	S[RATE - 1] ^= 0x80;
 
 	Keccak(S);
 
