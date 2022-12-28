@@ -235,7 +235,7 @@ sponge(uint8_t *N, int len) // len is length in bytes
 
 	n = len / RATE; // number of full blocks
 
-	for (i = 0; i < n - 1; i++) {
+	for (i = 0; i < n; i++) {
 		for (j = 0; j < RATE; j++)
 			S[j] ^= N[RATE * i + j];
 		Keccak(S);
