@@ -1,2 +1,2 @@
-pingpong: defs.h ec.c main.c
-	gcc -o pingpong main.c
+pingpong: defs.h ec.c main.c keccak.c
+	gcc -o pingpong main.c keccak.c

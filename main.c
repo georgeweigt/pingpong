@@ -29,6 +29,8 @@ uint32_t *bignum_gy;
 
 char buf[1000];
 
+extern void test_keccak(void);
+
 int
 main()
 {
@@ -36,6 +38,8 @@ main()
 	struct sockaddr_in addr;
 	struct pollfd pollfd;
 	socklen_t addrlen;
+
+	test_keccak();
 
 	bignum_x = ec_hexstr_to_bignum(X);
 	bignum_y = ec_hexstr_to_bignum(Y);
