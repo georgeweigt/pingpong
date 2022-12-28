@@ -278,6 +278,8 @@ test_keccak256(void)
 	char *Z;
 	static uint8_t buf[RATE + 1];
 
+	printf("Testing keccak256\n");
+
 	memset(buf, 'a', sizeof buf);
 
 	Z = keccak256(NULL, 0);
