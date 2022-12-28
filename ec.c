@@ -1,3 +1,5 @@
+#include "defs.h"
+
 int ec_malloc_count;
 
 // returns 1/c mod p

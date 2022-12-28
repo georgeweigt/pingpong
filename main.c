@@ -1,5 +1,4 @@
 #include "defs.h"
-#include "ec.c"
 
 #define TIMEOUT 1000 // poll timeout in milliseconds
 
@@ -38,8 +37,6 @@ main()
 	struct sockaddr_in addr;
 	struct pollfd pollfd;
 	socklen_t addrlen;
-
-	test_keccak();
 
 	bignum_x = ec_hexstr_to_bignum(X);
 	bignum_y = ec_hexstr_to_bignum(Y);
