@@ -274,7 +274,7 @@ keccak256(uint8_t *buf, int len)
 void
 test_keccak256(void)
 {
-	int err, i, j;
+	int err;
 	char *Z;
 	static uint8_t buf[RATE + 1];
 

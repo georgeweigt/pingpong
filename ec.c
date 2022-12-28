@@ -827,7 +827,7 @@ ec_free_xyz(struct point *u)
 uint32_t *
 ec_add(uint32_t *u, uint32_t *v)
 {
-	int i, n, nu, nv, nw;
+	int i, nu, nv, nw;
 	uint64_t t;
 	uint32_t *w;
 	nu = len(u);
