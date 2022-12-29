@@ -15,7 +15,7 @@ rlp_encode_list(uint8_t *outbuf, struct atom *p)
 	int h, len;
 	uint8_t *t;
 
-	len = rlp_length(p, 0);
+	len = rlp_length(p, 0); // raw length (no header)
 
 	if (len > 65535)
 		h = 4;
