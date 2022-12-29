@@ -1,7 +1,7 @@
 #include "defs.h"
 
-static uint32_t *p256, *q256, *gx256, *gy256;
-static uint32_t *p384, *q384, *gx384, *gy384;
+uint32_t *p256, *q256, *gx256, *gy256;
+uint32_t *p384, *q384, *gx384, *gy384;
 
 // returns 0 for ok, -1 otherwise
 
@@ -403,6 +403,7 @@ ecdsa384_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig)
 	ec_free_xyz(&R);
 }
 
+#if 0
 static char *str_p256 =
 	"ffffffff00000001000000000000000000000000ffffffff"
 	"ffffffffffffffff";
@@ -434,17 +435,20 @@ static char *str_gx384 =
 static char *str_gy384 =
 	"3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147c"
 	"e9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f";
+#endif
+
+// secp256k1
+
+#define P "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
+#define Q "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"
+#define GX "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+#define GY "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
 
 void
 ecdsa_init(void)
 {
-	p256 = ec_hexstr_to_bignum(str_p256);
-	q256 = ec_hexstr_to_bignum(str_q256);
-	gx256 = ec_hexstr_to_bignum(str_gx256);
-	gy256 = ec_hexstr_to_bignum(str_gy256);
-
-	p384 = ec_hexstr_to_bignum(str_p384);
-	q384 = ec_hexstr_to_bignum(str_q384);
-	gx384 = ec_hexstr_to_bignum(str_gx384);
-	gy384 = ec_hexstr_to_bignum(str_gy384);
+	p256 = ec_hexstr_to_bignum(P);
+	q256 = ec_hexstr_to_bignum(Q);
+	gx256 = ec_hexstr_to_bignum(GX);
+	gy256 = ec_hexstr_to_bignum(GY);
 }
