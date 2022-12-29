@@ -1,15 +1,15 @@
 #include "defs.h"
 
-static unsigned *p256, *q256, *gx256, *gy256;
-static unsigned *p384, *q384, *gx384, *gy384;
+static uint32_t *p256, *q256, *gx256, *gy256;
+static uint32_t *p384, *q384, *gx384, *gy384;
 
 // returns 0 for ok, -1 otherwise
 
 int
-ecdhe256_verify_hash(unsigned char *hash, int hashlen, unsigned char *rr, int r_length, unsigned char *ss, int s_length, unsigned char *xx, unsigned char *yy)
+ecdhe256_verify_hash(uint8_t *hash, int hashlen, uint8_t *rr, int r_length, uint8_t *ss, int s_length, uint8_t *xx, uint8_t *yy)
 {
 	int err;
-	unsigned *h, *r, *s, *x, *y;
+	uint32_t *h, *r, *s, *x, *y;
 
 	if (hashlen > 32)
 		hashlen = 32;
@@ -44,10 +44,10 @@ ecdhe256_verify_hash(unsigned char *hash, int hashlen, unsigned char *rr, int r_
 //	x, y	public key
 
 int
-ecdsa256_verify_f(unsigned *h, unsigned *r, unsigned *s, unsigned *x, unsigned *y)
+ecdsa256_verify_f(uint32_t *h, uint32_t *r, uint32_t *s, uint32_t *x, uint32_t *y)
 {
 	int err;
-	unsigned *u, *v, *w;
+	uint32_t *u, *v, *w;
 	struct point R, S, T;
 
 	R.x = NULL;
@@ -92,20 +92,17 @@ ecdsa256_verify_f(unsigned *h, unsigned *r, unsigned *s, unsigned *x, unsigned *
 	return err;
 }
 
-/* All arguments are bignums
-
-	h	hash of certificate
-
-	d	private key
-
-	sig	pointer to 64-byte buffer
-*/
+//	h	hash of certificate
+//
+//	d	private key
+//
+//	sig	pointer to 64-byte buffer
 
 void
-ecdsa256_sign_f(unsigned *h, unsigned *d, unsigned char *sig)
+ecdsa256_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig)
 {
 	int i;
-	unsigned *k, *r, *s, *t;
+	uint32_t *k, *r, *s, *t;
 	struct point G, R;
 
 	G.x = gx256;
@@ -209,10 +206,10 @@ ecdsa256_sign_f(unsigned *h, unsigned *d, unsigned char *sig)
 // returns 0 for ok, -1 otherwise
 
 int
-ecdhe384_verify_hash(unsigned char *hash, int hashlen, unsigned char *rr, int r_length, unsigned char *ss, int s_length, unsigned char *xx, unsigned char *yy)
+ecdhe384_verify_hash(uint8_t *hash, int hashlen, uint8_t *rr, int r_length, uint8_t *ss, int s_length, uint8_t *xx, uint8_t *yy)
 {
 	int err;
-	unsigned *h, *r, *s, *x, *y;
+	uint32_t *h, *r, *s, *x, *y;
 
 	if (hashlen > 48)
 		hashlen = 48;
@@ -247,10 +244,10 @@ ecdhe384_verify_hash(unsigned char *hash, int hashlen, unsigned char *rr, int r_
 //	x, y	public key
 
 int
-ecdsa384_verify_f(unsigned *h, unsigned *r, unsigned *s, unsigned *x, unsigned *y)
+ecdsa384_verify_f(uint32_t *h, uint32_t *r, uint32_t *s, uint32_t *x, uint32_t *y)
 {
 	int err;
-	unsigned *u, *v, *w;
+	uint32_t *u, *v, *w;
 	struct point R, S, T;
 
 	R.x = NULL;
@@ -295,20 +292,17 @@ ecdsa384_verify_f(unsigned *h, unsigned *r, unsigned *s, unsigned *x, unsigned *
 	return err;
 }
 
-/* All arguments are bignums
-
-	h	hash of certificate
-
-	d	private key
-
-	sig	pointer to 96-byte buffer
-*/
+//	h	hash of certificate
+//
+//	d	private key
+//
+//	sig	pointer to 96-byte buffer
 
 void
-ecdsa384_sign_f(unsigned *h, unsigned *d, unsigned char *sig)
+ecdsa384_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig)
 {
 	int i;
-	unsigned *k, *r, *s, *t;
+	uint32_t *k, *r, *s, *t;
 	struct point G, R;
 
 	G.x = gx384;
