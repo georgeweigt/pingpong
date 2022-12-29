@@ -28,8 +28,6 @@ uint32_t *bignum_gy;
 
 char buf[1000];
 
-extern void test_keccak(void);
-
 int
 main()
 {
