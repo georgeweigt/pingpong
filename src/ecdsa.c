@@ -1,4 +1,3 @@
-#include "defs.h"
 
 uint32_t *p256, *q256, *gx256, *gy256;
 uint32_t *p384, *q384, *gx384, *gy384;

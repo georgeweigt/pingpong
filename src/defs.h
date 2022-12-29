@@ -22,5 +22,3 @@ struct atom {
 	int length;
 	uint8_t *string;
 };
-
-#include "prototypes.h"

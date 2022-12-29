@@ -1,4 +1,3 @@
-#include "defs.h"
 
 int
 rlp_encode(uint8_t *outbuf, struct atom *p)

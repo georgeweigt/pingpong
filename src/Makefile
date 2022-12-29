@@ -1,7 +1,7 @@
 .PHONY: clean
 
-a.out: prototypes.h *.h *.c
-	gcc -Wall -O0 *.c
+a.out: defs.h prototypes.h *.c
+	gcc -Wall -O0 -include defs.h -include prototypes.h *.c
 
 prototypes.h: *.c
 	make -s -C ../tools make-prototypes

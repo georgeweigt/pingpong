@@ -1,4 +1,3 @@
-#include "defs.h"
 
 int ec_malloc_count;
 

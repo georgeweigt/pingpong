@@ -1,4 +1,3 @@
-#include "defs.h"
 
 #define TIMEOUT 1000 // poll timeout in milliseconds
 

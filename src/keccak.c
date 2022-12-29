@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 
 // Keccak-256 (see Table 3 on page 22 of FIPS PUB 202)
 //
