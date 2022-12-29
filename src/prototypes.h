@@ -1,21 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <poll.h>
-
-#define len(p) (p)[-1]
-
-#define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
-
-extern int ec_malloc_count;
-
-struct point {
-	uint32_t *x, *y, *z;
-};
-
 uint32_t * ec_modinv(uint32_t *c, uint32_t *p);
 void ec_projectify(struct point *S);
 void ec_affinify(struct point *S, uint32_t *p);
@@ -44,9 +26,30 @@ void ec_free(uint32_t *u);
 uint32_t * ec_dup(uint32_t *u);
 void ec_norm(uint32_t *u);
 uint32_t * ec_hexstr_to_bignum(char *s);
+uint32_t * ec_buf_to_bignum(uint8_t *buf, int len);
 void ec_test();
 void ec_test_full_add();
 void ec_test_full_sub();
 void ec_test_double();
 void ec_test_mult();
 void ec_test_twin_mult();
+void test_boot_key(void);
+int ecdhe256_verify_hash(unsigned char *hash, int hashlen, unsigned char *rr, int r_length, unsigned char *ss, int s_length, unsigned char *xx, unsigned char *yy);
+int ecdsa256_verify_f(unsigned *h, unsigned *r, unsigned *s, unsigned *x, unsigned *y);
+void ecdsa256_sign_f(unsigned *h, unsigned *d, unsigned char *sig);
+int ecdhe384_verify_hash(unsigned char *hash, int hashlen, unsigned char *rr, int r_length, unsigned char *ss, int s_length, unsigned char *xx, unsigned char *yy);
+int ecdsa384_verify_f(unsigned *h, unsigned *r, unsigned *s, unsigned *x, unsigned *y);
+void ecdsa384_sign_f(unsigned *h, unsigned *d, unsigned char *sig);
+void ecdsa_init(void);
+uint8_t * theta(uint8_t *A);
+uint8_t * rho(uint8_t *A);
+uint8_t * pi(uint8_t *A);
+uint8_t * chi(uint8_t *A);
+uint8_t rc(int t);
+uint8_t * iota(uint8_t *A, int ir);
+uint8_t * Rnd(uint8_t *A, int ir);
+void Keccak(uint8_t *S);
+uint8_t * sponge(uint8_t *N, int len);
+char * keccak256(uint8_t *buf, int len);
+void test_keccak256(void);
+int main();

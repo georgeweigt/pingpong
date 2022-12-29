@@ -226,7 +226,7 @@ Keccak(uint8_t *S)
 }
 
 uint8_t *
-sponge(uint8_t *N, int len) // len is length in bytes
+sponge(uint8_t *N, int len)
 {
 	int i, j, k, n;
 	static uint8_t S[200]; // 1600 bits

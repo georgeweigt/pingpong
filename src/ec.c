@@ -1209,6 +1209,25 @@ ec_hexstr_to_bignum(char *s)
 	return u;
 }
 
+uint32_t *
+ec_buf_to_bignum(uint8_t *buf, int len)
+{
+	int i, n, t;
+	uint32_t *u;
+	n = (len + 3) / 4;
+	u = ec_new(n);
+	t = 0;
+	for (i = 0; i < len; i++) {
+		t = t << 8 | buf[i];
+		if ((len - i - 1) % 4 == 0) {
+			u[--n] = t;
+			t = 0;
+		}
+	}
+	ec_norm(u);
+	return u;
+}
+
 void
 ec_test()
 {
