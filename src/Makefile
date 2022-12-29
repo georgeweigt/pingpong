@@ -1,5 +1,5 @@
 a.out: prototypes.h *.h *.c
-	gcc -Wall -O0 main.c ec.c ecdsa.c keccak.c
+	gcc -Wall -O0 *.c
 
 prototypes.h: *.c
 	make -s -C ../tools make-prototypes

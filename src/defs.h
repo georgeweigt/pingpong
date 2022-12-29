@@ -16,4 +16,11 @@ struct point {
 	uint32_t *x, *y, *z;
 };
 
+struct atom {
+	struct atom *car;
+	struct atom *cdr;
+	int length;
+	uint8_t *string;
+};
+
 #include "prototypes.h"

@@ -53,3 +53,8 @@ uint8_t * sponge(uint8_t *N, int len);
 char * keccak256(uint8_t *buf, int len);
 void test_keccak256(void);
 int main();
+int rlp_encode(uint8_t *outbuf, struct atom *p);
+int rlp_encode_list(uint8_t *outbuf, struct atom *p);
+int rlp_encode_string(uint8_t *outbuf, struct atom *p);
+int rlp_length(struct atom *p, int level);
+void rlp_decode(struct atom *p);
