@@ -35,6 +35,8 @@ main()
 	struct pollfd pollfd;
 	socklen_t addrlen;
 
+	selftest();
+
 	bignum_x = ec_hexstr_to_bignum(X);
 	bignum_y = ec_hexstr_to_bignum(Y);
 	bignum_p = ec_hexstr_to_bignum(P);

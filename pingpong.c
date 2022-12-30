@@ -57,7 +57,6 @@ void ec_test_full_sub();
 void ec_test_double();
 void ec_test_mult();
 void ec_test_twin_mult();
-void test_boot_key(void);
 int ecdhe256_verify_hash(uint8_t *hash, int hashlen, uint8_t *rr, int r_length, uint8_t *ss, int s_length, uint8_t *xx, uint8_t *yy);
 int ecdsa256_verify_f(uint32_t *h, uint32_t *r, uint32_t *s, uint32_t *x, uint32_t *y);
 void ecdsa256_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig);
@@ -82,7 +81,8 @@ int rlp_encode_list(uint8_t *outbuf, struct atom *p);
 int rlp_encode_string(uint8_t *outbuf, struct atom *p);
 int rlp_length(struct atom *p, int level);
 void rlp_decode(struct atom *p);
-
+void selftest(void);
+void test_boot_key(void);
 int ec_malloc_count;
 
 // returns 1/c mod p
@@ -1584,6 +1584,8 @@ ec_test_twin_mult()
 	uint32_t *d, *e, *p, *x, *y;
 	struct point R, S, T;
 
+	printf("Testing ec_twin_mult ");
+
 	char *str_p384 =
 		"ffffffffffffffffffffffffffffffffffffffffffffffff"
 		"fffffffffffffffeffffffff0000000000000000ffffffff";
@@ -1641,9 +1643,9 @@ ec_test_twin_mult()
 	y = ec_hexstr_to_bignum(str_yr);
 
 	if (ec_cmp(R.x, x) == 0 && ec_cmp(R.y, y) == 0)
-		printf("ec_twin_mult ok\n");
+		printf("ok\n");
 	else
-		printf("ec_twin_mult fail\n");
+		printf("err\n");
 
 	ec_free(p);
 	ec_free(d);
@@ -1654,44 +1656,6 @@ ec_test_twin_mult()
 	ec_free_xyz(&R);
 	ec_free_xyz(&S);
 	ec_free_xyz(&T);
-}
-
-// secp256k1
-
-#define P "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
-
-// Sepolia boot node geth
-
-#define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
-#define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
-
-void
-test_boot_key(void)
-{
-	uint32_t *n3, *n7, *x, *x3, *y, *y2, *p, *r;
-
-	ec_test();
-	printf("ec_malloc_count %d\n", ec_malloc_count); // should be zero (no memory leaks)
-
-	p = ec_hexstr_to_bignum(P);
-	x = ec_hexstr_to_bignum(X);
-	y = ec_hexstr_to_bignum(Y);
-
-	// y^2 mod p == (x^3 + 7) mod p
-
-	y2 = ec_mul(y, y);
-	ec_mod(y2, p);
-
-	n3 = ec_int(3);
-	x3 = ec_pow(x, n3);
-	n7 = ec_int(7);
-	r = ec_add(x3, n7);
-	ec_mod(r, p);
-
-	if (ec_cmp(y2, r) == 0)
-		printf("ok\n");
-	else
-		printf("fail\n");
 }
 
 uint32_t *p256, *q256, *gx256, *gy256;
@@ -2484,6 +2448,8 @@ main()
 	struct pollfd pollfd;
 	socklen_t addrlen;
 
+	selftest();
+
 	bignum_x = ec_hexstr_to_bignum(X);
 	bignum_y = ec_hexstr_to_bignum(Y);
 	bignum_p = ec_hexstr_to_bignum(P);
@@ -2711,4 +2677,47 @@ rlp_length(struct atom *p, int level)
 void
 rlp_decode(struct atom *p)
 {
+}
+void
+selftest(void)
+{
+	ec_test();
+	test_boot_key();
+}
+
+// secp256k1
+
+#define P "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
+
+// Sepolia boot node geth
+
+#define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
+#define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
+
+void
+test_boot_key(void)
+{
+	uint32_t *n3, *n7, *x, *x3, *y, *y2, *p, *r;
+
+	printf("Testing boot key ");
+
+	p = ec_hexstr_to_bignum(P);
+	x = ec_hexstr_to_bignum(X);
+	y = ec_hexstr_to_bignum(Y);
+
+	// y^2 mod p == (x^3 + 7) mod p
+
+	y2 = ec_mul(y, y);
+	ec_mod(y2, p);
+
+	n3 = ec_int(3);
+	x3 = ec_pow(x, n3);
+	n7 = ec_int(7);
+	r = ec_add(x3, n7);
+	ec_mod(r, p);
+
+	if (ec_cmp(y2, r) == 0)
+		printf("ok\n");
+	else
+		printf("fail\n");
 }
