@@ -11,5 +11,5 @@ To build `pingpong.c` from the files in `src`
 
 ```
 cd tools
-make update
+make
 ```
