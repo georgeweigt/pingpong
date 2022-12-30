@@ -51,12 +51,12 @@ uint32_t * ec_dup(uint32_t *u);
 void ec_norm(uint32_t *u);
 uint32_t * ec_hexstr_to_bignum(char *s);
 uint32_t * ec_buf_to_bignum(uint8_t *buf, int len);
-void ec_test();
-void ec_test_full_add();
-void ec_test_full_sub();
-void ec_test_double();
-void ec_test_mult();
-void ec_test_twin_mult();
+void test_ec();
+void test_ec_full_add();
+void test_ec_full_sub();
+void test_ec_double();
+void test_ec_mult();
+void test_ec_twin_mult();
 int ecdhe256_verify_hash(uint8_t *hash, int hashlen, uint8_t *rr, int r_length, uint8_t *ss, int s_length, uint8_t *xx, uint8_t *yy);
 int ecdsa256_verify_f(uint32_t *h, uint32_t *r, uint32_t *s, uint32_t *x, uint32_t *y);
 void ecdsa256_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig);
@@ -1312,17 +1312,17 @@ ec_buf_to_bignum(uint8_t *buf, int len)
 }
 
 void
-ec_test()
+test_ec()
 {
-	ec_test_full_add();
-	ec_test_full_sub();
-	ec_test_double();
-	ec_test_mult();
-	ec_test_twin_mult();
+	test_ec_full_add();
+	test_ec_full_sub();
+	test_ec_double();
+	test_ec_mult();
+	test_ec_twin_mult();
 }
 
 void
-ec_test_full_add()
+test_ec_full_add()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S, T;
@@ -1393,7 +1393,7 @@ ec_test_full_add()
 }
 
 void
-ec_test_full_sub()
+test_ec_full_sub()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S, T;
@@ -1464,7 +1464,7 @@ ec_test_full_sub()
 }
 
 void
-ec_test_double()
+test_ec_double()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S;
@@ -1522,7 +1522,7 @@ ec_test_double()
 }
 
 void
-ec_test_mult()
+test_ec_mult()
 {
 	uint32_t *d, *p, *x, *y;
 	struct point R, S;
@@ -1587,7 +1587,7 @@ ec_test_mult()
 }
 
 void
-ec_test_twin_mult()
+test_ec_twin_mult()
 {
 	uint32_t *d, *e, *p, *x, *y;
 	struct point R, S, T;
@@ -2531,6 +2531,7 @@ main()
 
 	printf("%s\n", buf);
 }
+// recursive length prefix
 
 int
 rlp_encode(uint8_t *outbuf, struct atom *p)
@@ -2600,7 +2601,7 @@ rlp_encode_string(uint8_t *outbuf, struct atom *p)
 
 	len = p->length;
 
-	if (len == 1) {
+	if (len == 1 && p->string[0] < 0x80) {
 		outbuf[0] = p->string[0];
 		return 1;
 	}
@@ -2660,7 +2661,7 @@ rlp_length(struct atom *p, int level)
 
 		len = p->length;
 
-		if (len == 1)
+		if (len == 1 && p->string[0] < 0x80)
 			return 1;
 	}
 
@@ -2686,7 +2687,7 @@ rlp_decode(struct atom *p)
 void
 selftest(void)
 {
-	ec_test();
+	test_ec();
 	test_boot_key();
 	test_keccak256();
 }

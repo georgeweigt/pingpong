@@ -1,3 +1,4 @@
+// recursive length prefix
 
 int
 rlp_encode(uint8_t *outbuf, struct atom *p)
@@ -67,7 +68,7 @@ rlp_encode_string(uint8_t *outbuf, struct atom *p)
 
 	len = p->length;
 
-	if (len == 1) {
+	if (len == 1 && p->string[0] < 0x80) {
 		outbuf[0] = p->string[0];
 		return 1;
 	}
@@ -127,7 +128,7 @@ rlp_length(struct atom *p, int level)
 
 		len = p->length;
 
-		if (len == 1)
+		if (len == 1 && p->string[0] < 0x80)
 			return 1;
 	}
 

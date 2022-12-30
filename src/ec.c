@@ -1227,17 +1227,17 @@ ec_buf_to_bignum(uint8_t *buf, int len)
 }
 
 void
-ec_test()
+test_ec()
 {
-	ec_test_full_add();
-	ec_test_full_sub();
-	ec_test_double();
-	ec_test_mult();
-	ec_test_twin_mult();
+	test_ec_full_add();
+	test_ec_full_sub();
+	test_ec_double();
+	test_ec_mult();
+	test_ec_twin_mult();
 }
 
 void
-ec_test_full_add()
+test_ec_full_add()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S, T;
@@ -1308,7 +1308,7 @@ ec_test_full_add()
 }
 
 void
-ec_test_full_sub()
+test_ec_full_sub()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S, T;
@@ -1379,7 +1379,7 @@ ec_test_full_sub()
 }
 
 void
-ec_test_double()
+test_ec_double()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S;
@@ -1437,7 +1437,7 @@ ec_test_double()
 }
 
 void
-ec_test_mult()
+test_ec_mult()
 {
 	uint32_t *d, *p, *x, *y;
 	struct point R, S;
@@ -1502,7 +1502,7 @@ ec_test_mult()
 }
 
 void
-ec_test_twin_mult()
+test_ec_twin_mult()
 {
 	uint32_t *d, *e, *p, *x, *y;
 	struct point R, S, T;

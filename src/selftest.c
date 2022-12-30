@@ -1,7 +1,7 @@
 void
 selftest(void)
 {
-	ec_test();
+	test_ec();
 	test_boot_key();
 	test_keccak256();
 }
