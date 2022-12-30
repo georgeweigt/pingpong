@@ -86,3 +86,19 @@ alloc_atom(int string_length)
 	p->length = string_length;
 	return p;
 }
+
+void
+free_list(struct atom *p)
+{
+	struct atom *q;
+
+	if (p->car)
+		do {
+			free_list(p->car);
+			q = p->cdr;
+			free(p);
+			p = q;
+		} while (p);
+	else
+		free(p);
+}
