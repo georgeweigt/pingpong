@@ -3,6 +3,7 @@ selftest(void)
 {
 	ec_test();
 	test_boot_key();
+	test_keccak256();
 }
 
 // secp256k1

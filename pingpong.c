@@ -1327,6 +1327,8 @@ ec_test_full_add()
 	uint32_t *p, *x, *y;
 	struct point R, S, T;
 
+	printf("Testing ec_full_add ");
+
 	char *str_p384 =
 		"ffffffffffffffffffffffffffffffffffffffffffffffff"
 		"fffffffffffffffeffffffff0000000000000000ffffffff";
@@ -1377,9 +1379,9 @@ ec_test_full_add()
 	y = ec_hexstr_to_bignum(str_yr);
 
 	if (ec_cmp(R.x, x) == 0 && ec_cmp(R.y, y) == 0)
-		printf("ec_full_add ok\n");
+		printf("ok\n");
 	else
-		printf("ec_full_add fail\n");
+		printf("err\n");
 
 	ec_free(p);
 	ec_free(x);
@@ -1395,6 +1397,8 @@ ec_test_full_sub()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S, T;
+
+	printf("Testing ec_full_sub ");
 
 	char *str_p384 =
 		"ffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -1446,9 +1450,9 @@ ec_test_full_sub()
 	y = ec_hexstr_to_bignum(str_yr);
 
 	if (ec_cmp(R.x, x) == 0 && ec_cmp(R.y, y) == 0)
-		printf("ec_full_sub ok\n");
+		printf("ok\n");
 	else
-		printf("ec_full_sub fail\n");
+		printf("err\n");
 
 	ec_free(p);
 	ec_free(x);
@@ -1464,6 +1468,8 @@ ec_test_double()
 {
 	uint32_t *p, *x, *y;
 	struct point R, S;
+
+	printf("Testing ec_double ");
 
 	char *str_p384 =
 		"ffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -1503,9 +1509,9 @@ ec_test_double()
 	y = ec_hexstr_to_bignum(str_yr);
 
 	if (ec_cmp(R.x, x) == 0 && ec_cmp(R.y, y) == 0)
-		printf("ec_double ok\n");
+		printf("ok\n");
 	else
-		printf("ec_double fail\n");
+		printf("err\n");
 
 	ec_free(p);
 	ec_free(x);
@@ -1520,6 +1526,8 @@ ec_test_mult()
 {
 	uint32_t *d, *p, *x, *y;
 	struct point R, S;
+
+	printf("Testing ec_mult ");
 
 	char *str_p384 =
 		"ffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -1565,9 +1573,9 @@ ec_test_mult()
 	y = ec_hexstr_to_bignum(str_yr);
 
 	if (ec_cmp(R.x, x) == 0 && ec_cmp(R.y, y) == 0)
-		printf("ec_mult ok\n");
+		printf("ok\n");
 	else
-		printf("ec_mult fail\n");
+		printf("err\n");
 
 	ec_free(p);
 	ec_free(d);
@@ -2683,6 +2691,7 @@ selftest(void)
 {
 	ec_test();
 	test_boot_key();
+	test_keccak256();
 }
 
 // secp256k1
