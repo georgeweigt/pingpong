@@ -57,13 +57,13 @@ void test_ec_full_sub();
 void test_ec_double();
 void test_ec_mult();
 void test_ec_twin_mult();
+void ecdsa_init(void);
 int ecdhe256_verify_hash(uint8_t *hash, int hashlen, uint8_t *rr, int r_length, uint8_t *ss, int s_length, uint8_t *xx, uint8_t *yy);
 int ecdsa256_verify_f(uint32_t *h, uint32_t *r, uint32_t *s, uint32_t *x, uint32_t *y);
 void ecdsa256_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig);
 int ecdhe384_verify_hash(uint8_t *hash, int hashlen, uint8_t *rr, int r_length, uint8_t *ss, int s_length, uint8_t *xx, uint8_t *yy);
 int ecdsa384_verify_f(uint32_t *h, uint32_t *r, uint32_t *s, uint32_t *x, uint32_t *y);
 void ecdsa384_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig);
-void ecdsa_init(void);
 uint8_t * theta(uint8_t *A);
 uint8_t * rho(uint8_t *A);
 uint8_t * pi(uint8_t *A);
@@ -76,6 +76,7 @@ uint8_t * sponge(uint8_t *N, int len);
 char * keccak256(uint8_t *buf, int len);
 void test_keccak256(void);
 int main();
+void stub(void);
 int rlp_encode(uint8_t *outbuf, struct atom *p);
 int rlp_encode_list(uint8_t *outbuf, struct atom *p);
 int rlp_encode_string(uint8_t *outbuf, struct atom *p);
@@ -1665,9 +1666,26 @@ test_ec_twin_mult()
 	ec_free_xyz(&S);
 	ec_free_xyz(&T);
 }
+// Elliptic curve digital signature algorithm
 
 uint32_t *p256, *q256, *gx256, *gy256;
 uint32_t *p384, *q384, *gx384, *gy384;
+
+// secp256k1
+
+#define P "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
+#define Q "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"
+#define GX "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
+#define GY "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
+
+void
+ecdsa_init(void)
+{
+	p256 = ec_hexstr_to_bignum(P);
+	q256 = ec_hexstr_to_bignum(Q);
+	gx256 = ec_hexstr_to_bignum(GX);
+	gy256 = ec_hexstr_to_bignum(GY);
+}
 
 // returns 0 for ok, -1 otherwise
 
@@ -2069,56 +2087,6 @@ ecdsa384_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig)
 	ec_free_xyz(&R);
 }
 
-#if 0
-static char *str_p256 =
-	"ffffffff00000001000000000000000000000000ffffffff"
-	"ffffffffffffffff";
-
-static char *str_q256 =
-	"ffffffff00000000ffffffffffffffffbce6faada7179e84"
-	"f3b9cac2fc632551";
-
-static char *str_gx256 =
-	"6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0"
-	"f4a13945d898c296";
-
-static char *str_gy256 =
-	"4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ece"
-	"cbb6406837bf51f5";
-
-static char *str_p384 =
-	"ffffffffffffffffffffffffffffffffffffffffffffffff"
-	"fffffffffffffffeffffffff0000000000000000ffffffff";
-
-static char *str_q384 =
-	"ffffffffffffffffffffffffffffffffffffffffffffffff"
-	"c7634d81f4372ddf581a0db248b0a77aecec196accc52973";
-
-static char *str_gx384 =
-	"aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b98"
-	"59f741e082542a385502f25dbf55296c3a545e3872760ab7";
-
-static char *str_gy384 =
-	"3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147c"
-	"e9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f";
-#endif
-
-// secp256k1
-
-#define P "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
-#define Q "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"
-#define GX "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
-#define GY "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
-
-void
-ecdsa_init(void)
-{
-	p256 = ec_hexstr_to_bignum(P);
-	q256 = ec_hexstr_to_bignum(Q);
-	gx256 = ec_hexstr_to_bignum(GX);
-	gy256 = ec_hexstr_to_bignum(GY);
-}
-
 // Keccak-256 (see Table 3 on page 22 of FIPS PUB 202)
 //
 // Rate      r = 1088 bits (136 bytes)
@@ -2429,40 +2397,28 @@ test_keccak256(void)
 #define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
 #define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
 
-// secp256k1
-
-#define P "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
-#define Q "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"
-#define GX "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
-#define GY "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
-
 uint32_t *bignum_x;
 uint32_t *bignum_y;
-uint32_t *bignum_p;
-uint32_t *bignum_q;
-uint32_t *bignum_gx;
-uint32_t *bignum_gy;
 
 char buf[1000];
 
 int
 main()
 {
+	selftest();
+	ecdsa_init();
+	stub();
+}
+
+void
+stub(void)
+{
 	int err, fd, len, n;
 	struct sockaddr_in addr;
 	struct pollfd pollfd;
 	socklen_t addrlen;
 
-	selftest();
-
-	bignum_x = ec_hexstr_to_bignum(X);
-	bignum_y = ec_hexstr_to_bignum(Y);
-	bignum_p = ec_hexstr_to_bignum(P);
-	bignum_q = ec_hexstr_to_bignum(Q);
-	bignum_gx = ec_hexstr_to_bignum(GX);
-	bignum_gy = ec_hexstr_to_bignum(GY);
-
-	// get socket
+	// create socket
 
 	fd = socket(PF_INET, SOCK_DGRAM, 0);
 
