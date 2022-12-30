@@ -26,11 +26,19 @@ pop(void)
 }
 
 void
+push_string(uint8_t *string, int length)
+{
+	struct atom *p;
+	p = alloc_atom(length);
+	memcpy(p->string, string, length);
+	push(p);
+}
+
+void
 push_number(uint64_t n)
 {
-	int i, k, len;
+	int i;
 	uint8_t buf[8];
-	struct atom *p;
 
 	buf[0] = n >> 56;
 	buf[1] = n >> 48;
@@ -41,18 +49,11 @@ push_number(uint64_t n)
 	buf[6] = n >> 8;
 	buf[7] = n;
 
-	for (k = 0; k < 7; k++)
-		if (buf[k])
+	for (i = 0; i < 7; i++)
+		if (buf[i])
 			break;
 
-	len = 8 - k;
-
-	p = alloc_atom(len);
-
-	for (i = 0; i < len; i++)
-		p->string[i] = buf[k + i];
-
-	push(p);
+	push_string(buf + i, 8 - i);
 }
 
 void

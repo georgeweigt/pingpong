@@ -5,7 +5,7 @@
 // to = [recipient-ip, recipient-udp-port, 0]
 
 void
-push_ping_packet_data(uint32_t sender_ip, uint32_t recipient_ip)
+push_ping_packet_data(uint8_t *sender_ip, uint8_t *recipient_ip)
 {
 	time_t t;
 
@@ -17,19 +17,21 @@ push_ping_packet_data(uint32_t sender_ip, uint32_t recipient_ip)
 
 	// from
 
-	push_number(sender_ip);
+	push_string(sender_ip, 4);
 	push_number(0);
 	push_number(0);
-	list(3);
+	list(3); // [sender-ip, sender-udp-port, sender-tcp-port]
 
 	// to
 
-	push_number(recipient_ip);
+	push_string(recipient_ip, 4);
 	push_number(BOOT_PORT);
 	push_number(0);
-	list(3);
+	list(3); // [recipient-ip, recipient-udp-port, 0]
+
+	// expiration
 
 	push_number(t);
 
-	list(3);
+	list(4); // [version, from, to, expiration]
 }
