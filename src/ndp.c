@@ -55,8 +55,8 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 
 	t = time(NULL) + 60;
 
-	src = inet_addr(src_ip);
-	dst = inet_addr(dst_ip);
+	src = inet_addr(src_ip); // result is big endian
+	dst = inet_addr(dst_ip); // result is big endian
 
 	// version
 
