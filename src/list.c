@@ -62,15 +62,15 @@ void
 list(int n)
 {
 	int i;
-	struct atom *p, *q;
+	struct atom *p, *t;
 
 	p = NULL;
 
 	for (i = 0; i < n; i++) {
-		q = alloc_atom(-1);
-		q->cdr = p;
-		q->car = pop();
-		p = q;
+		t = alloc_atom(-1);
+		t->cdr = p;
+		t->car = pop();
+		p = t;
 	}
 
 	push(p);
@@ -93,18 +93,18 @@ alloc_atom(int string_length)
 void
 free_list(struct atom *p)
 {
-	struct atom *q;
+	struct atom *t;
 
 	if (p == NULL)
 		return;
 
 	if (p->length < 0)
 		while (p) {
-			q = p->cdr;
+			t = p->cdr;
 			free_list(p->car);
 			free(p);
 			atom_count--;
-			p = q;
+			p = t;
 		}
 	else {
 		free(p);
