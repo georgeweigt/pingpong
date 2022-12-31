@@ -100,8 +100,8 @@ free_list(struct atom *p)
 
 	if (p->length < 0)
 		while (p) {
-			free_list(p->car);
 			q = p->cdr;
+			free_list(p->car);
 			free(p);
 			atom_count--;
 			p = q;
