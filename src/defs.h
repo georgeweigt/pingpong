@@ -13,6 +13,8 @@
 
 #define BOOT_PORT 30303
 #define UDPBUFLEN 1000
+#define HASHLEN 32
+#define SIGLEN 69
 
 extern int ec_malloc_count;
 
