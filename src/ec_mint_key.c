@@ -1,5 +1,5 @@
 void
-mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
+ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 {
 	int err, i;
 	uint32_t *d;
@@ -90,7 +90,7 @@ mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 }
 
 void
-test_mint_key(void)
+test_ec_mint_key(void)
 {
 	int i;
 	static uint8_t private_key[32], public_key_x[32], public_key_y[32];
@@ -98,7 +98,7 @@ test_mint_key(void)
 
 	printf("Testing mint_key\n");
 
-	mint_key(private_key, public_key_x, public_key_y);
+	ec_mint_key(private_key, public_key_x, public_key_y);
 
 	printf("private key ");
 	for (i = 0; i < 32; i++)
@@ -118,7 +118,7 @@ test_mint_key(void)
 	for (i = 0; i < 32; i++)
 		hash[i] = i;
 
-	encrypt(r, s, hash, private_key);
+	ec_encrypt(r, s, hash, private_key);
 
 	printf("r ");
 	for (i = 0; i < 32; i++)
