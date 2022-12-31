@@ -8,9 +8,9 @@ encrypt(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 	memset(rbuf, 0, 32);
 	memset(sbuf, 0, 32);
 
-	G.x = gx256;
-	G.y = gy256;
-	G.z = ec_int(1);
+	G.x = NULL;
+	G.y = NULL;
+	G.z = NULL;
 
 	R.x = NULL;
 	R.y = NULL;
@@ -29,15 +29,20 @@ encrypt(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 		ec_free(k);
 		ec_free(r);
 		ec_free(s);
-		ec_free_xyz(&R);
 
-		k = NULL;
+		k = ec_new(8);
 		r = NULL;
 		s = NULL;
 
+		ec_free_xyz(&G);
+		ec_free_xyz(&R);
+
+		G.x = ec_dup(gx256);
+		G.y = ec_dup(gy256);
+		G.z = ec_int(1);
+
 		// choose k from [1, n - 1]
 
-		k = ec_new(8);
 		for (i = 0; i < 8; i++)
 			k[i] = random();
 		ec_norm(k);
@@ -111,6 +116,6 @@ encrypt(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 	ec_free(k);
 	ec_free(r);
 	ec_free(s);
-	ec_free(G.z);
+	ec_free_xyz(&G);
 	ec_free_xyz(&R);
 }

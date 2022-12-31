@@ -17,6 +17,8 @@ ecdsa_init(void)
 	q256 = ec_hexstr_to_bignum(Q);
 	gx256 = ec_hexstr_to_bignum(GX);
 	gy256 = ec_hexstr_to_bignum(GY);
+
+	ec_malloc_count = 0;
 }
 
 // returns 0 for ok, -1 otherwise

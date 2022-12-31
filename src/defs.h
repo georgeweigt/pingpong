@@ -30,4 +30,5 @@ struct atom {
 };
 
 extern int atom_count;
+extern int ec_malloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256;

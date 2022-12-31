@@ -43,4 +43,13 @@ test_boot_key(void)
 		printf("ok\n");
 	else
 		printf("fail\n");
+
+	ec_free(n3);
+	ec_free(n7);
+	ec_free(x);
+	ec_free(x3);
+	ec_free(y);
+	ec_free(y2);
+	ec_free(p);
+	ec_free(r);
 }
