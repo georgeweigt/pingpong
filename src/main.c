@@ -19,8 +19,8 @@ char buf[1000];
 int
 main()
 {
-	selftest();
 	ecdsa_init();
+	selftest();
 	stub();
 }
 

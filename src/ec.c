@@ -72,15 +72,13 @@ ec_projectify(struct point *S)
 	S->z = ec_int(1);
 }
 
-void
-ec_affinify(struct point *S, uint32_t *p)
+int
+ec_affinify(struct point *S, unsigned *p)
 {
-	uint32_t *lambda, *lambda2, *lambda3, *x, *y;
+	unsigned *lambda, *lambda2, *lambda3, *x, *y;
 
-	if (ec_equal(S->z, 0)) {
-		printf("cannot affinify\n");
-		return;
-	}
+	if (ec_equal(S->z, 0))
+		return -1;
 
 	lambda = ec_modinv(S->z, p);
 
@@ -104,6 +102,8 @@ ec_affinify(struct point *S, uint32_t *p)
 	ec_free(lambda);
 	ec_free(lambda2);
 	ec_free(lambda3);
+
+	return 0;
 }
 
 void
