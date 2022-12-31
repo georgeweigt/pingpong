@@ -5,10 +5,13 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <poll.h>
+#include <time.h>
 
 #define len(p) (p)[-1]
 
 #define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
+
+#define BOOT_PORT 30303
 
 extern int ec_malloc_count;
 
@@ -20,7 +23,7 @@ struct atom {
 	struct atom *car;
 	struct atom *cdr;
 	int length;
-	uint8_t *string;
+	uint8_t string[0];
 };
 uint32_t * ec_modinv(uint32_t *c, uint32_t *p);
 void ec_projectify(struct point *S);
@@ -77,11 +80,21 @@ char * keccak256(uint8_t *buf, int len);
 void test_keccak256(void);
 int main();
 void stub(void);
+void send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key);
+int ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key);
+struct atom * ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port);
 int rlp_encode(uint8_t *outbuf, struct atom *p);
 int rlp_encode_list(uint8_t *outbuf, struct atom *p);
 int rlp_encode_string(uint8_t *outbuf, struct atom *p);
 int rlp_length(struct atom *p, int level);
 void rlp_decode(struct atom *p);
+void push(struct atom *p);
+struct atom * pop(void);
+void push_string(uint8_t *string, int length);
+void push_number(uint64_t n);
+void list(int n);
+struct atom * alloc_atom(int string_length);
+void free_list(struct atom *p);
 void selftest(void);
 void test_boot_key(void);
 int ec_malloc_count;
@@ -2487,6 +2500,92 @@ stub(void)
 
 	printf("%s\n", buf);
 }
+void
+send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
+{
+	int len, n;
+	uint8_t *buf;
+	struct sockaddr_in dst_addr;
+
+	buf = malloc(1000); // big enough that no length checks are required
+
+	if (buf == NULL)
+		exit(1);
+
+	len = ping_payload(buf, src_ip, dst_ip, src_port, dst_port, private_key);
+
+	dst_addr.sin_family = AF_INET;
+	dst_addr.sin_addr.s_addr = inet_addr(dst_ip);
+	dst_addr.sin_port = htons(dst_port);
+
+	n = sendto(fd, buf, len, 0, (struct sockaddr *) &dst_addr, sizeof dst_addr);
+
+	if (n < 0)
+		perror("sendto");
+
+	free(buf);
+}
+
+int
+ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
+{
+	int len;
+	struct atom *p;
+
+	outbuf[64] = 0x01; // packet type (ping)
+
+	p = ping_data(src_ip, dst_ip, src_port, dst_port);
+	len = rlp_encode(outbuf + 65, p);
+	free_list(p);
+
+	// signature
+
+	// sign(outbuf + 32, outbuf + 64, len + 1, private_key);
+
+	// hash
+
+	// hash(outbuf, outbuf + 32, len + 33);
+
+	return len + 65; // 32 byte hash + 32 byte signature + 1 byte packet type
+}
+
+struct atom *
+ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
+{
+	time_t t;
+	in_addr_t src, dst;
+
+	t = time(NULL) + 60;
+
+	src = inet_addr(src_ip); // result is big endian
+	dst = inet_addr(dst_ip); // result is big endian
+
+	// version
+
+	push_number(4);
+
+	// from
+
+	push_string((uint8_t *) &src, 4);
+	push_number(src_port);
+	push_number(0);
+	list(3); // [sender-ip, sender-udp-port, sender-tcp-port]
+
+	// to
+
+	push_string((uint8_t *) &dst, 4);
+	push_number(dst_port);
+	push_number(0);
+	list(3); // [recipient-ip, recipient-udp-port, 0]
+
+	// expiration
+
+	push_number(t);
+
+	list(4); // [version, from, to, expiration]
+
+	return pop();
+}
 // recursive length prefix
 
 int
@@ -2639,6 +2738,111 @@ rlp_length(struct atom *p, int level)
 void
 rlp_decode(struct atom *p)
 {
+}
+
+#define STACKSIZE 1000
+
+int tos;
+struct atom *stack[STACKSIZE];
+
+void
+push(struct atom *p)
+{
+	if (tos == STACKSIZE) {
+		printf("stack overrun\n");
+		exit(1);
+	}
+
+	stack[tos++] = p;
+}
+
+struct atom *
+pop(void)
+{
+	if (tos == 0) {
+		printf("stack underrun\n");
+		exit(1);
+	}
+
+	return stack[--tos];
+}
+
+void
+push_string(uint8_t *string, int length)
+{
+	struct atom *p;
+	p = alloc_atom(length);
+	memcpy(p->string, string, length);
+	push(p);
+}
+
+void
+push_number(uint64_t n)
+{
+	int i;
+	uint8_t buf[8];
+
+	buf[0] = n >> 56;
+	buf[1] = n >> 48;
+	buf[2] = n >> 40;
+	buf[3] = n >> 32;
+	buf[4] = n >> 24;
+	buf[5] = n >> 16;
+	buf[6] = n >> 8;
+	buf[7] = n;
+
+	for (i = 0; i < 7; i++)
+		if (buf[i])
+			break;
+
+	push_string(buf + i, 8 - i);
+}
+
+void
+list(int n)
+{
+	int i;
+	struct atom *p, *q;
+
+	p = NULL;
+
+	for (i = 0; i < n; i++) {
+		q = alloc_atom(0);
+		q->cdr = p;
+		q->car = pop();
+		p = q;
+	}
+
+	push(p);
+}
+
+struct atom *
+alloc_atom(int string_length)
+{
+	struct atom *p;
+	p = malloc(sizeof (struct atom) + string_length);
+	if (p == NULL)
+		exit(1);
+	p->car = NULL;
+	p->cdr = NULL;
+	p->length = string_length;
+	return p;
+}
+
+void
+free_list(struct atom *p)
+{
+	struct atom *q;
+
+	if (p->car)
+		do {
+			free_list(p->car);
+			q = p->cdr;
+			free(p);
+			p = q;
+		} while (p);
+	else
+		free(p);
 }
 void
 selftest(void)

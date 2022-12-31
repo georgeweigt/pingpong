@@ -1,5 +1,5 @@
 void
-send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *public_key_x, uint8_t *public_key_y)
+send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
 {
 	int len, n;
 	uint8_t *buf;
@@ -10,7 +10,7 @@ send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port,
 	if (buf == NULL)
 		exit(1);
 
-	len = ping_payload(buf, src_ip, dst_ip, src_port, dst_port, public_key_x, public_key_y);
+	len = ping_payload(buf, src_ip, dst_ip, src_port, dst_port, private_key);
 
 	dst_addr.sin_family = AF_INET;
 	dst_addr.sin_addr.s_addr = inet_addr(dst_ip);
@@ -25,7 +25,7 @@ send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port,
 }
 
 int
-ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *public_key_x, uint8_t *public_key_y)
+ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
 {
 	int len;
 	struct atom *p;
@@ -38,13 +38,13 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 
 	// signature
 
-	// sign(outbuf + 32, outbuf + 64, len + 1, public_key_x, public_key_y);
+	// sign(outbuf + 32, outbuf + 64, len + 1, private_key);
 
 	// hash
 
 	// hash(outbuf, outbuf + 32, len + 33);
 
-	return len + 65;
+	return len + 65; // 32 byte hash + 32 byte signature + 1 byte packet type
 }
 
 struct atom *
