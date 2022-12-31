@@ -12,6 +12,7 @@
 #define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
 
 #define BOOT_PORT 30303
+#define UDPBUFLEN 1000
 
 extern int ec_malloc_count;
 

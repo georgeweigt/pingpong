@@ -1,11 +1,11 @@
 void
-send_ping_packet(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
+send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
 {
 	int len, n;
 	uint8_t *buf;
 	struct sockaddr_in dst_addr;
 
-	buf = malloc(1000); // big enough that no length checks are required
+	buf = malloc(UDPBUFLEN);
 
 	if (buf == NULL)
 		exit(1);
@@ -33,7 +33,7 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 	outbuf[64] = 0x01; // packet type (ping)
 
 	p = ping_data(src_ip, dst_ip, src_port, dst_port);
-	len = rlp_encode(outbuf + 65, p);
+	len = encode(outbuf + 65, p);
 	free_list(p);
 
 	// signature
@@ -42,9 +42,9 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 
 	// hash
 
-	// hash(outbuf, outbuf + 32, len + 33);
+	keccak256(outbuf, outbuf + 32, len + 68 + 1);
 
-	return len + 65; // 32 byte hash + 32 byte signature + 1 byte packet type
+	return len + 32 + 68 + 1; // 32 byte hash + 68 byte signature + 1 byte packet type
 }
 
 struct atom *
