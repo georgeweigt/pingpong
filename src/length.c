@@ -10,7 +10,10 @@ sublength(struct atom *p)
 {
 	int len;
 
-	if (p->car) {
+	if (p == NULL)
+		return 0;
+
+	if (p->length < 0) {
 
 		len = 0;
 
@@ -27,7 +30,10 @@ sublength(struct atom *p)
 int
 padlength(struct atom *p, int sublen)
 {
-	if (p->car == NULL && p->length == 1 && p->string[0] < 0x80)
+	if (p == NULL)
+		return 1;
+
+	if (p->length == 1 && p->string[0] < 0x80)
 		return 0;
 
 	if (sublen < 56)

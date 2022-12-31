@@ -43,6 +43,7 @@ void ecdsa384_sign_f(uint32_t *h, uint32_t *d, uint8_t *sig);
 int encode(uint8_t *outbuf, struct atom *p);
 int encode_list(uint8_t *outbuf, struct atom *p);
 int encode_string(uint8_t *outbuf, struct atom *p);
+void test_encode(void);
 uint8_t * theta(uint8_t *A);
 uint8_t * rho(uint8_t *A);
 uint8_t * pi(uint8_t *A);

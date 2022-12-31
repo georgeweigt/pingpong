@@ -28,3 +28,5 @@ struct atom {
 	int length;
 	uint8_t string[0];
 };
+
+extern int atom_count;

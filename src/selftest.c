@@ -4,6 +4,7 @@ selftest(void)
 	test_ec();
 	test_boot_key();
 	test_keccak256();
+	test_encode();
 }
 
 // secp256k1

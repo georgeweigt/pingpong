@@ -1,6 +1,7 @@
 
 #define STACKSIZE 1000
 
+int atom_count;
 int tos;
 struct atom *stack[STACKSIZE];
 
@@ -66,7 +67,7 @@ list(int n)
 	p = NULL;
 
 	for (i = 0; i < n; i++) {
-		q = alloc_atom(0);
+		q = alloc_atom(-1);
 		q->cdr = p;
 		q->car = pop();
 		p = q;
@@ -79,12 +80,13 @@ struct atom *
 alloc_atom(int string_length)
 {
 	struct atom *p;
-	p = malloc(sizeof (struct atom) + string_length);
+	p = malloc(sizeof (struct atom) + (string_length > 0 ? string_length : 0));
 	if (p == NULL)
 		exit(1);
 	p->car = NULL;
 	p->cdr = NULL;
 	p->length = string_length;
+	atom_count++;
 	return p;
 }
 
@@ -93,13 +95,19 @@ free_list(struct atom *p)
 {
 	struct atom *q;
 
-	if (p->car)
-		do {
+	if (p == NULL)
+		return;
+
+	if (p->length < 0)
+		while (p) {
 			free_list(p->car);
 			q = p->cdr;
 			free(p);
+			atom_count--;
 			p = q;
-		} while (p);
-	else
+		}
+	else {
 		free(p);
+		atom_count--;
+	}
 }
