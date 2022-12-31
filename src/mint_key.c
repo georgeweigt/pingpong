@@ -47,8 +47,10 @@ mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 		ec_mult(&S, d, &R, p256);
 		err = ec_affinify(&S, p256);
 
-		if (!err)
-			break;
+		if (err)
+			continue;
+
+		break;
 	}
 
 	// save private key
