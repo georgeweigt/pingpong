@@ -27,13 +27,15 @@ send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_
 int
 ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
 {
-	int len;
+	int datalen;
 	struct atom *p;
 
-	outbuf[64] = 0x01; // packet type (ping)
+	outbuf[32 + 69] = 0x01; // packet type (ping)
+
+	// data
 
 	p = ping_data(src_ip, dst_ip, src_port, dst_port);
-	len = encode(outbuf + 65, p);
+	datalen = encode(outbuf + 32 + 69 + 1, p);
 	free_list(p);
 
 	// signature
@@ -42,9 +44,9 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 
 	// hash
 
-	keccak256(outbuf, outbuf + 32, len + 68 + 1);
+	keccak256(outbuf, outbuf + 32, 69 + 1 + datalen);
 
-	return len + 32 + 68 + 1; // 32 byte hash + 68 byte signature + 1 byte packet type
+	return 32 + 69 + 1 + datalen; // 32 byte hash + 69 byte signature + 1 byte packet type
 }
 
 struct atom *
