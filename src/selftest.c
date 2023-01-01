@@ -5,7 +5,7 @@ selftest(void)
 	test_boot_key();
 	test_keccak256();
 	test_encode();
-	test_ec_mint_key();
+	test_ec_genkey();
 }
 
 // secp256k1
@@ -70,7 +70,7 @@ test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
 	r = ec_add(x3, n7);
 	ec_mod(r, p256);
 
-	printf("%s\n", ec_cmp(y2, r) == 0 ? "ok" : "fail");
+	printf("public key check %s\n", ec_cmp(y2, r) == 0 ? "ok" : "fail");
 
 	ec_free(n3);
 	ec_free(n7);
@@ -105,7 +105,7 @@ test_public_keys_secp256r1(uint32_t *x, uint32_t *y)
 
 	ec_mod(r, p256);
 
-	printf("%s\n", ec_cmp(y2, r) == 0 ? "ok" : "fail");
+	printf("public key check %s\n", ec_cmp(y2, r) == 0 ? "ok" : "fail");
 
 	ec_free(a);
 	ec_free(b);

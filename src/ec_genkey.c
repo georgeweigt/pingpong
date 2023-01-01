@@ -1,5 +1,5 @@
 void
-ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
+ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 {
 	int i;
 	uint32_t *d;
@@ -9,9 +9,9 @@ ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	memset(public_key_x, 0, 32);
 	memset(public_key_y, 0, 32);
 
-	R.x = NULL;
-	R.y = NULL;
-	R.z = NULL;
+	R.x = ec_dup(gx256);
+	R.y = ec_dup(gy256);
+	R.z = ec_int(1);
 
 	S.x = NULL;
 	S.y = NULL;
@@ -22,15 +22,9 @@ ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	for (;;) {
 
 		ec_free(d);
-
-		d = ec_new(8);
-
-		ec_free_xyz(&R);
 		ec_free_xyz(&S);
 
-		R.x = ec_dup(gx256);
-		R.y = ec_dup(gy256);
-		R.z = ec_int(1);
+		d = ec_new(8);
 
 		// generate private key d
 
@@ -88,15 +82,15 @@ ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 }
 
 void
-test_ec_mint_key(void)
+test_ec_genkey(void)
 {
 	int err, i;
 	static uint8_t private_key[32], public_key_x[32], public_key_y[32];
 	static uint8_t r[32], s[32], hash[32];
 
-	printf("Testing mint_key ");
+	printf("Testing ec_genkey ");
 
-	ec_mint_key(private_key, public_key_x, public_key_y);
+	ec_genkey(private_key, public_key_x, public_key_y);
 #if 0
 	printf("private key ");
 	for (i = 0; i < 32; i++)
