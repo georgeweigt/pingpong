@@ -1,15 +1,86 @@
 int ec_malloc_count;
 
-// returns 1/c mod p
+// Returns (1 / a) mod p
 
 uint32_t *
-ec_modinv(uint32_t *c, uint32_t *p)
+ec_modinv(uint32_t *a, uint32_t *p)
+{
+	return ec_modinv_v1(a, p);
+}
+
+uint32_t *
+ec_modinv_v1(uint32_t *a, uint32_t *p)
+{
+	uint32_t *k, *r, *u, *v, *t, *x1, *x2;
+	u = ec_dup(a);
+	v = ec_dup(p);
+	x1 = ec_int(1);
+	x2 = ec_int(0);
+	while (!ec_equal(u, 1) && !ec_equal(v, 1)) {
+		while ((u[0] & 1) == 0) {
+			ec_shr(u);
+			if (x1[0] & 1) {
+				t = ec_add(x1, p);
+				ec_free(x1);
+				x1 = t;
+			}
+			ec_shr(x1);
+		}
+		while ((v[0] & 1) == 0) {
+			ec_shr(v);
+			if (x2[0] & 1) {
+				t = ec_add(x2, p);
+				ec_free(x2);
+				x2 = t;
+			}
+			ec_shr(x2);
+		}
+		if (ec_cmp(u, v) >= 0) {
+			t = ec_sub(u, v);
+			ec_free(u);
+			u = t;
+			// x1 = x1 - x2
+			k = ec_sub(p, x2);
+			t = ec_add(x1, k);
+			ec_free(x1);
+			x1 = t;
+			ec_mod(x1, p);
+			ec_free(k);
+		} else {
+			t = ec_sub(v, u);
+			ec_free(v);
+			v = t;
+			// x2 = x2 - x1
+			k = ec_sub(p, x1);
+			t = ec_add(x2, k);
+			ec_free(x2);
+			x2 = t;
+			ec_mod(x2, p);
+			ec_free(k);
+		}
+	}
+	if (ec_equal(u, 1)) {
+		r = x1;
+		ec_free(x2);
+	} else {
+		r = x2;
+		ec_free(x1);
+	}
+	ec_free(u);
+	ec_free(v);
+	return r;
+}
+
+// Anton Iliev, Nikolay Kyurkchiev, Asen Rahnev
+
+uint32_t *
+ec_modinv_v2(uint32_t *a, uint32_t *p)
 {
 	int i;
 	uint32_t *q, *r, *u1, *u3, *v1, *v3, *t, *t1, *t3;
 
 	u1 = ec_int(1);
-	u3 = ec_dup(c);
+	u3 = ec_dup(a);
 	v1 = ec_int(0);
 	v3 = ec_dup(p);
 
@@ -80,6 +151,81 @@ ec_modinv(uint32_t *c, uint32_t *p)
 	ec_free(t3);
 
 	return r;
+}
+
+// M. Brown, D. Hankerson, J. Lopez, A. Menezes
+
+uint32_t *
+ec_modinv_v3(uint32_t *a, uint32_t *p)
+{
+	uint32_t *t, *u, *v, *A, *C;
+
+	u = ec_dup(a);
+	v = ec_dup(p);
+
+	A = ec_int(1);
+	C = ec_int(0);
+
+	while (!ec_equal(u, 0)) {
+
+		// while u is even
+
+		while ((u[0] & 1) == 0) {
+			// u = u / 2
+			ec_shr(u);
+			// if A is odd then A = A + p
+			if (A[0] & 1) {
+				t = ec_add(A, p);
+				ec_free(A);
+				A = t;
+			}
+			// A = A / 2
+			ec_shr(A);
+		}
+
+		// while v is even
+
+		while ((v[0] & 1) == 0) {
+			// v = v / 2
+			ec_shr(v);
+			// if C is odd then C = C + p
+			if (C[0] & 1) {
+				t = ec_add(C, p);
+				ec_free(C);
+				C = t;
+			}
+			// C = C / 2
+			ec_shr(C);
+		}
+
+		if (ec_cmp(u, v) >= 0) {
+			// u = u - v
+			t = ec_sub(u, v);
+			ec_free(u);
+			u = t;
+			// A = A - C
+			t = ec_sub(A, C);
+			ec_free(A);
+			A = t;
+		} else {
+			// v = v - u
+			t = ec_sub(v, u);
+			ec_free(v);
+			v = t;
+			// C = C - A
+			t = ec_sub(C, A);
+			ec_free(C);
+			C = t;
+		}
+	}
+
+	ec_mod(C, p);
+
+	ec_free(u);
+	ec_free(v);
+	ec_free(A);
+
+	return C;
 }
 
 void
@@ -1065,6 +1211,23 @@ ec_div(uint32_t *u, uint32_t *v)
 void
 ec_mod(uint32_t *u, uint32_t *v)
 {
+#if 0
+	int i;
+	uint32_t *q, *r, *t;
+
+	q = ec_div(u, v);
+	t = ec_mul(q, v);
+	r = ec_sub(u, t);
+
+	for (i = 0; i < len(r); i++)
+		u[i] = r[i];
+
+	len(u) = len(r);
+
+	ec_free(q);
+	ec_free(r);
+	ec_free(t);
+#else
 	int i, k, nu, nv;
 	uint32_t qhat, *w;
 	uint64_t a, b, t;
@@ -1120,6 +1283,7 @@ ec_mod(uint32_t *u, uint32_t *v)
 		}
 	} while (--k >= 0);
 	ec_free(w);
+#endif
 }
 
 // returns u ** v

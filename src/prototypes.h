@@ -1,4 +1,7 @@
-uint32_t * ec_modinv(uint32_t *c, uint32_t *p);
+uint32_t * ec_modinv(uint32_t *a, uint32_t *p);
+uint32_t * ec_modinv_v1(uint32_t *a, uint32_t *p);
+uint32_t * ec_modinv_v2(uint32_t *a, uint32_t *p);
+uint32_t * ec_modinv_v3(uint32_t *a, uint32_t *p);
 void ec_projectify(struct point *S);
 int ec_affinify(struct point *S, uint32_t *p);
 void ec_double(struct point *R, struct point *S, uint32_t *p);
