@@ -22,8 +22,6 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	for (;;) {
 
 		ec_free(d);
-		ec_free_xyz(&S);
-
 		d = ec_new(8);
 
 		// generate private key d

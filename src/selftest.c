@@ -55,20 +55,20 @@ test_boot_key(void)
 }
 
 void
-test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
+test_public_keys_secp256k1(uint32_t *x, uint32_t *y, uint32_t *p)
 {
 	uint32_t *n3, *n7, *x3, *y2, *r;
 
 	// y^2 mod p == (x^3 + 7) mod p
 
 	y2 = ec_mul(y, y);
-	ec_mod(y2, p256);
+	ec_mod(y2, p);
 
 	n3 = ec_int(3);
 	x3 = ec_pow(x, n3);
 	n7 = ec_int(7);
 	r = ec_add(x3, n7);
-	ec_mod(r, p256);
+	ec_mod(r, p);
 
 	printf("public key check %s\n", ec_cmp(y2, r) == 0 ? "ok" : "fail");
 
@@ -83,14 +83,14 @@ test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
 #define B "5AC635D8" "AA3A93E7" "B3EBBD55" "769886BC" "651D06B0" "CC53B0F6" "3BCE3C3E" "27D2604B"
 
 void
-test_public_keys_secp256r1(uint32_t *x, uint32_t *y)
+test_public_keys_secp256r1(uint32_t *x, uint32_t *y, uint32_t *p)
 {
 	uint32_t *a, *b, *n3, *x3, *y2, *r, *t1, *t2;
 
 	// y^2 mod p == (x^3 + a x + b) mod p
 
 	y2 = ec_mul(y, y);
-	ec_mod(y2, p256);
+	ec_mod(y2, p);
 
 	n3 = ec_int(3);
 	x3 = ec_pow(x, n3);
@@ -103,7 +103,7 @@ test_public_keys_secp256r1(uint32_t *x, uint32_t *y)
 	t2 = ec_add(x3, t1);
 	r = ec_add(t2, b);
 
-	ec_mod(r, p256);
+	ec_mod(r, p);
 
 	printf("public key check %s\n", ec_cmp(y2, r) == 0 ? "ok" : "fail");
 

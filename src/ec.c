@@ -5,63 +5,80 @@ int ec_malloc_count;
 uint32_t *
 ec_modinv(uint32_t *c, uint32_t *p)
 {
-	uint32_t *k, *r, *u, *v, *t, *x1, *x2;
-	u = ec_dup(c);
-	v = ec_dup(p);
-	x1 = ec_int(1);
-	x2 = ec_int(0);
-	while (!ec_equal(u, 1) && !ec_equal(v, 1)) {
-		while ((u[0] & 1) == 0) {
-			ec_shr(u);
-			if (x1[0] & 1) {
-				t = ec_add(x1, p);
-				ec_free(x1);
-				x1 = t;
-			}
-			ec_shr(x1);
-		}
-		while ((v[0] & 1) == 0) {
-			ec_shr(v);
-			if (x2[0] & 1) {
-				t = ec_add(x2, p);
-				ec_free(x2);
-				x2 = t;
-			}
-			ec_shr(x2);
-		}
-		if (ec_cmp(u, v) >= 0) {
-			t = ec_sub(u, v);
-			ec_free(u);
-			u = t;
-			// x1 = x1 - x2
-			k = ec_sub(p, x2);
-			t = ec_add(x1, k);
-			ec_free(x1);
-			x1 = t;
-			ec_mod(x1, p);
-			ec_free(k);
-		} else {
-			t = ec_sub(v, u);
-			ec_free(v);
-			v = t;
-			// x2 = x2 - x1
-			k = ec_sub(p, x1);
-			t = ec_add(x2, k);
-			ec_free(x2);
-			x2 = t;
-			ec_mod(x2, p);
-			ec_free(k);
-		}
+	int i;
+	uint32_t *q, *r, *u1, *u3, *v1, *v3, *t, *t1, *t3;
+
+	u1 = ec_int(1);
+	u3 = ec_dup(c);
+	v1 = ec_int(0);
+	v3 = ec_dup(p);
+
+	q = NULL;
+	t = NULL;
+	t1 = NULL;
+	t3 = NULL;
+
+	i = 1;
+
+	while (!ec_equal(v3, 0)) {
+
+		// q = u3 / v3
+
+		ec_free(q);
+		q = ec_div(u3, v3);
+
+		// t3 = u3 % v3
+
+		ec_free(t3);
+		t3 = ec_dup(u3);
+		ec_mod(t3, v3);
+
+		// t1 = u1 + q * v1;
+
+		ec_free(t);
+		t = ec_mul(q, v1);
+		ec_free(t1);
+		t1 = ec_add(u1, t);
+
+		// u1 = v1
+
+		// v1 = t1
+
+		ec_free(u1);
+		u1 = v1;
+		v1 = t1;
+		t1 = NULL;
+
+		// u3 = v3
+
+		// v3 = t3
+
+		ec_free(u3);
+		u3 = v3;
+		v3 = t3;
+		t3 = NULL;
+
+		i = -i;
 	}
-	if (ec_equal(u, 1)) {
-		r = x1;
-		ec_free(x2);
-	} else {
-		r = x2;
-		ec_free(x1);
+
+	if (!ec_equal(u3, 1))
+		r = ec_int(0);
+	else if (i < 0)
+		r = ec_sub(p, u1);
+	else {
+		r = u1;
+		u1 = NULL;
 	}
-	ec_free(u);
-	ec_free(v);
+
+	ec_free(q);
+	ec_free(u1);
+	ec_free(u3);
+	ec_free(v1);
+	ec_free(v3);
+	ec_free(t);
+	ec_free(t1);
+	ec_free(t3);
+
 	return r;
 }
 
@@ -73,9 +90,9 @@ ec_projectify(struct point *S)
 }
 
 int
-ec_affinify(struct point *S, unsigned *p)
+ec_affinify(struct point *S, uint32_t *p)
 {
-	unsigned *lambda, *lambda2, *lambda3, *x, *y;
+	uint32_t *lambda, *lambda2, *lambda3, *x, *y;
 
 	if (ec_equal(S->z, 0))
 		return -1;
@@ -560,6 +577,60 @@ ec_full_sub(struct point *R, struct point *S, struct point *T, uint32_t *p)
 	ec_free_xyz(&U);
 }
 
+// R = (d S) mod p
+
+#if 1
+
+void
+ec_mult(struct point *R, uint32_t *d, struct point *S, uint32_t *p)
+{
+	int i;
+
+	ec_free_xyz(R);
+
+	if (ec_equal(d, 0)) {
+		R->x = ec_int(1);
+		R->y = ec_int(1);
+		R->z = ec_int(0);
+		return;
+	}
+
+	if (ec_equal(d, 1)) {
+		R->x = ec_dup(S->x);
+		R->y = ec_dup(S->y);
+		R->z = ec_dup(S->z);
+		return;
+	}
+
+	if (ec_equal(S->z, 0)) {
+		R->x = ec_int(1);
+		R->y = ec_int(1);
+		R->z = ec_int(0);
+		return;
+	}
+
+	if (!ec_equal(S->z, 1)) {
+		ec_affinify(S, p);
+		ec_projectify(S);
+	}
+
+	R->x = ec_int(0);
+	R->y = ec_int(0);
+	R->z = ec_int(0);
+
+	for (i = 32 * len(d) - 1; i >= 0; i--) {
+
+		ec_double(R, R, p);
+
+		if (ec_get_bit(d, i))
+			ec_full_add(R, R, S, p);
+	}
+}
+
+#else
+
+// original NIST algorithm
+
 void
 ec_mult(struct point *R, uint32_t *d, struct point *S, uint32_t *p)
 {
@@ -642,6 +713,8 @@ ec_mult(struct point *R, uint32_t *d, struct point *S, uint32_t *p)
 
 	ec_free(t);
 }
+
+#endif
 
 int
 ec_get_msbit_index(uint32_t *u)
