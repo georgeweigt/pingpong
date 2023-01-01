@@ -9,8 +9,8 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	memset(public_key_x, 0, 32);
 	memset(public_key_y, 0, 32);
 
-	R.x = ec_dup(gx256);
-	R.y = ec_dup(gy256);
+	R.x = gx256;
+	R.y = gy256;
 	R.z = ec_int(1);
 
 	S.x = NULL;
@@ -77,7 +77,7 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	}
 
 	ec_free(d);
-	ec_free_xyz(&R);
+	ec_free(R.z);
 	ec_free_xyz(&S);
 }
 
