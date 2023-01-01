@@ -1,5 +1,7 @@
+// hash, private_key --> ec_sign --> r, s
+
 void
-ec_encrypt(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
+ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 {
 	int err, i;
 	uint32_t *d, *h, *k, *r, *s, *t;

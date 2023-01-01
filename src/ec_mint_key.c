@@ -1,7 +1,7 @@
 void
 ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 {
-	int err, i;
+	int i;
 	uint32_t *d;
 	struct point R, S;
 
@@ -22,14 +22,15 @@ ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	for (;;) {
 
 		ec_free(d);
+
+		d = ec_new(8);
+
 		ec_free_xyz(&R);
 		ec_free_xyz(&S);
 
 		R.x = ec_dup(gx256);
 		R.y = ec_dup(gy256);
 		R.z = ec_int(1);
-
-		d = ec_new(8);
 
 		// generate private key d
 
@@ -45,12 +46,9 @@ ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 		// generate public key
 
 		ec_mult(&S, d, &R, p256);
-		err = ec_affinify(&S, p256);
 
-		if (err)
-			continue;
-
-		break;
+		if (ec_affinify(&S, p256) == 0)
+			break;
 	}
 
 	// save private key
@@ -92,14 +90,14 @@ ec_mint_key(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 void
 test_ec_mint_key(void)
 {
-	int i;
+	int err, i;
 	static uint8_t private_key[32], public_key_x[32], public_key_y[32];
 	static uint8_t r[32], s[32], hash[32];
 
-	printf("Testing mint_key\n");
+	printf("Testing mint_key ");
 
 	ec_mint_key(private_key, public_key_x, public_key_y);
-
+#if 0
 	printf("private key ");
 	for (i = 0; i < 32; i++)
 		printf("%02x", private_key[i]);
@@ -114,12 +112,13 @@ test_ec_mint_key(void)
 	for (i = 0; i < 32; i++)
 		printf("%02x", public_key_y[i]);
 	printf("\n");
-
+#endif
 	for (i = 0; i < 32; i++)
 		hash[i] = i;
 
-	ec_encrypt(r, s, hash, private_key);
+	ec_sign(r, s, hash, private_key);
 
+#if 0
 	printf("r ");
 	for (i = 0; i < 32; i++)
 		printf("%02x", r[i]);
@@ -129,6 +128,11 @@ test_ec_mint_key(void)
 	for (i = 0; i < 32; i++)
 		printf("%02x", s[i]);
 	printf("\n");
+#endif
+
+	err = ec_verify(hash, r, s, public_key_x, public_key_y);
+
+	printf("%s\n", err ? "err" : "ok");
 
 	if (ec_malloc_count)
 		printf("memory leak\n");
