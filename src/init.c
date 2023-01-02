@@ -12,15 +12,28 @@ uint8_t public_key_y[32];
 void
 init(void)
 {
+	int i;
+
 	ec_init();
-
 	memcpy(private_key, PRIVATE_KEY, 32);
-	memcpy(public_key_x, PUBLIC_KEY_X, 32);
-	memcpy(public_key_y, PUBLIC_KEY_Y, 32);
-
 	account();
-
 	ec_public_keys(public_key_x, public_key_y, private_key);
+
+	for (i = 0; i < 20; i++)
+		printf("%02x", account_number[i]);
+	printf("\n");
+
+	for (i = 0; i < 32; i++)
+		printf("%02x", private_key[i]);
+	printf("\n");
+
+	for (i = 0; i < 32; i++)
+		printf("%02x", public_key_x[i]);
+	printf("\n");
+
+	for (i = 0; i < 32; i++)
+		printf("%02x", public_key_y[i]);
+	printf("\n");
 }
 
 void
@@ -50,14 +63,6 @@ account(void)
 	}
 
 	free(buf);
-
-	for (i = 0; i < 20; i++)
-		printf("%02x", account_number[i]);
-	printf("\n");
-
-	for (i = 0; i < 32; i++)
-		printf("%02x", private_key[i]);
-	printf("\n");
 }
 
 char *
