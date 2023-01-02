@@ -1,2 +1,0 @@
-#!/bin/bash
-openssl ecparam -out key.pem -name secp256k1 -genkey

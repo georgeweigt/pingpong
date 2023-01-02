@@ -35,4 +35,4 @@ struct atom {
 extern int atom_count;
 extern int ec_malloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
-extern uint8_t *private_key, *public_key_x, *public_key_y;
+extern uint8_t private_key[32], public_key_x[32], public_key_y[32];
