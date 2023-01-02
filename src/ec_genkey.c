@@ -105,27 +105,27 @@ test_ec_genkey(void)
 #if 0
 	printf("private key ");
 	for (i = 0; i < 32; i++)
-		printf("%02x", private_key[i]);
+		printf("\\x%02x", private_key[i]);
 	printf("\n");
 
 	printf("public key x ");
 	for (i = 0; i < 32; i++)
-		printf("%02x", public_key_x[i]);
+		printf("\\x%02x", public_key_x[i]);
 	printf("\n");
 
 	printf("public key y ");
 	for (i = 0; i < 32; i++)
-		printf("%02x", public_key_y[i]);
+		printf("\\x%02x", public_key_y[i]);
 	printf("\n");
 
 	printf("r ");
 	for (i = 0; i < 32; i++)
-		printf("%02x", r[i]);
+		printf("\\x%02x", r[i]);
 	printf("\n");
 
 	printf("s ");
 	for (i = 0; i < 32; i++)
-		printf("%02x", s[i]);
+		printf("\\x%02x", s[i]);
 	printf("\n");
 #endif
 }

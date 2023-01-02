@@ -25,8 +25,6 @@ sign(uint8_t *sig, uint8_t *msg, int msglen, uint8_t *private_key)
 	encode(sig, p);
 }
 
-#define PRIVATE_KEY "\x62\x55\x58\xec\x2a\xe8\x94\x4a\x19\x49\x5c\xff\x74\xb0\xdc\x51\x66\x33\x48\x73\x64\x3c\x98\x69\x32\x7b\x23\xc6\x6b\x8b\x45\x67"
-
 void
 test_sign(void)
 {
@@ -35,7 +33,7 @@ test_sign(void)
 
 	printf("Testing sign ");
 
-	sign(sig, (uint8_t *) "hello", 5, (uint8_t *) PRIVATE_KEY);
+	sign(sig, (uint8_t *) "hello", 5, private_key);
 
 	for (i = 0; i < SIGLEN; i++)
 		printf("%02x", sig[i]);
