@@ -269,9 +269,140 @@ ec_affinify(struct point *S, uint32_t *p)
 	return 0;
 }
 
+#define A "FFFFFFFF" "00000001" "00000000" "00000000" "00000000" "FFFFFFFF" "FFFFFFFF" "FFFFFFFC"
+
 void
 ec_double(struct point *R, struct point *S, uint32_t *p)
 {
+#if 1
+	uint32_t *x, *y, *z;
+	uint32_t *xp, *yp, *zp;
+	uint32_t *a, *c2, *c3, *c4, *c8, *m, *s, *t, *u, *v, *x2, *y2, *y4, *z2, *z4;
+
+#if 1
+	a = ec_int(0); // secp256k1
+#else
+	a = ec_hexstr_to_bignum(A); // secp256r1
+#endif
+
+	x = S->x;
+	y = S->y;
+	z = S->z;
+
+	c2 = ec_int(2);
+	c3 = ec_int(3);
+	c4 = ec_int(4);
+	c8 = ec_int(8);
+
+	// s == 4 x y^2
+
+	y2 = ec_mul(y, y);
+	ec_mod(y2, p);
+
+	t = ec_mul(x, y2);
+	s = ec_mul(c4, t);
+	ec_free(t);
+	ec_mod(s, p);
+
+	// m = 3 x^2 + a Z^4
+
+	x2 = ec_mul(x, x);
+	ec_mod(x2, p);
+
+	u = ec_mul(c3, x2);
+
+	z2 = ec_mul(z, z);
+	ec_mod(z2, p);
+
+	z4 = ec_mul(z2, z2);
+	ec_mod(z4, p);
+
+	v = ec_mul(a, z4);
+
+	m = ec_add(u, v);
+
+	ec_free(u);
+	ec_free(v);
+
+	// x' = m^2 - 2 s
+
+	u = ec_mul(m, m);
+	ec_mod(u, p);
+
+	v = ec_mul(c2, s);
+	ec_mod(v, p);
+
+	if (ec_cmp(u, v) < 0) {
+		t = ec_add(u, p);
+		ec_free(u);
+		u = t;
+	}
+
+	xp = ec_sub(u, v);
+	ec_mod(xp, p);
+
+	ec_free(u);
+	ec_free(v);
+
+	// y' = m (s - x') - 8 y^4
+
+	if (ec_cmp(s, xp) < 0) {
+		t = ec_add(s, p);
+		ec_free(s);
+		s = t;
+	}
+
+	t = ec_sub(s, xp);
+	u = ec_mul(m, t);
+	ec_free(t);
+	ec_mod(u, p);
+
+	y4 = ec_mul(y2, y2);
+	v = ec_mul(c8, y4);
+	ec_mod(v, p);
+
+	if (ec_cmp(u, v) < 0) {
+		t = ec_add(u, p);
+		ec_free(u);
+		u = t;
+	}
+
+	yp = ec_sub(u, v);
+	ec_mod(yp, p);
+
+	ec_free(u);
+	ec_free(v);
+
+	// z' = 2 y z
+
+	t = ec_mul(y, z);
+	zp = ec_mul(c2, t);
+	ec_free(t);
+	ec_mod(zp, p);
+
+	// return x', y', z'
+
+	ec_free_xyz(R);
+
+	R->x = xp;
+	R->y = yp;
+	R->z = zp;
+
+	ec_free(a);
+	ec_free(c2);
+	ec_free(c3);
+	ec_free(c4);
+	ec_free(c8);
+	ec_free(m);
+	ec_free(s);
+	ec_free(x2);
+	ec_free(y2);
+	ec_free(y4);
+	ec_free(z2);
+	ec_free(z4);
+#else
+	// original code doesn't work for secp256k1
+
 	uint32_t *k, *t, *t1, *t2, *t3, *t4, *t5;
 
 	// take care to handle the case when R and S are the same pointer
@@ -425,6 +556,7 @@ ec_double(struct point *R, struct point *S, uint32_t *p)
 
 	ec_free(t4);
 	ec_free(t5);
+#endif
 }
 
 void
