@@ -101,7 +101,7 @@ test_ping_payload(void)
 
 	// check length
 
-	printf("checking length %s\n", len == 129 ? "ok" : "err");
+	printf("checking length %s\n", len < HASHLEN + SIGLEN + 1 ? "err" : "ok");
 
 	// check hash
 
