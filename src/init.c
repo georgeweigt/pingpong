@@ -19,6 +19,8 @@ init(void)
 	memcpy(public_key_y, PUBLIC_KEY_Y, 32);
 
 	account();
+
+	ec_public_keys(public_key_x, public_key_y, private_key);
 }
 
 void

@@ -79,6 +79,52 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	ec_free_xyz(&S);
 }
 
+// generate public keys from private key
+
+void
+ec_public_keys(uint8_t *public_key_x, uint8_t *public_key_y, uint8_t *private_key)
+{
+	int i;
+	uint32_t *d;
+	struct point R, S;
+
+	R.x = gx256;
+	R.y = gy256;
+	R.z = ec_int(1);
+
+	S.x = NULL;
+	S.y = NULL;
+	S.z = NULL;
+
+	d = ec_buf_to_bignum(private_key, 32);
+
+	ec_mult(&S, d, &R, p256);
+
+	ec_affinify(&S, p256);
+
+	for (i = 0; i < len(S.x); i++) {
+		if (32 - 4 * i - 4 < 0)
+			break; // err
+		public_key_x[32 - 4 * i - 4] = S.x[i] >> 24;
+		public_key_x[32 - 4 * i - 3] = S.x[i] >> 16;
+		public_key_x[32 - 4 * i - 2] = S.x[i] >> 8;
+		public_key_x[32 - 4 * i - 1] = S.x[i];
+	}
+
+	for (i = 0; i < len(S.y); i++) {
+		if (32 - 4 * i - 4 < 0)
+			break; // err
+		public_key_y[32 - 4 * i - 4] = S.y[i] >> 24;
+		public_key_y[32 - 4 * i - 3] = S.y[i] >> 16;
+		public_key_y[32 - 4 * i - 2] = S.y[i] >> 8;
+		public_key_y[32 - 4 * i - 1] = S.y[i];
+	}
+
+	ec_free(d);
+	ec_free(R.z);
+	ec_free_xyz(&S);
+}
+
 void
 test_ec_genkey(void)
 {

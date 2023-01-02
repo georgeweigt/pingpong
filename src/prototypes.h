@@ -46,6 +46,7 @@ int test_public_keys_secp256k1(uint32_t *x, uint32_t *y);
 int test_public_keys_secp256r1(uint32_t *x, uint32_t *y);
 void ec_init(void);
 void ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y);
+void ec_public_keys(uint8_t *public_key_x, uint8_t *public_key_y, uint8_t *private_key);
 void test_ec_genkey(void);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
