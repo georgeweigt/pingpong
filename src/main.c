@@ -1,3 +1,9 @@
+int
+main()
+{
+	ec_init();
+	selftest();
+}
 
 #define TIMEOUT 1000 // poll timeout in milliseconds
 
@@ -8,22 +14,6 @@
 #define DST_PORT 30303
 #define SRC_PORT 30303
 
-#define X "9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40"
-#define Y "998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066"
-
-uint32_t *bignum_x;
-uint32_t *bignum_y;
-
-char buf[1000];
-
-int
-main()
-{
-	ecdsa_init();
-	selftest();
-	stub();
-}
-
 void
 stub(void)
 {
@@ -31,6 +21,7 @@ stub(void)
 	struct sockaddr_in addr;
 	struct pollfd pollfd;
 	socklen_t addrlen;
+	static char buf[1000];
 
 	// create socket
 
@@ -99,5 +90,5 @@ stub(void)
 
 	buf[n] = '\0';
 
-//	printf("%s\n", buf);
+	printf("%s\n", buf);
 }
