@@ -8,8 +8,6 @@ ec_modinv(uint32_t *a, uint32_t *p)
 	return ec_modinv_v1(a, p);
 }
 
-// This code is from 'Mathematical routines for the NIST prime elliptic curves'
-
 uint32_t *
 ec_modinv_v1(uint32_t *a, uint32_t *p)
 {
