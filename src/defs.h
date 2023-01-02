@@ -11,6 +11,7 @@
 
 #define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
 
+#define SECP256K1 1 // set to 0 for secp256r1
 #define BOOT_PORT 30303
 #define UDPBUFLEN 1000
 #define HASHLEN 32
@@ -31,4 +32,4 @@ struct atom {
 
 extern int atom_count;
 extern int ec_malloc_count;
-extern uint32_t *p256, *q256, *gx256, *gy256;
+extern uint32_t *p256, *q256, *gx256, *gy256, *a256;
