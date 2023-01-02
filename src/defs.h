@@ -16,6 +16,8 @@
 #define UDPBUFLEN 1000
 #define HASHLEN 32
 #define SIGLEN 69
+#define R_INDEX (HASHLEN + 3)
+#define S_INDEX (HASHLEN + 36)
 
 #define len(p) (p)[-1]
 

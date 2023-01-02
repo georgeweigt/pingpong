@@ -90,4 +90,34 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 void
 test_ping_payload(void)
 {
+	int err, len;
+	uint8_t *buf, hash[32], m[60];
+
+	printf("Testing ping_payload\n");
+
+	buf = malloc(UDPBUFLEN);
+
+	len = ping_payload(buf, "1.2.3.4", "5.6.7.8", 1234, 5678, private_key);
+
+	// check length
+
+	printf("checking length %s\n", len == 129 ? "ok" : "err");
+
+	// check hash
+
+	printf("checking hash ");
+	keccak256(hash, buf + 32, len - 32);
+	err = memcmp(buf, hash, 32);
+	printf("%s\n", err ? "err" : "ok");
+
+	// check signature
+
+	printf("checking signature ");
+	memcpy(m, "\x19" "Ethereum Signed Message:\n32", 28);
+	keccak256(m + 28, buf + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
+	keccak256(hash, m, 60);
+	err = ec_verify(hash, buf + R_INDEX, buf + S_INDEX, public_key_x, public_key_y);
+	printf("%s\n", err ? "err" : "ok");
+
+	free(buf);
 }

@@ -16,7 +16,7 @@ init(void)
 
 	ec_init();
 	memcpy(private_key, PRIVATE_KEY, 32);
-	account();
+//	account();
 	ec_public_keys(public_key_x, public_key_y, private_key);
 
 	for (i = 0; i < 20; i++)
