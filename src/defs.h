@@ -7,8 +7,6 @@
 #include <poll.h>
 #include <time.h>
 
-#define len(p) (p)[-1]
-
 #define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
 
 #define SECP256K1 1 // set to 0 for secp256r1
@@ -16,6 +14,8 @@
 #define UDPBUFLEN 1000
 #define HASHLEN 32
 #define SIGLEN 69
+
+#define len(p) (p)[-1]
 
 extern int ec_malloc_count;
 

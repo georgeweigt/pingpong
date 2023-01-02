@@ -82,8 +82,10 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 		s = t;
 		ec_mod(s, q256);
 
-		if (!ec_equal(s, 0))
-			break;
+		if (ec_equal(s, 0))
+			continue;
+
+		break;
 	}
 
 	for (i = 0; i < len(r); i++) {

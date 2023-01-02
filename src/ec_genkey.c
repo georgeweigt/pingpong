@@ -90,6 +90,18 @@ test_ec_genkey(void)
 
 	ec_genkey(private_key, public_key_x, public_key_y);
 
+	for (i = 0; i < 32; i++)
+		hash[i] = i;
+
+	ec_sign(r, s, hash, private_key);
+
+	err = ec_verify(hash, r, s, public_key_x, public_key_y);
+
+	printf("%s\n", err ? "err" : "ok");
+
+	if (ec_malloc_count)
+		printf("memory leak\n");
+
 #if 0
 	printf("private key ");
 	for (i = 0; i < 32; i++)
@@ -105,14 +117,7 @@ test_ec_genkey(void)
 	for (i = 0; i < 32; i++)
 		printf("%02x", public_key_y[i]);
 	printf("\n");
-#endif
 
-	for (i = 0; i < 32; i++)
-		hash[i] = i;
-
-	ec_sign(r, s, hash, private_key);
-
-#if 0
 	printf("r ");
 	for (i = 0; i < 32; i++)
 		printf("%02x", r[i]);
@@ -123,11 +128,4 @@ test_ec_genkey(void)
 		printf("%02x", s[i]);
 	printf("\n");
 #endif
-
-	err = ec_verify(hash, r, s, public_key_x, public_key_y);
-
-	printf("%s\n", err ? "err" : "ok");
-
-	if (ec_malloc_count)
-		printf("memory leak\n");
 }
