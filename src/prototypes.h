@@ -53,6 +53,8 @@ int encode(uint8_t *outbuf, struct atom *p);
 int encode_list(uint8_t *outbuf, struct atom *p);
 int encode_string(uint8_t *outbuf, struct atom *p);
 void test_encode(void);
+void init(void);
+char * read_file(char *filename);
 uint8_t * theta(uint8_t *A);
 uint8_t * rho(uint8_t *A);
 uint8_t * pi(uint8_t *A);

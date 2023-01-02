@@ -1,7 +1,7 @@
 int
 main()
 {
-	ec_init();
+	init();
 	selftest();
 }
 

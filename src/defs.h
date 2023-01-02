@@ -6,6 +6,8 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
 
