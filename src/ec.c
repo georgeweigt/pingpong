@@ -8,6 +8,8 @@ ec_modinv(uint32_t *a, uint32_t *p)
 	return ec_modinv_v1(a, p);
 }
 
+// This code is from 'Mathematical routines for the NIST prime elliptic curves'
+
 uint32_t *
 ec_modinv_v1(uint32_t *a, uint32_t *p)
 {
@@ -71,7 +73,7 @@ ec_modinv_v1(uint32_t *a, uint32_t *p)
 	return r;
 }
 
-// Anton Iliev, Nikolay Kyurkchiev, Asen Rahnev
+// Ref. Anton Iliev, Nikolay Kyurkchiev, Asen Rahnev paper
 
 uint32_t *
 ec_modinv_v2(uint32_t *a, uint32_t *p)
@@ -153,7 +155,9 @@ ec_modinv_v2(uint32_t *a, uint32_t *p)
 	return r;
 }
 
-// M. Brown, D. Hankerson, J. Lopez, A. Menezes
+// Ref. M. Brown, D. Hankerson, J. Lopez, A. Menezes paper
+
+// This code does not work
 
 uint32_t *
 ec_modinv_v3(uint32_t *a, uint32_t *p)
@@ -274,7 +278,14 @@ ec_affinify(struct point *S, uint32_t *p)
 void
 ec_double(struct point *R, struct point *S, uint32_t *p)
 {
-#if 1
+	ec_double_v2(R, S, p);
+}
+
+// Ref. Shay Gueron, Vlad Krasnov paper
+
+void
+ec_double_v2(struct point *R, struct point *S, uint32_t *p)
+{
 	uint32_t *x, *y, *z;
 	uint32_t *xp, *yp, *zp;
 	uint32_t *a, *c2, *c3, *c4, *c8, *m, *s, *t, *u, *v, *x2, *y2, *y4, *z2, *z4;
@@ -400,9 +411,17 @@ ec_double(struct point *R, struct point *S, uint32_t *p)
 	ec_free(y4);
 	ec_free(z2);
 	ec_free(z4);
-#else
-	// original code doesn't work for secp256k1
+}
 
+// This code is from 'Mathematical routines for the NIST prime elliptic curves'
+
+// This code works for secp256r1 but does not work for secp256k1
+
+// (Because "a" is different in the polynomial y^2 = x^3 + a x + b)
+
+void
+ec_double_v1(struct point *R, struct point *S, uint32_t *p)
+{
 	uint32_t *k, *t, *t1, *t2, *t3, *t4, *t5;
 
 	// take care to handle the case when R and S are the same pointer
@@ -556,7 +575,6 @@ ec_double(struct point *R, struct point *S, uint32_t *p)
 
 	ec_free(t4);
 	ec_free(t5);
-#endif
 }
 
 void
