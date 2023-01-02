@@ -27,7 +27,7 @@ account(void)
 	int d, i;
 	char *buf;
 
-	buf = read_file("../Account1");
+	buf = read_file("Account1");
 
 	if (buf == NULL)
 		return;
