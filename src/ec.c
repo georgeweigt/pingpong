@@ -310,20 +310,31 @@ ec_double_v2(struct point *R, struct point *S, uint32_t *p)
 	x2 = ec_mul(x, x);
 	ec_mod(x2, p);
 
-	u = ec_mul(c3, x2);
+	if (ec_equal(a, 0)) {
 
-	z2 = ec_mul(z, z);
-	ec_mod(z2, p);
+		m = ec_mul(c3, x2);
+		z2 = NULL;
+		z4 = NULL;
 
-	z4 = ec_mul(z2, z2);
-	ec_mod(z4, p);
+	} else {
 
-	v = ec_mul(a, z4);
+		u = ec_mul(c3, x2);
 
-	m = ec_add(u, v);
+		z2 = ec_mul(z, z);
+		ec_mod(z2, p);
 
-	ec_free(u);
-	ec_free(v);
+		z4 = ec_mul(z2, z2);
+		ec_mod(z4, p);
+
+		v = ec_mul(a, z4);
+
+		m = ec_add(u, v);
+
+		ec_free(u);
+		ec_free(v);
+	}
+
+	ec_mod(m, p);
 
 	// x' = m^2 - 2 s
 
