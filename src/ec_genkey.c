@@ -89,6 +89,7 @@ test_ec_genkey(void)
 	printf("Testing ec_genkey ");
 
 	ec_genkey(private_key, public_key_x, public_key_y);
+
 #if 0
 	printf("private key ");
 	for (i = 0; i < 32; i++)
@@ -105,6 +106,7 @@ test_ec_genkey(void)
 		printf("%02x", public_key_y[i]);
 	printf("\n");
 #endif
+
 	for (i = 0; i < 32; i++)
 		hash[i] = i;
 

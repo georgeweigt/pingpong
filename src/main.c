@@ -99,5 +99,5 @@ stub(void)
 
 	buf[n] = '\0';
 
-	printf("%s\n", buf);
+//	printf("%s\n", buf);
 }
