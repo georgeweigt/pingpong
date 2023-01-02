@@ -6,6 +6,22 @@ void
 init(void)
 {
 	ec_init();
+//	get_keys();
+}
+
+void
+get_keys(void)
+{
+	char *buf;
+
+	buf = read_file("key.pem");
+
+	if (buf == NULL) {
+		printf("run make-key first\n");
+		exit(1);
+	}
+
+	free(buf);
 }
 
 char *

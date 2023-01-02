@@ -40,7 +40,7 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 
 	// signature
 
-	// sign(outbuf + 32, outbuf + 64, len + 1, private_key);
+	sign(outbuf + HASHLEN, outbuf + HASHLEN + SIGLEN, datalen + 1, private_key);
 
 	// hash
 
