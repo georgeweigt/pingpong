@@ -47,18 +47,18 @@ account(void)
 	if (buf == NULL)
 		return;
 
-	if (strlen(buf) < 105) {
+	if (strlen(buf) < 106) {
 		free(buf);
 		return;
 	}
 
 	for (i = 0; i < 20; i++) {
-		sscanf(buf + 2 * i, "%2x", &d);
+		sscanf(buf + 2 + 2 * i, "%2x", &d);
 		account_number[i] = d;
 	}
 
 	for (i = 0; i < 32; i++) {
-		sscanf(buf + 41 + 2 * i, "%2x", &d);
+		sscanf(buf + 42 + 2 * i, "%2x", &d);
 		private_key[i] = d;
 	}
 

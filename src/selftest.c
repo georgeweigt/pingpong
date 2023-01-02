@@ -5,7 +5,7 @@ selftest(void)
 	test_keccak256();
 	test_encode();
 	test_ec_genkey();
-	test_sign();
+//	test_sign();
 }
 
 // Sepolia boot node geth

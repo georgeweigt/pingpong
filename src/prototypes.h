@@ -86,5 +86,6 @@ void test_boot_key(void);
 void send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key);
 int ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key);
 struct atom * ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port);
+void test_ping_payload(void);
 void sign(uint8_t *sig, uint8_t *msg, int msglen, uint8_t *private_key);
 void test_sign(void);

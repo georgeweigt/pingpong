@@ -86,3 +86,8 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 
 	return pop();
 }
+
+void
+test_ping_payload(void)
+{
+}
