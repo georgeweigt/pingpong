@@ -15,8 +15,8 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, ui
 	R.y = NULL;
 	R.z = NULL;
 
-	S.x = ec_dup(gx256);
-	S.y = ec_dup(gy256);
+	S.x = gx256;
+	S.y = gy256;
 	S.z = ec_int(1);
 
 	T.x = ec_buf_to_bignum(public_key_x, 32);
@@ -46,8 +46,9 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, ui
 	ec_free(v);
 	ec_free(w);
 
+	ec_free(S.z);
+
 	ec_free_xyz(&R);
-	ec_free_xyz(&S);
 	ec_free_xyz(&T);
 
 	return err;
