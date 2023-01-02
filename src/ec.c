@@ -1,8 +1,3 @@
-// secp256r1
-
-#define COEFF_A "FFFFFFFF" "00000001" "00000000" "00000000" "00000000" "FFFFFFFF" "FFFFFFFF" "FFFFFFFC"
-#define COEFF_B "5AC635D8" "AA3A93E7" "B3EBBD55" "769886BC" "651D06B0" "CC53B0F6" "3BCE3C3E" "27D2604B"
-
 // Returns (1 / a) mod p
 
 uint32_t *
@@ -289,11 +284,7 @@ ec_double_v2(struct point *R, struct point *S, uint32_t *p)
 	uint32_t *xp, *yp, *zp;
 	uint32_t *a, *c2, *c3, *c4, *c8, *m, *s, *t, *u, *v, *x2, *y2, *y4, *z2, *z4;
 
-#if 1
 	a = ec_int(0); // secp256k1
-#else
-	a = ec_hexstr_to_bignum(COEFF_A); // secp256r1
-#endif
 
 	x = S->x;
 	y = S->y;
@@ -2003,6 +1994,9 @@ test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
 
 	return err;
 }
+
+#define COEFF_A "FFFFFFFF" "00000001" "00000000" "00000000" "00000000" "FFFFFFFF" "FFFFFFFF" "FFFFFFFC"
+#define COEFF_B "5AC635D8" "AA3A93E7" "B3EBBD55" "769886BC" "651D06B0" "CC53B0F6" "3BCE3C3E" "27D2604B"
 
 int
 test_public_keys_secp256r1(uint32_t *x, uint32_t *y)
