@@ -1,4 +1,7 @@
-int ec_malloc_count;
+// secp256r1
+
+#define COEFF_A "FFFFFFFF" "00000001" "00000000" "00000000" "00000000" "FFFFFFFF" "FFFFFFFF" "FFFFFFFC"
+#define COEFF_B "5AC635D8" "AA3A93E7" "B3EBBD55" "769886BC" "651D06B0" "CC53B0F6" "3BCE3C3E" "27D2604B"
 
 // Returns (1 / a) mod p
 
@@ -271,8 +274,6 @@ ec_affinify(struct point *S, uint32_t *p)
 	return 0;
 }
 
-#define A "FFFFFFFF" "00000001" "00000000" "00000000" "00000000" "FFFFFFFF" "FFFFFFFF" "FFFFFFFC"
-
 void
 ec_double(struct point *R, struct point *S, uint32_t *p)
 {
@@ -291,7 +292,7 @@ ec_double_v2(struct point *R, struct point *S, uint32_t *p)
 #if 1
 	a = ec_int(0); // secp256k1
 #else
-	a = ec_hexstr_to_bignum(A); // secp256r1
+	a = ec_hexstr_to_bignum(COEFF_A); // secp256r1
 #endif
 
 	x = S->x;
@@ -1521,6 +1522,8 @@ ec_int(int k)
 	return u;
 }
 
+int ec_malloc_count;
+
 uint32_t *
 ec_new(int n)
 {
@@ -1610,6 +1613,8 @@ ec_buf_to_bignum(uint8_t *buf, int len)
 	ec_norm(u);
 	return u;
 }
+
+#if 0 // does not support secp256k1
 
 void
 test_ec()
@@ -1964,4 +1969,78 @@ test_ec_twin_mult()
 	ec_free_xyz(&R);
 	ec_free_xyz(&S);
 	ec_free_xyz(&T);
+}
+
+#endif
+
+int
+test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
+{
+	int err;
+	uint32_t *n3, *n7, *p, *x3, *y2, *r;
+
+	p = ec_hexstr_to_bignum("FFFFFFFF" "FFFFFFFF" "FFFFFFFF" "FFFFFFFF" "FFFFFFFF" "FFFFFFFF" "FFFFFFFE" "FFFFFC2F");
+
+	// y^2 mod p == (x^3 + 7) mod p
+
+	y2 = ec_mul(y, y);
+	ec_mod(y2, p);
+
+	n3 = ec_int(3);
+	x3 = ec_pow(x, n3);
+	n7 = ec_int(7);
+	r = ec_add(x3, n7);
+	ec_mod(r, p);
+
+	err = ec_cmp(y2, r); // 0 = ok
+
+	ec_free(n3);
+	ec_free(n7);
+	ec_free(p);
+	ec_free(x3);
+	ec_free(y2);
+	ec_free(r);
+
+	return err;
+}
+
+int
+test_public_keys_secp256r1(uint32_t *x, uint32_t *y)
+{
+	int err;
+	uint32_t *a, *b, *n3, *p, *x3, *y2, *r, *t1, *t2;
+
+	p = ec_hexstr_to_bignum("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff");
+
+	// y^2 mod p == (x^3 + a x + b) mod p
+
+	y2 = ec_mul(y, y);
+	ec_mod(y2, p);
+
+	n3 = ec_int(3);
+	x3 = ec_pow(x, n3);
+
+	a = ec_hexstr_to_bignum(COEFF_A);
+	b = ec_hexstr_to_bignum(COEFF_B);
+
+	t1 = ec_mul(a, x);
+
+	t2 = ec_add(x3, t1);
+	r = ec_add(t2, b);
+
+	ec_mod(r, p);
+
+	err = ec_cmp(y2, r); // 0 = ok
+
+	ec_free(a);
+	ec_free(b);
+	ec_free(n3);
+	ec_free(p);
+	ec_free(x3);
+	ec_free(y2);
+	ec_free(r);
+	ec_free(t1);
+	ec_free(t2);
+
+	return err;
 }
