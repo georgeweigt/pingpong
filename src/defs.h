@@ -13,7 +13,6 @@
 
 #define SECP256K1 1 // set to 0 for secp256r1
 #define BOOT_PORT 30303
-#define UDPBUFLEN 1000
 #define HASHLEN 32
 #define SIGLEN 69
 #define R_INDEX (HASHLEN + 3)

@@ -5,12 +5,7 @@ send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port)
 	uint8_t *buf;
 	struct sockaddr_in dst_addr;
 
-	buf = malloc(UDPBUFLEN);
-
-	if (buf == NULL)
-		exit(1);
-
-	len = ping_payload(buf, src_ip, dst_ip, src_port, dst_port);
+	buf = ping_payload(src_ip, dst_ip, src_port, dst_port, &len);
 
 	dst_addr.sin_family = AF_INET;
 	dst_addr.sin_addr.s_addr = inet_addr(dst_ip);
@@ -24,29 +19,38 @@ send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port)
 	free(buf);
 }
 
-int
-ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port)
+uint8_t *
+ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen)
 {
-	int datalen;
+	int len;
+	uint8_t *buf;
 	struct atom *p;
-
-	outbuf[HASHLEN + SIGLEN] = 0x01; // packet type (ping)
 
 	// data
 
 	p = ping_data(src_ip, dst_ip, src_port, dst_port);
-	datalen = encode(outbuf + HASHLEN + SIGLEN + 1, UDPBUFLEN, p);
+	len = length(p);
+	buf = malloc(HASHLEN + SIGLEN + len + 1);
+	if (buf == NULL)
+		exit(1);
+	encode(buf + HASHLEN + SIGLEN + 1, len, p);
 	free_list(p);
+
+	// packet type (ping)
+
+	buf[HASHLEN + SIGLEN] = 0x01;
 
 	// signature
 
-	sign(outbuf + HASHLEN, outbuf + HASHLEN + SIGLEN, datalen + 1);
+	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1);
 
 	// hash
 
-	keccak256(outbuf, outbuf + HASHLEN, SIGLEN + 1 + datalen);
+	keccak256(buf, buf + HASHLEN, SIGLEN + len + 1);
 
-	return HASHLEN + SIGLEN + 1 + datalen; // payload length
+	*plen = HASHLEN + SIGLEN + len + 1;
+
+	return buf;
 }
 
 struct atom *
@@ -93,43 +97,40 @@ test_ping_payload(void)
 	int err, len, n;
 	uint8_t *buf, hash[32], m[60];
 
-	printf("Testing ping_payload\n");
+	printf("Testing ping_payload");
 
-	buf = malloc(UDPBUFLEN);
-
-	len = ping_payload(buf, "1.2.3.4", "5.6.7.8", 1234, 5678);
+	buf = ping_payload("1.2.3.4", "5.6.7.8", 1234, 5678, &len);
 
 	// check length
 
-	printf("checking length %s\n", len < HASHLEN + SIGLEN + 1 ? "err" : "ok");
+	printf(" length %s", len < HASHLEN + SIGLEN + 1 ? "err" : "ok");
 
 	// check hash
 
-	printf("checking hash ");
+	printf(" hash ");
 	keccak256(hash, buf + 32, len - 32);
 	err = memcmp(buf, hash, 32);
-	printf("%s\n", err ? "err" : "ok");
-
-	// check signature encoding
-
-	printf("checking signature encoding ");
-	n = decode_check(buf + HASHLEN, SIGLEN);
-	printf("%s\n", n == SIGLEN ? "ok" : "err");
+	printf("%s", err ? "err" : "ok");
 
 	// check signature
 
-	printf("checking signature ");
-	memcpy(m, "\x19" "Ethereum Signed Message:\n32", 28);
-	keccak256(m + 28, buf + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
-	keccak256(hash, m, 60);
-	err = ec_verify(hash, buf + R_INDEX, buf + S_INDEX, public_key_x, public_key_y);
-	printf("%s\n", err ? "err" : "ok");
+	printf(" signature ");
+	if (decode_check(buf + HASHLEN, SIGLEN) == SIGLEN) {
+		memcpy(m, "\x19" "Ethereum Signed Message:\n32", 28);
+		keccak256(m + 28, buf + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
+		keccak256(hash, m, 60);
+		err = ec_verify(hash, buf + R_INDEX, buf + S_INDEX, public_key_x, public_key_y);
+	} else
+		err = 1;
+	printf("%s", err ? "err" : "ok");
 
-	// check data encoding
+	// check data
 
-	printf("checking data encoding ");
+	printf(" data ");
 	n = decode_check(buf + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
-	printf("%s\n", n == len - HASHLEN - SIGLEN - 1 ? "ok" : "err");
+	printf("%s", n == len - HASHLEN - SIGLEN - 1 ? "ok" : "err");
+
+	printf("\n");
 
 	free(buf);
 }
