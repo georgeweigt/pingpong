@@ -247,5 +247,24 @@ test_decode(void)
 		return;
 	}
 
+	// "" (empty string)
+
+	push_string(NULL, 0);
+	p = pop();
+	len = encode(buf, sizeof buf, p);
+	err = decode(buf, len);
+	if (err)
+		q = NULL;
+	else {
+		q = pop();
+		err = compare_lists(p, q);
+	}
+	free_list(p);
+	free_list(q);
+	if (err) {
+		printf("err\n");
+		return;
+	}
+
 	printf("ok\n");
 }

@@ -11,19 +11,19 @@ sublength(struct atom *p)
 	int len;
 
 	if (p == NULL)
+		// empty list
 		return 0;
 
 	if (p->length < 0) {
-
+		// list
 		len = 0;
-
 		while (p) {
 			len += enlength(p->car);
 			p = p->cdr;
 		}
-
 		return len;
 	} else
+		// string
 		return p->length;
 }
 
@@ -31,6 +31,7 @@ int
 padlength(struct atom *p, int sublen)
 {
 	if (p == NULL)
+		// empty list
 		return 1;
 
 	if (p->length == 1 && p->string[0] < 0x80)
