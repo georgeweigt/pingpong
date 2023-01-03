@@ -16,8 +16,8 @@ decode_check(uint8_t *buf, int length)
 	// string 0..55 bytes
 
 	if (buf[0] < 0xb8) {
-		len = 1 + buf[0] - 0x80;
-		return len <= length ? len : -1;
+		len = buf[0] - 0x80 + 1;
+		return len > length ? -1 : len;
 	}
 
 	// string > 55 bytes
@@ -35,7 +35,7 @@ decode_check(uint8_t *buf, int length)
 			u = (u << 8) | buf[i + 1];
 
 		if (u > 65535)
-			return -1; // not accepting insane lengths
+			return -1; // not accepting large lengths
 
 		len = n + u + 1;
 
@@ -46,7 +46,7 @@ decode_check(uint8_t *buf, int length)
 
 	if (buf[0] < 0xf8) {
 
-		len = 1 + buf[0] - 0xc0;
+		len = buf[0] - 0xc0 + 1;
 
 		if (len > length)
 			return -1;
@@ -69,7 +69,7 @@ decode_check(uint8_t *buf, int length)
 		u = (u << 8) | buf[i + 1];
 
 	if (u > 65535)
-		return -1; // not accepting insane lengths
+		return -1; // not accepting large lengths
 
 	len = n + u + 1;
 

@@ -90,7 +90,7 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 void
 test_ping_payload(void)
 {
-	int err, len;
+	int err, len, n;
 	uint8_t *buf, hash[32], m[60];
 
 	printf("Testing ping_payload\n");
@@ -110,6 +110,12 @@ test_ping_payload(void)
 	err = memcmp(buf, hash, 32);
 	printf("%s\n", err ? "err" : "ok");
 
+	// check signature encoding
+
+	printf("checking signature encoding ");
+	n = decode_check(buf + HASHLEN, SIGLEN);
+	printf("%s\n", n == SIGLEN ? "ok" : "err");
+
 	// check signature
 
 	printf("checking signature ");
@@ -118,6 +124,12 @@ test_ping_payload(void)
 	keccak256(hash, m, 60);
 	err = ec_verify(hash, buf + R_INDEX, buf + S_INDEX, public_key_x, public_key_y);
 	printf("%s\n", err ? "err" : "ok");
+
+	// check data encoding
+
+	printf("checking data encoding ");
+	n = decode_check(buf + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
+	printf("%s\n", n == len - HASHLEN - SIGLEN - 1 ? "ok" : "err");
 
 	free(buf);
 }
