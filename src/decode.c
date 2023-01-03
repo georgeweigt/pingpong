@@ -226,5 +226,26 @@ test_decode(void)
 		return;
 	}
 
+	// [[],[]]
+
+	list(0);
+	list(0);
+	list(2);
+	p = pop();
+	len = encode(buf, sizeof buf, p);
+	err = decode(buf, len);
+	if (err)
+		q = NULL;
+	else {
+		q = pop();
+		err = compare_lists(p, q);
+	}
+	free_list(p);
+	free_list(q);
+	if (err) {
+		printf("err\n");
+		return;
+	}
+
 	printf("ok\n");
 }
