@@ -1,5 +1,5 @@
 int
-length(struct atom *p)
+enlength(struct atom *p)
 {
 	int len = sublength(p);
 	return padlength(p, len) + len;
@@ -18,7 +18,7 @@ sublength(struct atom *p)
 		len = 0;
 
 		while (p) {
-			len += length(p->car);
+			len += enlength(p->car);
 			p = p->cdr;
 		}
 

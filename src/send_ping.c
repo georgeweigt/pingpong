@@ -29,7 +29,7 @@ ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen)
 	// data
 
 	p = ping_data(src_ip, dst_ip, src_port, dst_port);
-	len = length(p);
+	len = enlength(p);
 	buf = malloc(HASHLEN + SIGLEN + len + 1);
 	if (buf == NULL)
 		exit(1);

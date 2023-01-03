@@ -1,7 +1,7 @@
 int
 encode(uint8_t *buf, int len, struct atom *p)
 {
-	if (length(p) > len)
+	if (enlength(p) > len)
 		return 0;
 	else
 		return encode_nib(buf, p);
