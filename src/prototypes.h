@@ -1,3 +1,5 @@
+int decode_check(uint8_t *buf, int length);
+int decode_check_list(uint8_t *buf, int length);
 uint32_t * ec_modinv(uint32_t *a, uint32_t *p);
 uint32_t * ec_modinv_v1(uint32_t *a, uint32_t *p);
 uint32_t * ec_modinv_v2(uint32_t *a, uint32_t *p);
