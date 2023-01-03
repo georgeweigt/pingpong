@@ -1,5 +1,5 @@
 void
-send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
+send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port)
 {
 	int len, n;
 	uint8_t *buf;
@@ -10,7 +10,7 @@ send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_
 	if (buf == NULL)
 		exit(1);
 
-	len = ping_payload(buf, src_ip, dst_ip, src_port, dst_port, private_key);
+	len = ping_payload(buf, src_ip, dst_ip, src_port, dst_port);
 
 	dst_addr.sin_family = AF_INET;
 	dst_addr.sin_addr.s_addr = inet_addr(dst_ip);
@@ -25,7 +25,7 @@ send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_
 }
 
 int
-ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port, uint8_t *private_key)
+ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_port)
 {
 	int datalen;
 	struct atom *p;
@@ -40,7 +40,7 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 
 	// signature
 
-	sign(outbuf + HASHLEN, outbuf + HASHLEN + SIGLEN, datalen + 1, private_key);
+	sign(outbuf + HASHLEN, outbuf + HASHLEN + SIGLEN, datalen + 1);
 
 	// hash
 
@@ -97,7 +97,7 @@ test_ping_payload(void)
 
 	buf = malloc(UDPBUFLEN);
 
-	len = ping_payload(buf, "1.2.3.4", "5.6.7.8", 1234, 5678, private_key);
+	len = ping_payload(buf, "1.2.3.4", "5.6.7.8", 1234, 5678);
 
 	// check length
 
