@@ -95,7 +95,7 @@ void
 test_ping_payload(void)
 {
 	int err, len, n;
-	uint8_t *buf, hash[32], m[60];
+	uint8_t *buf, hash[92]; // 32 + 28 + 32
 
 	printf("Testing ping_payload");
 
@@ -116,9 +116,9 @@ test_ping_payload(void)
 
 	printf(" signature ");
 	if (decode_check(buf + HASHLEN, SIGLEN) == SIGLEN) {
-		memcpy(m, "\x19" "Ethereum Signed Message:\n32", 28);
-		keccak256(m + 28, buf + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
-		keccak256(hash, m, 60);
+		memcpy(hash + HASHLEN, "\x19" "Ethereum Signed Message:\n32", 28);
+		keccak256(hash + HASHLEN + 28, buf + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
+		keccak256(hash, hash + HASHLEN, 60);
 		err = ec_verify(hash, buf + R_INDEX, buf + S_INDEX, public_key_x, public_key_y);
 	} else
 		err = 1;
