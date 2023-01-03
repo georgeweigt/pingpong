@@ -74,8 +74,6 @@ encode_string(uint8_t *buf, struct atom *p)
 	memcpy(buf + padlen, p->string, sublen);
 
 	switch (padlen) {
-	case 0:
-		break;
 	case 1:
 		buf[0] = 0x80 + sublen;
 		break;
