@@ -103,9 +103,9 @@ decode_check(uint8_t *buf, int length)
 			return -1;
 		len = 0;
 		for (i = 0; i < n; i++) {
-			len = (len << 8) | buf[i + 1];
 			if (len > 65535)
-				return -1; // not accepting large lengths
+				return -1; // not accepting lengths > 2^24 - 1
+			len = (len << 8) | buf[i + 1];
 		}
 		return len + 1 > length ? -1 : len + 1;
 	}
@@ -127,9 +127,9 @@ decode_check(uint8_t *buf, int length)
 		return -1;
 	len = 0;
 	for (i = 0; i < n; i++) {
-		len = (len << 8) | buf[i + 1];
 		if (len > 65535)
-			return -1; // not accepting large lengths
+			return -1; // not accepting lengths > 2^24 - 1
+		len = (len << 8) | buf[i + 1];
 	}
 	err = decode_check_list(buf + n + 1, len);
 	return err ? -1 : len + n + 1;
