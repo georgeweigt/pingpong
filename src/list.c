@@ -1,3 +1,20 @@
+void
+list(int n)
+{
+	int i;
+	struct atom *p, *q;
+
+	p = NULL;
+
+	for (i = 0; i < n; i++) {
+		q = alloc_atom(-1);
+		q->cdr = p;
+		q->car = pop();
+		p = q;
+	}
+
+	push(p);
+}
 
 #define STACKSIZE 1000
 
@@ -56,24 +73,6 @@ push_number(uint64_t n)
 			break;
 
 	push_string(buf + i, 8 - i);
-}
-
-void
-list(int n)
-{
-	int i;
-	struct atom *p, *t;
-
-	p = NULL;
-
-	for (i = 0; i < n; i++) {
-		t = alloc_atom(-1);
-		t->cdr = p;
-		t->car = pop();
-		p = t;
-	}
-
-	push(p);
 }
 
 struct atom *
