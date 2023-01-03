@@ -35,7 +35,7 @@ ping_payload(uint8_t *outbuf, char *src_ip, char *dst_ip, int src_port, int dst_
 	// data
 
 	p = ping_data(src_ip, dst_ip, src_port, dst_port);
-	datalen = encode(outbuf + HASHLEN + SIGLEN + 1, p);
+	datalen = encode(outbuf + HASHLEN + SIGLEN + 1, UDPBUFLEN, p);
 	free_list(p);
 
 	// signature

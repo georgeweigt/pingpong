@@ -22,7 +22,7 @@ sign(uint8_t *sig, uint8_t *msg, int msglen)
 
 	p = pop();
 
-	encode(sig, p);
+	encode(sig, SIGLEN, p);
 }
 
 void

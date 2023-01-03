@@ -1,5 +1,10 @@
+int decode(uint8_t *buf, int length);
+int decode_nib(uint8_t *buf, int length);
+void decode_list(uint8_t *buf, int length);
 int decode_check(uint8_t *buf, int length);
 int decode_check_list(uint8_t *buf, int length);
+int compare_lists(struct atom *p, struct atom *q);
+void test_decode(void);
 uint32_t * ec_modinv(uint32_t *a, uint32_t *p);
 uint32_t * ec_modinv_v1(uint32_t *a, uint32_t *p);
 uint32_t * ec_modinv_v2(uint32_t *a, uint32_t *p);
@@ -52,9 +57,10 @@ void ec_public_keys(uint8_t *public_key_x, uint8_t *public_key_y, uint8_t *priva
 void test_ec_genkey(void);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
-int encode(uint8_t *outbuf, struct atom *p);
-int encode_list(uint8_t *outbuf, struct atom *p);
-int encode_string(uint8_t *outbuf, struct atom *p);
+int encode(uint8_t *buf, int len, struct atom *p);
+int encode_nib(uint8_t *buf, struct atom *p);
+int encode_list(uint8_t *buf, struct atom *p);
+int encode_string(uint8_t *buf, struct atom *p);
 void test_encode(void);
 void init(void);
 void account(void);
