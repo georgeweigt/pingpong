@@ -148,36 +148,6 @@ decode_check_list(uint8_t *buf, int length)
 	return 0;
 }
 
-// returns 0 for equal
-
-int
-compare_lists(struct atom *p, struct atom *q)
-{
-	if (p == NULL && q == NULL)
-		return 0;
-
-	if (p == NULL || q == NULL)
-		return -1;
-
-	if (p->length == -1 && q->length == -1) {
-		while (p && q) {
-			if (compare_lists(p->car, q->car))
-				return -1;
-			p = p->cdr;
-			q = q->cdr;
-		}
-		if (p == NULL && q == NULL)
-			return 0;
-		else
-			return -1;
-	}
-
-	if (p->length != q->length)
-		return -1;
-	else
-		return memcmp(p->string, q->string, p->length) ? -1 : 0;
-}
-
 void
 test_decode(void)
 {

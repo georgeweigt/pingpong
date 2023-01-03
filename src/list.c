@@ -111,3 +111,39 @@ free_list(struct atom *p)
 		atom_count--;
 	}
 }
+
+// returns 0 for equal
+
+int
+compare_lists(struct atom *p, struct atom *q)
+{
+	int d;
+
+	if (p == NULL && q == NULL)
+		return 0;
+
+	if (p == NULL && q != NULL)
+		return -1;
+
+	if (p != NULL && q == NULL)
+		return 1;
+
+	if (p->length == -1 && q->length == -1) {
+		while (p && q) {
+			d = compare_lists(p->car, q->car);
+			if (d)
+				return d;
+			p = p->cdr;
+			q = q->cdr;
+		}
+		return compare_lists(p, q);
+	}
+
+	if (p->length < q->length)
+		return -1;
+
+	if (p->length > q->length)
+		return 1;
+
+	return memcmp(p->string, q->string, p->length);
+}
