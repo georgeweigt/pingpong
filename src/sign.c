@@ -28,15 +28,20 @@ sign(uint8_t *sig, uint8_t *msg, int msglen)
 void
 test_sign(void)
 {
-	int i;
-	uint8_t sig[SIGLEN];
+	int err;
+	uint8_t hash[92], sig[SIGLEN];
 
 	printf("Testing sign ");
 
 	sign(sig, (uint8_t *) "hello", 5);
 
-	for (i = 0; i < SIGLEN; i++)
-		printf("%02x", sig[i]);
+	if (decode_check(sig, SIGLEN) == SIGLEN) {
+		memcpy(hash + HASHLEN, "\x19" "Ethereum Signed Message:\n32", 28);
+		keccak256(hash + HASHLEN + 28, (uint8_t *) "hello", 5);
+		keccak256(hash, hash + HASHLEN, 60);
+		err = ec_verify(hash, sig + 3, sig + 36, public_key_x, public_key_y);
+	} else
+		err = 1;
 
-	printf("\n");
+	printf("%s\n", err ? "err" : "ok");
 }

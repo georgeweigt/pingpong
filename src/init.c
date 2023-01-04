@@ -22,7 +22,7 @@ init(void)
 	for (i = 0; i < 20; i++)
 		printf("%02x", account_number[i]);
 	printf("\n");
-
+#if 0
 	for (i = 0; i < 32; i++)
 		printf("%02x", private_key[i]);
 	printf("\n");
@@ -34,6 +34,7 @@ init(void)
 	for (i = 0; i < 32; i++)
 		printf("%02x", public_key_y[i]);
 	printf("\n");
+#endif
 }
 
 void

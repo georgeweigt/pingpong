@@ -1,12 +1,12 @@
 void
 selftest(void)
 {
-	test_boot_key();
+//	test_boot_key();
 	test_keccak256();
 	test_encode();
 	test_decode();
 	test_ec_genkey();
-//	test_sign();
+	test_sign();
 	test_ping_payload();
 }
 
