@@ -95,11 +95,11 @@ void
 test_ping_payload(void)
 {
 	int err, len, n;
-	uint8_t *buf, hash[92]; // 32 + 28 + 32
+	uint8_t buf[60], hash[32], *payload;
 
 	printf("Testing ping_payload");
 
-	buf = ping_payload("1.2.3.4", "5.6.7.8", 1234, 5678, &len);
+	payload = ping_payload("1.2.3.4", "5.6.7.8", 1234, 5678, &len);
 
 	// check length
 
@@ -108,18 +108,18 @@ test_ping_payload(void)
 	// check hash
 
 	printf(" hash ");
-	keccak256(hash, buf + 32, len - 32);
-	err = memcmp(buf, hash, 32);
+	keccak256(hash, payload + 32, len - 32);
+	err = memcmp(hash, payload, 32);
 	printf("%s", err ? "err" : "ok");
 
 	// check signature
 
 	printf(" signature ");
-	if (decode_check(buf + HASHLEN, SIGLEN) == SIGLEN) {
-		memcpy(hash + HASHLEN, "\x19" "Ethereum Signed Message:\n32", 28);
-		keccak256(hash + HASHLEN + 28, buf + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
-		keccak256(hash, hash + HASHLEN, 60);
-		err = ec_verify(hash, buf + R_INDEX, buf + S_INDEX, public_key_x, public_key_y);
+	if (decode_check(payload + HASHLEN, SIGLEN) == SIGLEN) {
+		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
+		keccak256(buf + 28, payload + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
+		keccak256(hash, buf, 60);
+		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, public_key_x, public_key_y);
 	} else
 		err = 1;
 	printf("%s", err ? "err" : "ok");
@@ -127,10 +127,10 @@ test_ping_payload(void)
 	// check data
 
 	printf(" data ");
-	n = decode_check(buf + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
+	n = decode_check(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
 	printf("%s", n == len - HASHLEN - SIGLEN - 1 ? "ok" : "err");
 
 	printf("\n");
 
-	free(buf);
+	free(payload);
 }
