@@ -89,6 +89,8 @@ void free_list(struct atom *p);
 int compare_lists(struct atom *p, struct atom *q);
 int main();
 void stub(void);
+int open_tcp_socket(char *hostname, int portnumber);
+void test(void);
 void selftest(void);
 void test_boot_key(void);
 void send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port);
