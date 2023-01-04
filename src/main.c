@@ -3,7 +3,7 @@ main()
 {
 	init();
 	selftest();
-	test();
+//	test();
 }
 
 #define TIMEOUT 1000 // poll timeout in milliseconds

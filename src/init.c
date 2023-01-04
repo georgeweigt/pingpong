@@ -1,4 +1,5 @@
-// default keys
+
+// phony private key
 
 #define PRIVATE_KEY "\x62\x55\x58\xec\x2a\xe8\x94\x4a\x19\x49\x5c\xff\x74\xb0\xdc\x51\x66\x33\x48\x73\x64\x3c\x98\x69\x32\x7b\x23\xc6\x6b\x8b\x45\x67"
 #define PUBLIC_KEY_X "\x25\xfc\x29\xdd\x14\x62\x64\xc7\x0d\xc2\xda\x19\x59\x60\xc3\x5c\x6d\x05\xbc\x21\xfe\x37\xc7\xc1\x53\xb5\x76\x1b\x86\x4b\x9f\x07"
@@ -9,41 +10,30 @@ uint8_t private_key[32];
 uint8_t public_key_x[32];
 uint8_t public_key_y[32];
 
+struct account account_table[2];
+
 void
 init(void)
 {
-	int i;
-
 	ec_init();
+
 	memcpy(private_key, PRIVATE_KEY, 32);
-	account();
 	ec_public_keys(public_key_x, public_key_y, private_key);
 
-	for (i = 0; i < 20; i++)
-		printf("%02x", account_number[i]);
-	printf("\n");
-#if 1
-	for (i = 0; i < 32; i++)
-		printf("%02x", private_key[i]);
-	printf("\n");
+	read_account(account_table + 0, "Account1");
+	read_account(account_table + 1, "Account2");
 
-	for (i = 0; i < 32; i++)
-		printf("%02x", public_key_x[i]);
-	printf("\n");
-
-	for (i = 0; i < 32; i++)
-		printf("%02x", public_key_y[i]);
-	printf("\n");
-#endif
+//	print_account(account_table + 0);
+//	print_account(account_table + 1);
 }
 
 void
-account(void)
+read_account(struct account *p, char *filename)
 {
 	int d, i;
 	char *buf;
 
-	buf = read_file("Account1");
+	buf = read_file(filename);
 
 	if (buf == NULL)
 		return;
@@ -55,15 +45,17 @@ account(void)
 
 	for (i = 0; i < 20; i++) {
 		sscanf(buf + 2 + 2 * i, "%2x", &d);
-		account_number[i] = d;
+		p->account_number[i] = d;
 	}
 
 	for (i = 0; i < 32; i++) {
 		sscanf(buf + 42 + 2 * i, "%2x", &d);
-		private_key[i] = d;
+		p->private_key[i] = d;
 	}
 
 	free(buf);
+
+	ec_public_keys(p->public_key_x, p->public_key_y, p->private_key);
 }
 
 char *
@@ -107,4 +99,37 @@ read_file(char *filename)
 	buf[n] = '\0';
 
 	return buf;
+}
+
+void
+print_account(struct account *p)
+{
+	int i;
+	uint8_t buf[64], hash[32];
+
+	// account number is hash of public keys
+
+	memcpy(buf, p->public_key_x, 32);
+	memcpy(buf + 32, p->public_key_y, 32);
+	keccak256(hash, buf, 64);
+
+	for (i = 0; i < 20; i++)
+		printf("%02x", p->account_number[i]);
+	printf("\n");
+
+	for (i = 0; i < 32; i++)
+		printf("%02x", p->private_key[i]);
+	printf("\n");
+
+	for (i = 0; i < 32; i++)
+		printf("%02x", p->public_key_x[i]);
+	printf("\n");
+
+	for (i = 0; i < 32; i++)
+		printf("%02x", p->public_key_y[i]);
+	printf("\n");
+
+	for (i = 0; i < 20; i++)
+		printf("%02x", hash[i + 12]);
+	printf("\n");
 }
