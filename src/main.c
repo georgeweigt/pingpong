@@ -22,11 +22,11 @@ main()
 void
 stub(void)
 {
-	int err, fd1, fd2, n;
+	int err, fd1, fd2, i, n;
 	struct sockaddr_in addr;
 	struct pollfd pollfd;
 	socklen_t addrlen;
-	static char buf[1200];
+	static uint8_t buf[1200];
 
 	fd1 = socket(PF_INET, SOCK_DGRAM, 0);
 
@@ -93,4 +93,8 @@ stub(void)
 	}
 
 	printf("%d bytes received\n", n);
+
+	for (i = 0; i < n; i++)
+		printf("%02x", buf[i]);
+	printf("\n");
 }
