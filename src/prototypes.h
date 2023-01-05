@@ -90,6 +90,7 @@ void free_list(struct atom *p);
 int compare_lists(struct atom *p, struct atom *q);
 int main();
 void stub(void);
+int start_listening(int port);
 void selftest(void);
 void test_boot_key(void);
 void send_enr_request(int fd, char *dst_ip, int dst_port, struct account *acct);

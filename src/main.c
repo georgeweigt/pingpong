@@ -8,25 +8,22 @@ main()
 
 #define TIMEOUT 10000 // poll timeout in milliseconds
 
-#if 0
-#define SRC_IP "98.161.224.53"
-#define DST_IP "18.168.182.86"
-#else
 #define SRC_IP "127.0.0.1"
 #define DST_IP "127.0.0.1"
-#endif
 
-#define SRC_PORT 30000
+#define SRC_PORT 29000
 #define DST_PORT 30303
 
 void
 stub(void)
 {
-	int err, fd1, fd2, i, n;
+	int err, fd0, fd1, fd2, fd3, i, n;
 	struct sockaddr_in addr;
-	struct pollfd pollfd;
+	struct pollfd pollfd[2];
 	socklen_t addrlen;
 	static uint8_t buf[1200];
+
+	fd0 = start_listening(SRC_PORT);
 
 	fd1 = socket(PF_INET, SOCK_DGRAM, 0);
 
@@ -68,33 +65,100 @@ stub(void)
 
 	send_ping(fd1, SRC_IP, DST_IP, SRC_PORT, DST_PORT, account_table + 0);
 
-	pollfd.fd = fd2;
-	pollfd.events = POLLIN;
+	pollfd[0].fd = fd0;
+	pollfd[0].events = POLLIN;
 
-	n = poll(&pollfd, 1, TIMEOUT);
+	pollfd[1].fd = fd2;
+	pollfd[1].events = POLLIN;
 
-	if (n < 0) {
-		perror("poll");
+	for (;;) {
+
+		n = poll(pollfd, 2, TIMEOUT);
+
+		if (n < 0) {
+			perror("poll");
+			exit(1);
+		}
+
+		if (n < 1) {
+			printf("poll timeout\n");
+			exit(1);
+		}
+
+		// event on listening interface
+
+		if (pollfd[0].revents & POLLIN) {
+			fd3 = accept(fd0, (struct sockaddr *) &addr, &addrlen);
+			if (fd3 < 0) {
+				perror("accept");
+				exit(1);
+			}
+			printf("connect from %s\n", inet_ntoa(addr.sin_addr));
+		}
+
+		if (pollfd[1].revents & POLLIN) {
+			addrlen = sizeof addr;
+			n = recvfrom(fd2, buf, sizeof buf, 0, (struct sockaddr *) &addr, &addrlen);
+			if (n < 0) {
+				perror("recvfrom");
+				exit(1);
+			}
+			printf("%d bytes received\n", n);
+			for (i = 0; i < n; i++)
+				printf("%02x", buf[i]);
+			printf("\n");
+		}
+	}
+}
+
+int
+start_listening(int port)
+{
+	int err, fd;
+	struct sockaddr_in addr;
+
+	fd = socket(AF_INET, SOCK_STREAM, 0);
+
+	if (fd < 0) {
+		perror("socket");
 		exit(1);
 	}
 
-	if (n < 1 || (pollfd.revents & POLLIN) == 0) {
-		printf("poll timeout\n");
+	// struct sockaddr {
+	//         unsigned short   sa_family;    // address family, AF_xxx
+	//         char             sa_data[14];  // 14 bytes of protocol address
+	// };
+	//
+	// struct sockaddr_in {
+	//         short            sin_family;   // e.g. AF_INET, AF_INET6
+	//         unsigned short   sin_port;     // e.g. htons(3490)
+	//         struct in_addr   sin_addr;     // see struct in_addr, below
+	//         char             sin_zero[8];  // zero this if you want to
+	// };
+	//
+	// struct in_addr {
+	//         unsigned long s_addr;          // load with inet_pton()
+	// };
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_port = htons(port);
+
+	err = bind(fd, (struct sockaddr *) &addr, sizeof addr);
+
+	if (err) {
+		perror("bind");
 		exit(1);
 	}
 
-	addrlen = sizeof addr;
+	// listen
 
-	n = recvfrom(fd2, buf, sizeof buf, 0, (struct sockaddr *) &addr, &addrlen);
+	err = listen(fd, 10);
 
-	if (n < 0) {
-		perror("recvfrom");
+	if (err) {
+		perror("listen");
 		exit(1);
 	}
 
-	printf("%d bytes received\n", n);
-
-	for (i = 0; i < n; i++)
-		printf("%02x", buf[i]);
-	printf("\n");
+	return fd;
 }

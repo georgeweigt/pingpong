@@ -71,8 +71,8 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 	// from
 
 	push_string((uint8_t *) &src, 4);
-	push_number(src_port);
-	push_number(0);
+	push_number(src_port); // udp
+	push_number(src_port); // tcp
 	list(3); // [sender-ip, sender-udp-port, sender-tcp-port]
 
 	// to
