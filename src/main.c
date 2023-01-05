@@ -3,7 +3,7 @@ main()
 {
 	init();
 	selftest();
-	stub();
+	nib();
 }
 
 #define TIMEOUT 10000 // poll timeout in milliseconds
@@ -11,13 +11,13 @@ main()
 #define SRC_IP "127.0.0.1"
 #define DST_IP "127.0.0.1"
 
-#define SRC_PORT 29000
-#define DST_PORT 30303
+#define SRC_PORT 29001
+#define DST_PORT 29002
 
 void
 stub(void)
 {
-	int err, fd0, fd1, fd2, fd3, i, n;
+	int err, fd0, fd1, fd2, i, n;
 	struct sockaddr_in addr;
 	struct pollfd pollfd[2];
 	socklen_t addrlen;
@@ -85,17 +85,6 @@ stub(void)
 			exit(1);
 		}
 
-		// event on listening interface
-
-		if (pollfd[0].revents & POLLIN) {
-			fd3 = accept(fd0, (struct sockaddr *) &addr, &addrlen);
-			if (fd3 < 0) {
-				perror("accept");
-				exit(1);
-			}
-			printf("connect from %s\n", inet_ntoa(addr.sin_addr));
-		}
-
 		if (pollfd[1].revents & POLLIN) {
 			addrlen = sizeof addr;
 			n = recvfrom(fd2, buf, sizeof buf, 0, (struct sockaddr *) &addr, &addrlen);
@@ -161,4 +150,114 @@ start_listening(int port)
 	}
 
 	return fd;
+}
+
+int
+client_connect(char *ipaddr, int portnumber)
+{
+	int err, fd;
+	struct sockaddr_in addr;
+
+	// https://github.com/openbsd/src/blob/master/include/netdb.h
+	//
+	// /*
+	//  * Structures returned by network data base library.  All addresses are
+	//  * supplied in host order, and returned in network order (suitable for
+	//  * use in system calls).
+	//  */
+	// struct  hostent {
+	//         char    *h_name;        /* official name of host */
+	//         char    **h_aliases;    /* alias list */
+	//         int     h_addrtype;     /* host address type */
+	//         int     h_length;       /* length of address */
+	//         char    **h_addr_list;  /* list of addresses from name server */
+	// #define h_addr  h_addr_list[0]  /* address, for backward compatibility */
+	// };
+
+	// open socket
+
+	fd = socket(AF_INET, SOCK_STREAM, 0);
+
+	if (fd < 0) {
+		perror("socket");
+		return -1;
+	}
+
+	// struct sockaddr {
+	//         unsigned short   sa_family;    // address family, AF_xxx
+	//         char             sa_data[14];  // 14 bytes of protocol address
+	// };
+	//
+	// struct sockaddr_in {
+	//         short            sin_family;   // e.g. AF_INET, AF_INET6
+	//         unsigned short   sin_port;     // e.g. htons(3490)
+	//         struct in_addr   sin_addr;     // see struct in_addr, below
+	//         char             sin_zero[8];  // zero this if you want to
+	// };
+	//
+	// struct in_addr {
+	//         unsigned long s_addr;          // load with inet_pton()
+	// };
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr(ipaddr);
+	addr.sin_port = htons(portnumber);
+
+	err = connect(fd, (struct sockaddr *) &addr, sizeof addr);
+
+	if (err) {
+		close(fd);
+		perror("connect");
+		return -1;
+	}
+
+	// set nonblocking
+#if 0
+	err = fcntl(fd, F_SETFL, O_NONBLOCK);
+
+	if (err == -1) {
+		close(fd);
+		perror("fcntl");
+		return -1;
+	}
+#endif
+	return fd;
+}
+
+int
+server_connect(int listen_fd)
+{
+	int fd;
+	struct sockaddr_in addr;
+	socklen_t addrlen;
+
+	addrlen = sizeof addr;
+	fd = accept(listen_fd, (struct sockaddr *) &addr, &addrlen);
+
+	if (fd < 0) {
+		perror("accept");
+		return -1;
+	}
+
+//	printf("connect from %s\n", inet_ntoa(addr.sin_addr));
+
+	return fd;
+}
+
+#define PORT 12345
+
+void
+nib(void)
+{
+	int listen_fd, client_fd, server_fd;
+//	struct pollfd pollfd;
+
+	listen_fd = start_listening(PORT);
+	client_fd = client_connect("127.0.0.1", PORT);
+	server_fd = server_connect(listen_fd);
+
+	if (listen_fd == -1 || client_fd == -1 || server_fd == -1)
+		exit(1);
+
+	printf("ok\n");
 }
