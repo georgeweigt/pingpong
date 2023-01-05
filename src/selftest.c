@@ -6,8 +6,8 @@ selftest(void)
 	test_encode();
 	test_decode();
 	test_ec_genkey();
-	test_sign();
-	test_ping_payload();
+	test_sign(account_table + 0);
+	test_ping_payload(account_table + 0);
 }
 
 // Sepolia boot node geth

@@ -1,5 +1,5 @@
 void
-sign(uint8_t *sig, uint8_t *msg, int msglen)
+sign(uint8_t *sig, uint8_t *msg, int msglen, struct account *acct)
 {
 	int v;
 	uint8_t buf[60], hash[32], r[32], s[32];
@@ -11,9 +11,9 @@ sign(uint8_t *sig, uint8_t *msg, int msglen)
 
 	keccak256(hash, buf, 60);
 
-	ec_sign(r, s, hash, private_key);
+	ec_sign(r, s, hash, acct->private_key);
 
-	v = 27 + (public_key_y[31] & 1); // 27 even, 28 odd
+	v = 27 + (acct->public_key_y[31] & 1); // 27 even, 28 odd
 
 	push_string(r, 32);
 	push_string(s, 32);
@@ -26,20 +26,20 @@ sign(uint8_t *sig, uint8_t *msg, int msglen)
 }
 
 void
-test_sign(void)
+test_sign(struct account *acct)
 {
 	int err;
 	uint8_t buf[60], hash[32], sig[SIGLEN];
 
 	printf("Testing sign ");
 
-	sign(sig, (uint8_t *) "hello", 5);
+	sign(sig, (uint8_t *) "hello", 5, acct);
 
 	if (decode_check(sig, SIGLEN) == SIGLEN) {
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
 		keccak256(buf + 28, (uint8_t *) "hello", 5);
 		keccak256(hash, buf, 60);
-		err = ec_verify(hash, sig + 3, sig + 36, public_key_x, public_key_y);
+		err = ec_verify(hash, sig + 3, sig + 36, acct->public_key_x, acct->public_key_y);
 	} else
 		err = 1;
 

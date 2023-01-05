@@ -3,22 +3,24 @@ main()
 {
 	init();
 	selftest();
-//	test();
+	stub();
 }
 
-#define TIMEOUT 1000 // poll timeout in milliseconds
-#define DST_IP "127.0.0.1"
-#define DST_PORT 30000
-#define SRC_PORT 30000
+#define TIMEOUT 60000 // poll timeout in milliseconds
+
+#define SRC_IP "98.161.224.53"
+#define DST_IP "18.168.182.86"
+#define SRC_PORT 7000
+#define DST_PORT 30303
 
 void
 stub(void)
 {
-	int err, fd, len, n;
+	int err, fd, n;
 	struct sockaddr_in addr;
 	struct pollfd pollfd;
 	socklen_t addrlen;
-	static char buf[1000];
+	static char buf[1200];
 
 	// create socket
 
@@ -42,24 +44,7 @@ stub(void)
 		exit(1);
 	}
 
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr(DST_IP);
-	addr.sin_port = htons(DST_PORT);
-
-	strcpy(buf, "hello");
-	len = strlen(buf);
-
-	n = sendto(fd, buf, len, 0, (struct sockaddr *) &addr, sizeof addr);
-
-	if (n < 0) {
-		perror("sendto");
-		exit(1);
-	}
-
-	if (n < len) {
-		printf("sendto?\n");
-		exit(1);
-	}
+	send_ping(fd, SRC_IP, DST_IP, SRC_PORT, DST_PORT, account_table + 0);
 
 	pollfd.fd = fd;
 	pollfd.events = POLLIN;
@@ -85,9 +70,7 @@ stub(void)
 		exit(1);
 	}
 
-	buf[n] = '\0';
-
-	printf("%s\n", buf);
+	printf("%d bytes received\n", n);
 }
 
 int
@@ -184,7 +167,7 @@ test(void)
 {
 	int fd;
 
-	fd = open_tcp_socket("localhost", 7545);
+	fd = open_tcp_socket("localhost", 30301);
 
 	printf("fd %d\n", fd);
 }

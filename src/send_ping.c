@@ -1,11 +1,11 @@
 void
-send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port)
+send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, struct account *acct)
 {
 	int len, n;
 	uint8_t *buf;
 	struct sockaddr_in dst_addr;
 
-	buf = ping_payload(src_ip, dst_ip, src_port, dst_port, &len);
+	buf = ping_payload(src_ip, dst_ip, src_port, dst_port, &len, acct);
 
 	dst_addr.sin_family = AF_INET;
 	dst_addr.sin_addr.s_addr = inet_addr(dst_ip);
@@ -20,7 +20,7 @@ send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port)
 }
 
 uint8_t *
-ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen)
+ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen, struct account *acct)
 {
 	int len;
 	uint8_t *buf;
@@ -42,7 +42,7 @@ ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen)
 
 	// signature
 
-	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1);
+	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1, acct);
 
 	// hash
 
@@ -92,14 +92,14 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 }
 
 void
-test_ping_payload(void)
+test_ping_payload(struct account *acct)
 {
 	int err, len, n;
 	uint8_t buf[60], hash[32], *payload;
 
 	printf("Testing ping_payload");
 
-	payload = ping_payload("1.2.3.4", "5.6.7.8", 1234, 5678, &len);
+	payload = ping_payload("1.2.3.4", "5.6.7.8", 1234, 5678, &len, acct);
 
 	// check length
 
@@ -119,7 +119,7 @@ test_ping_payload(void)
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
 		keccak256(buf + 28, payload + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
 		keccak256(hash, buf, 60);
-		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, public_key_x, public_key_y);
+		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key_x, acct->public_key_y);
 	} else
 		err = 1;
 	printf("%s", err ? "err" : "ok");
