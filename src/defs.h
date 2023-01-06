@@ -53,6 +53,9 @@ struct session {
 	uint8_t ephemeral_public_key[64];
 	uint8_t encryption_key[16]; // k_E
 	uint8_t mac_key[16]; // k_M
+	uint8_t iv[16];
+	uint8_t *expanded_key; // points to 16 byte align in expanded key tab
+	uint8_t expanded_key_tab[560]; // 16 bytes for alignment pad, 32 bytes for 2 iv, 16 + 512 + 32 = 560
 };
 
 extern int tos;
