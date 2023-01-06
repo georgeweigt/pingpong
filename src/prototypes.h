@@ -83,6 +83,7 @@ uint8_t * sponge(uint8_t *N, int len);
 void keccak256(uint8_t *outbuf, uint8_t *inbuf, int inbuflen);
 char * keccak256str(uint8_t *buf, int len);
 void test_keccak256(void);
+uint8_t * key_derivation_function(uint8_t *buf, int len);
 void list(int n);
 void push(struct atom *p);
 struct atom * pop(void);
@@ -107,5 +108,9 @@ void send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, s
 uint8_t * ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen, struct account *acct);
 struct atom * ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port);
 void test_ping_payload(struct account *acct);
+void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
+void sha256(uint8_t *buf, int len, uint8_t *out);
+void sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out);
+void sha256_hash_block(uint8_t *buf, uint32_t *hash);
 void sign(uint8_t *sig, uint8_t *msg, int msglen, struct account *acct);
 void test_sign(struct account *acct);
