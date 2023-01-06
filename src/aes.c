@@ -17,13 +17,10 @@
 void
 aes128_init(struct session *p)
 {
-	uint32_t w[44], v[44];
 	p->expanded_key = p->expanded_key_tab;
 	while (((uint64_t) p->expanded_key) & 0xf)
 		p->expanded_key++; // align
-	key_expansion(p->encryption_key, w, v);
-	memcpy(p->expanded_key, w, 176);
-	memcpy(p->expanded_key + 272, v, 176);
+	key_expansion(p->encryption_key, (uint32_t *) p->expanded_key, (uint32_t *) p->expanded_key + 272);
 }
 
 void
