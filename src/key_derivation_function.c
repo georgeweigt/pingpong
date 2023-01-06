@@ -39,5 +39,5 @@ key_derivation_function(struct session *s)
 	sha256(inbuf, 36, outbuf);
 
 	memcpy(s->encryption_key, outbuf, 16);
-	memcpy(s->mac_key, outbuf + 16, 16);
+	memcpy(s->hmac_key, outbuf + 16, 16);
 }

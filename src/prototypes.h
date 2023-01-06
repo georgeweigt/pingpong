@@ -70,7 +70,7 @@ int encode_nib(uint8_t *buf, struct atom *p);
 int encode_list(uint8_t *buf, struct atom *p);
 int encode_string(uint8_t *buf, struct atom *p);
 void test_encode(void);
-uint8_t * encryptmsg(struct session *s, uint8_t *msg, int len, int *plen);
+uint8_t * encryptmsg(struct session *s, uint8_t *msg, int msglen, int *buflen);
 int enlength(struct atom *p);
 int sublength(struct atom *p);
 int padlength(struct atom *p, int sublen);
