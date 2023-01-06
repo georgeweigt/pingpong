@@ -1,7 +1,7 @@
 void
 generate_ephemeral_keyset(struct session *s)
 {
-	int i;
+	int err, i;
 	uint32_t *d;
 	struct point R, S;
 
@@ -27,10 +27,13 @@ generate_ephemeral_keyset(struct session *s)
 		ec_norm(d);
 		ec_mod(d, q256);
 
-	} while (ec_equal(d, 0));
+		if (ec_equal(d, 0))
+			continue;
 
-	ec_mult(&S, d, &R, p256);
-	ec_affinify(&S, p256);
+		ec_mult(&S, d, &R, p256);
+		err = ec_affinify(&S, p256);
+
+	} while (err);
 
 	// save private key
 

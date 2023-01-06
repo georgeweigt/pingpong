@@ -97,7 +97,7 @@ int start_listening(int port);
 int client_connect(char *ipaddr, int portnumber);
 int server_connect(int listen_fd);
 void nib(void);
-void receive_frame(int fd);
+void wait_for_pollin(int fd);
 void selftest(void);
 void test_boot_key(void);
 void send_enr_request(int fd, char *dst_ip, int dst_port, struct account *acct);

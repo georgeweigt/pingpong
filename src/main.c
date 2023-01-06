@@ -6,7 +6,7 @@ main()
 	nib();
 }
 
-#define TIMEOUT 10000 // poll timeout in milliseconds
+#define TIMEOUT 1000 // poll timeout in milliseconds
 
 #define SRC_IP "127.0.0.1"
 #define DST_IP "127.0.0.1"
@@ -253,20 +253,32 @@ nib(void)
 
 	listen_fd = start_listening(PORT);
 	client_fd = client_connect("127.0.0.1", PORT);
-	server_fd = server_connect(listen_fd);
 
-	if (listen_fd == -1 || client_fd == -1 || server_fd == -1)
-		exit(1);
+	wait_for_pollin(listen_fd);
+
+	server_fd = server_connect(listen_fd);
 
 	printf("ok\n");
 }
 
 void
-receive_frame(int fd)
+wait_for_pollin(int fd)
 {
+	int n;
 	struct pollfd pollfd;
 
 	pollfd.fd = fd;
 	pollfd.events = POLLIN;
-}
 
+	n = poll(&pollfd, 1, TIMEOUT);
+
+	if (n < 0) {
+		perror("poll");
+		exit(1);
+	}
+
+	if (n < 1) {
+		printf("timeout\n");
+		exit(1);
+	}
+}
