@@ -1,9 +1,9 @@
-void aes128_init(struct session *p, uint8_t *encrypt_key, uint8_t *decrypt_key);
+void aes128_init(struct session *p);
 void aes128_encrypt(struct session *p, uint8_t *buf, int num_blocks);
 void aes128_decrypt(struct session *p, unsigned char *buf, int num_blocks);
 int mul(int a, int b);
 void aes_init();
-void key_expansion(uint8_t *key);
+void key_expansion(uint8_t *key, uint32_t *w, uint32_t *v);
 void encrypt_nib(uint32_t *w, uint8_t *in, uint8_t *out);
 void decrypt_nib(uint32_t *v, uint8_t *in, uint8_t *out);
 uint8_t * create_auth_message(struct session *s, int *plen);

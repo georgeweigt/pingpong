@@ -1,5 +1,3 @@
-static uint32_t w[44], v[44];
-
 // Expanded key layout:
 //			 _______
 // expanded_key		|	|
@@ -17,14 +15,14 @@ static uint32_t w[44], v[44];
 // expanded key + 544
 
 void
-aes128_init(struct session *p, uint8_t *encrypt_key, uint8_t *decrypt_key)
+aes128_init(struct session *p)
 {
+	uint32_t w[44], v[44];
 	p->expanded_key = p->expanded_key_tab;
 	while (((uint64_t) p->expanded_key) & 0xf)
 		p->expanded_key++; // align
-	key_expansion(encrypt_key);
+	key_expansion(p->encryption_key, w, v);
 	memcpy(p->expanded_key, w, 176);
-	key_expansion(decrypt_key);
 	memcpy(p->expanded_key + 272, v, 176);
 }
 
@@ -163,7 +161,7 @@ aes_init()
 // Initialize w[44] and v[44] from encryption key
 
 void
-key_expansion(uint8_t *key)
+key_expansion(uint8_t *key, uint32_t *w, uint32_t *v)
 {
 	int i;
 	uint32_t *k, t;
