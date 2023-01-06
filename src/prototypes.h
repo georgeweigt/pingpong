@@ -83,7 +83,7 @@ uint8_t * sponge(uint8_t *N, int len);
 void keccak256(uint8_t *outbuf, uint8_t *inbuf, int inbuflen);
 char * keccak256str(uint8_t *buf, int len);
 void test_keccak256(void);
-uint8_t * key_derivation_function(uint8_t *buf, int len);
+void key_derivation_function(struct session *s);
 void list(int n);
 void push(struct atom *p);
 struct atom * pop(void);

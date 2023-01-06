@@ -51,6 +51,8 @@ struct session {
 	uint8_t shared_secret[32];
 	uint8_t ephemeral_private_key[32];
 	uint8_t ephemeral_public_key[64];
+	uint8_t encryption_key[16]; // k_E
+	uint8_t mac_key[16]; // k_M
 };
 
 extern int tos;

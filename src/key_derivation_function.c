@@ -24,8 +24,20 @@ def eciesKDF(key_material, key_len):
     return key[:key_len]
 */
 
-uint8_t *
-key_derivation_function(uint8_t *buf, int len)
+void
+key_derivation_function(struct session *s)
 {
-	return NULL; // stub
+	uint8_t inbuf[36], outbuf[32];
+
+	inbuf[0] = 1; // counter = 1
+	inbuf[1] = 0;
+	inbuf[2] = 0;
+	inbuf[3] = 0;
+
+	memcpy(inbuf + 4, s->shared_secret, 32);
+
+	sha256(inbuf, 36, outbuf);
+
+	memcpy(s->encryption_key, outbuf, 16);
+	memcpy(s->mac_key, outbuf + 16, 16);
 }
