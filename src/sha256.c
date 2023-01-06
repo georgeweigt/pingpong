@@ -89,6 +89,8 @@ sha256(uint8_t *buf, int len, uint8_t *out)
 	}
 }
 
+// key is 64 bytes
+
 void
 sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out)
 {
@@ -216,4 +218,48 @@ sha256_hash_block(uint8_t *buf, uint32_t *hash)
 	hash[5] += f;
 	hash[6] += g;
 	hash[7] += h;
+}
+
+void
+test_sha256(void)
+{
+	int i;
+	char s[65];
+	uint8_t hash[32];
+
+	printf("Testing sha256 ");
+
+	sha256((uint8_t *) "", 0, hash);
+	for (i = 0; i < 32; i++)
+		sprintf(s + 2 * i, "%02x", hash[i]);
+	if (strcmp(s, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855") != 0) {
+		printf("err 1\n");
+		return;
+	}
+
+	sha256((uint8_t *) "The quick brown fox jumps over the lazy dog", 43, hash);
+	for (i = 0; i < 32; i++)
+		sprintf(s + 2 * i, "%02x", hash[i]);
+	if (strcmp(s, "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592") != 0) {
+		printf("err 2\n");
+		return;
+	}
+
+	hmac_sha256((uint8_t *) "", 0, (uint8_t *) "", 0, hash);
+	for (i = 0; i < 32; i++)
+		sprintf(s + 2 * i, "%02x", hash[i]);
+	if (strcmp(s, "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad") != 0) {
+		printf("err 3\n");
+		return;
+	}
+
+	hmac_sha256((uint8_t *) "key", 3, (uint8_t *) "The quick brown fox jumps over the lazy dog", 43, hash);
+	for (i = 0; i < 32; i++)
+		sprintf(s + 2 * i, "%02x", hash[i]);
+	if (strcmp(s, "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8") != 0) {
+		printf("err 4\n");
+		return;
+	}
+
+	printf("ok\n");
 }

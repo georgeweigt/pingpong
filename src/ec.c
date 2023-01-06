@@ -2078,7 +2078,7 @@ test_ec_twin_mult()
 #endif
 
 int
-test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
+test_public_key_secp256k1(uint32_t *x, uint32_t *y)
 {
 	int err;
 	uint32_t *n3, *n7, *p, *x3, *y2, *r;
@@ -2112,7 +2112,7 @@ test_public_keys_secp256k1(uint32_t *x, uint32_t *y)
 #define COEFF_B "5AC635D8" "AA3A93E7" "B3EBBD55" "769886BC" "651D06B0" "CC53B0F6" "3BCE3C3E" "27D2604B"
 
 int
-test_public_keys_secp256r1(uint32_t *x, uint32_t *y)
+test_public_key_secp256r1(uint32_t *x, uint32_t *y)
 {
 	int err;
 	uint32_t *a, *b, *n3, *p, *x3, *y2, *r, *t1, *t2;
