@@ -44,7 +44,7 @@ encryptmsg(struct session *s, uint8_t *msg, int msglen, int *buflen)
 	// pad last block
 
 	pad = 15 - (msglen & 0xf); // pad byte value (0..15)
-	memset(buf + 80 + msglen, pad, pad + 1);
+	memset(buf + 80 + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
 
 	aes128_encrypt(s, buf + 64, n + 1); // n + 1 for iv
 
