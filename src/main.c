@@ -258,7 +258,9 @@ nib(void)
 
 	server_fd = server_connect(listen_fd);
 
-	printf("ok\n");
+	close(listen_fd);
+	close(client_fd);
+	close(server_fd);
 }
 
 void
