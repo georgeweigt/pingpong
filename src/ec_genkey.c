@@ -1,13 +1,9 @@
 void
 ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 {
-	int err, i;
+	int i;
 	uint32_t *d;
 	struct point R, S;
-
-	memset(private_key, 0, 32);
-	memset(public_key_x, 0, 32);
-	memset(public_key_y, 0, 32);
 
 	R.x = gx256;
 	R.y = gy256;
@@ -32,17 +28,16 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 		ec_norm(d);
 		ec_mod(d, q256);
 
-		if (ec_equal(d, 0))
-			continue;
+	} while (ec_equal(d, 0));
 
-		// generate public key
+	// generate public key
 
-		ec_mult(&S, d, &R, p256);
-		err = ec_affinify(&S, p256);
-
-	} while (err);
+	ec_mult(&S, d, &R, p256);
+	ec_affinify(&S, p256);
 
 	// save private key
+
+	memset(private_key, 0, 32);
 
 	for (i = 0; i < len(d); i++) {
 		if (32 - 4 * i - 4 < 0)
@@ -53,7 +48,10 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 		private_key[32 - 4 * i - 1] = d[i];
 	}
 
-	// save public keys
+	// save public key
+
+	memset(public_key_x, 0, 32);
+	memset(public_key_y, 0, 32);
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
@@ -78,10 +76,10 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 	ec_free_xyz(&S);
 }
 
-// generate public keys from private key
+// generate public key from private key
 
 void
-ec_public_keys(uint8_t *public_key_x, uint8_t *public_key_y, uint8_t *private_key)
+ec_public_key(uint8_t *public_key_x, uint8_t *public_key_y, uint8_t *private_key)
 {
 	int i;
 	uint32_t *d;
@@ -98,8 +96,10 @@ ec_public_keys(uint8_t *public_key_x, uint8_t *public_key_y, uint8_t *private_ke
 	d = ec_buf_to_bignum(private_key, 32);
 
 	ec_mult(&S, d, &R, p256);
-
 	ec_affinify(&S, p256);
+
+	memset(public_key_x, 0, 32);
+	memset(public_key_y, 0, 32);
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
