@@ -41,6 +41,18 @@ struct account {
 	uint8_t public_key_y[32];
 };
 
+struct session {
+
+	uint8_t private_key[32];
+	uint8_t public_key[64]; // public_key_x || public_key_y
+
+	uint8_t remote_public_key[64];
+
+	uint8_t shared_secret[32];
+	uint8_t ephemeral_private_key[32];
+	uint8_t ephemeral_public_key[64];
+};
+
 extern int tos;
 extern int atom_count;
 extern int ec_malloc_count;

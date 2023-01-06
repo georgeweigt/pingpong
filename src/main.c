@@ -250,7 +250,6 @@ void
 nib(void)
 {
 	int listen_fd, client_fd, server_fd;
-//	struct pollfd pollfd;
 
 	listen_fd = start_listening(PORT);
 	client_fd = client_connect("127.0.0.1", PORT);
@@ -261,3 +260,13 @@ nib(void)
 
 	printf("ok\n");
 }
+
+void
+receive_frame(int fd)
+{
+	struct pollfd pollfd;
+
+	pollfd.fd = fd;
+	pollfd.events = POLLIN;
+}
+
