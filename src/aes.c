@@ -21,7 +21,7 @@ aes128_init(struct session *p)
 	p->expanded_key = p->expanded_key_tab;
 	while (((uint64_t) p->expanded_key) & 0xf)
 		p->expanded_key++; // align
-	key_expansion(p->encryption_key, w, v);
+	key_expansion(p->encryption_key, w, v); // aes128 key is 16 bytes
 	memcpy(p->expanded_key, w, 176);
 	memcpy(p->expanded_key + 272, v, 176);
 }
