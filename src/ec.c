@@ -946,10 +946,8 @@ ec_full_add(struct point *R, struct point *S, struct point *T, uint32_t *p)
 
 	ec_add_xyz(&U, S, T, p);
 
-	if (ec_equal(U.x, 0) && ec_equal(U.y, 0) && ec_equal(U.z, 0)) {
-		ec_free_xyz(&U);
+	if (ec_equal(U.x, 0) && ec_equal(U.y, 0) && ec_equal(U.z, 0))
 		ec_double(&U, S, p);
-	}
 
 	ec_free_xyz(R);
 
