@@ -78,8 +78,12 @@ push_number(uint64_t n)
 struct atom *
 alloc_atom(int string_length)
 {
+	int n;
 	struct atom *p;
-	p = malloc(sizeof (struct atom) + (string_length > 0 ? string_length : 0));
+	n = string_length;
+	if (n < 0)
+		n = 0;
+	p = malloc(sizeof (struct atom) + n);
 	if (p == NULL)
 		exit(1);
 	p->car = NULL;
@@ -145,4 +149,46 @@ compare_lists(struct atom *p, struct atom *q)
 		return 1;
 
 	return memcmp(p->string, q->string, p->length);
+}
+
+void
+print_list(struct atom *p)
+{
+	print_list_nib(p, 0);
+	printf("\n");
+}
+
+void
+print_list_nib(struct atom *p, int level)
+{
+	int i;
+
+	for (i = 0; i < level; i++)
+		printf("\t");
+
+	if (p == NULL) {
+		printf("[]");
+		return;
+	}
+
+	if (p->length == -1) {
+
+		printf("[\n");
+
+		while (p) {
+			print_list_nib(p->car, level + 1);
+			printf(",\n");
+			p = p->cdr;
+		}
+
+		for (i = 0; i < level; i++)
+			printf("\t");
+
+		printf("]");
+
+		return;
+	}
+
+	for (i = 0; i < p->length; i++)
+		printf("%02x", p->string[i]);
 }

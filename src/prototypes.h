@@ -102,6 +102,8 @@ void push_number(uint64_t n);
 struct atom * alloc_atom(int string_length);
 void free_list(struct atom *p);
 int compare_lists(struct atom *p, struct atom *q);
+void print_list(struct atom *p);
+void print_list_nib(struct atom *p, int level);
 int main();
 void stub(void);
 int start_listening(int port);

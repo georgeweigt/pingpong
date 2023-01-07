@@ -100,9 +100,9 @@ encode_string(uint8_t *buf, struct atom *p)
 void
 test_encode(void)
 {
-	int n;
+	int err, i, n;
 	struct atom *p;
-	static uint8_t buf[100];
+	uint8_t buf[256], enc[256];
 
 	printf("Testing encode ");
 
@@ -268,6 +268,78 @@ test_encode(void)
 	free_list(p);
 	if (n != 4 || memcmp(buf, "\xc3\x01\xc0\x02", n)) {
 		printf("err line %d\n", __LINE__);
+		return;
+	}
+
+	// list of one 54 byte string
+
+	for (i = 0; i < 54; i++)
+		buf[i] = i;
+	push_string(buf, 54);
+	list(1);
+	p = pop();
+	n = encode(buf, sizeof buf, p);
+	free_list(p);
+	if (n != 56) {
+		printf("err on line %d\n", __LINE__);
+		return;
+	}
+	enc[0] = 0xc0 + 55; // 55 byte list
+	enc[1] = 0x80 + 54; // 54 byte string
+	for (i = 0; i < 54; i++)
+		enc[2 + i] = i;
+	err = memcmp(buf, enc, 56);
+	if (err) {
+		printf("err on line %d\n", __LINE__);
+		return;
+	}
+
+	// list of one 55 byte string
+
+	for (i = 0; i < 55; i++)
+		buf[i] = i;
+	push_string(buf, 55);
+	list(1);
+	p = pop();
+	n = encode(buf, sizeof buf, p);
+	free_list(p);
+	if (n != 58) {
+		printf("err on line %d\n", __LINE__);
+		return;
+	}
+	enc[0] = 0xf8; // list with 1 length byte
+	enc[1] = 56;
+	enc[2] = 0x80 + 55; // 55 byte string
+	for (i = 0; i < 55; i++)
+		enc[3 + i] = i;
+	err = memcmp(buf, enc, 58);
+	if (err) {
+		printf("err on line %d\n", __LINE__);
+		return;
+	}
+
+	// list of one 56 byte string
+
+	for (i = 0; i < 56; i++)
+		buf[i] = i;
+	push_string(buf, 56);
+	list(1);
+	p = pop();
+	n = encode(buf, sizeof buf, p);
+	free_list(p);
+	if (n != 60) {
+		printf("err on line %d\n", __LINE__);
+		return;
+	}
+	enc[0] = 0xf8; // list with 1 length byte
+	enc[1] = 58;
+	enc[2] = 0xb8; // string with 1 length byte
+	enc[3] = 56;
+	for (i = 0; i < 56; i++)
+		enc[4 + i] = i;
+	err = memcmp(buf, enc, 60);
+	if (err) {
+		printf("err on line %d\n", __LINE__);
 		return;
 	}
 

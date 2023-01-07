@@ -12,6 +12,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 {
 	int err, msglen, pad;
 	uint8_t hmac[32], *msg;
+	struct atom *list;
 
 	// check length (2 + 64 + 16 + 16 + 32 = 130)
 
@@ -39,9 +40,19 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	aes128_decrypt(p, buf + 66, (len - 98) / 16);
 	msg = buf + 82;
 	msglen = len - 114;
-	pad = msg[msglen - 1] + 1;
-	msglen = msglen - pad;
+	pad = msg[msglen - 1];
+	if (pad > 15)
+		return -1;
+	msglen = msglen - (pad + 1); // pad length is 1..16 bytes
 
+	err = decode(msg, msglen);
+
+	if (err)
+		return -1;
+
+	list = pop();
+	print_list(list);
+	free_list(list);
 
 	return 0;
 }

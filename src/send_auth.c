@@ -11,6 +11,7 @@ send_auth(struct node *p)
 	if (msg == NULL)
 		exit(1);
 	encode(msg, msglen, list);
+	free_list(list);
 
 	buf = ecies_encrypt(p, msg, msglen, 2, &len); // header length = 2
 
@@ -28,7 +29,6 @@ send_auth(struct node *p)
 
 	printf("%d bytes sent\n", n);
 
-	free_list(list);
 	free(msg);
 	free(buf);
 }
