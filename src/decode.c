@@ -92,7 +92,10 @@ decode_check(uint8_t *buf, int length)
 
 	if (buf[0] < 0xb8) {
 		len = buf[0] - 0x80;
-		return len + 1 > length ? -1 : len + 1;
+		if (len + 1 > length)
+			return -1;
+		else
+			return len + 1;
 	}
 
 	// string > 55 bytes
@@ -107,7 +110,10 @@ decode_check(uint8_t *buf, int length)
 				return -1; // not accepting lengths > 2^24 - 1
 			len = (len << 8) | buf[i + 1];
 		}
-		return len + n + 1 > length ? -1 : len + n + 1;
+		if (len + n + 1 > length)
+			return -1;
+		else
+			return len + n + 1;
 	}
 
 	// list 0..55 bytes
@@ -117,7 +123,10 @@ decode_check(uint8_t *buf, int length)
 		if (len + 1 > length)
 			return -1;
 		err = decode_check_list(buf + 1, len);
-		return err ? -1 : len + 1;
+		if (err)
+			return -1;
+		else
+			return len + 1;
 	}
 
 	// list > 55 bytes
@@ -134,7 +143,10 @@ decode_check(uint8_t *buf, int length)
 	if (len + n + 1 > length)
 		return -1;
 	err = decode_check_list(buf + n + 1, len);
-	return err ? -1 : len + n + 1;
+	if (err)
+		return -1;
+	else
+		return len + n + 1;
 }
 
 int
