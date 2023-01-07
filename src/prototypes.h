@@ -1,11 +1,12 @@
 void aes128_init(struct node *p);
 void aes128_encrypt(struct node *p, uint8_t *buf, int num_blocks);
-void aes128_decrypt(struct node *p, unsigned char *buf, int num_blocks);
+void aes128_decrypt(struct node *p, uint8_t *buf, int num_blocks);
 int mul(int a, int b);
 void aes_init();
 void key_expansion(uint8_t *key, uint32_t *w, uint32_t *v);
 void encrypt_nib(uint32_t *w, uint8_t *in, uint8_t *out);
 void decrypt_nib(uint32_t *v, uint8_t *in, uint8_t *out);
+void test_aes(void);
 struct atom * auth_body(struct node *p);
 int decode(uint8_t *buf, int length);
 int decode_nib(uint8_t *buf, int length);

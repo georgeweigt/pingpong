@@ -5,6 +5,7 @@ void
 selftest(void)
 {
 	printf("test public key %s\n", test_public_key(X, Y) ? "err" : "ok");
+	test_aes();
 	test_sha256();
 	test_keccak256();
 	test_encode();

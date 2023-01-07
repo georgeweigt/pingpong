@@ -1,6 +1,7 @@
 int
 main()
 {
+	aes_init();
 	ec_init();
 	init();
 	selftest();

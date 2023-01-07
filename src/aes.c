@@ -45,7 +45,7 @@ aes128_encrypt(struct node *p, uint8_t *buf, int num_blocks)
 }
 
 void
-aes128_decrypt(struct node *p, unsigned char *buf, int num_blocks)
+aes128_decrypt(struct node *p, uint8_t *buf, int num_blocks)
 {
 	int i, j;
 	uint8_t iv[16];
@@ -410,4 +410,30 @@ decrypt_nib(uint32_t *v, uint8_t *in, uint8_t *out)
 	out[13] = s3 >> 8;
 	out[14] = s3 >> 16;
 	out[15] = s3 >> 24;
+}
+
+void
+test_aes(void)
+{
+	int err, i;
+	struct node node;
+	uint8_t cipher[32], plain[32];
+
+	printf("Testing aes ");
+
+	for (i = 0; i < 16; i++)
+		node.encryption_key[i] = random();
+
+	for (i = 0; i < 32; i++)
+		plain[i] = random();
+
+	memcpy(cipher, plain, 32);
+
+	aes128_init(&node);
+	aes128_encrypt(&node, cipher, 2);
+	aes128_decrypt(&node, cipher, 2);
+
+	err = memcmp(cipher, plain, 32);
+
+	printf("%s\n", err ? "err" : "ok");
 }

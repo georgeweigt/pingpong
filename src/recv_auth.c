@@ -10,12 +10,12 @@
 int
 receive_auth(struct node *p, uint8_t *buf, int len)
 {
-	int err;
-	uint8_t hmac[32];
+	int err, msglen, pad;
+	uint8_t hmac[32], *msg;
 
 	// check length (2 + 64 + 16 + 16 + 32 = 130)
 
-	if (len < 130 || (buf[0] << 8 | buf[1]) != len - 2)
+	if (len < 130 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 2) % 16)
 		return -1;
 
 	// obtain 32 byte shared secret from k * R
@@ -32,6 +32,16 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	err = memcmp(hmac, buf + len - 32, 32);
 	if (err)
 		return -1;
+
+	// decrypt
+
+	aes128_init(p);
+	aes128_decrypt(p, buf + 66, (len - 98) / 16);
+	msg = buf + 82;
+	msglen = len - 114;
+	pad = msg[msglen - 1] + 1;
+	msglen = msglen - pad;
+
 
 	return 0;
 }

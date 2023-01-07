@@ -20,7 +20,6 @@ ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 
 	geneph(p); // generate ephemeral keyset
 	kdf(p); // key derivation function
-	aes128_init(p);
 
 	// get buffer
 
@@ -48,6 +47,7 @@ ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	pad = 15 - (msglen & 0xf); // pad byte value (0..15)
 	memset(buf + hdrlen + 80 + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
 
+	aes128_init(p);
 	aes128_encrypt(p, buf + hdrlen + 64, n + 1); // n + 1 for iv
 
 	// hmac
