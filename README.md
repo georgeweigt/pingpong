@@ -9,7 +9,7 @@ brew tap ethereum/ethereum
 brew install ethereum
 ```
 
-Create a directory `testnet` and initialize `geth`
+Create a directory `testnet` and setup `geth`
 
 ```
 mkdir testnet
