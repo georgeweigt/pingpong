@@ -1,3 +1,12 @@
+/* buf contents
+
+	length		2 bytes
+	public key	64
+	iv		16
+	ciphertext	n * 16
+	hmac		32
+*/
+
 int
 receive_auth(struct node *p, uint8_t *buf, int len)
 {
@@ -13,14 +22,14 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	ec_secret(p->shared_secret, p->private_key, buf + 2);
 
-	kdf(p); // returns hmac_key, encryption_key
+	// derive encryption_key, hmac_key from shared_secret
 
-	hmac_sha256(p->hmac_key, 16, buf + 66, len - 98, hmac);
+	kdf(p);
 
 	// check hmac
 
+	hmac_sha256(p->hmac_key, 16, buf + 66, len - 98, hmac);
 	err = memcmp(hmac, buf + len - 32, 32);
-
 	if (err)
 		return -1;
 
