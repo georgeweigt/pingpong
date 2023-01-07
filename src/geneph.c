@@ -80,10 +80,10 @@ geneph(struct node *p)
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
 			break; // err
-		p->secret_key[32 - 4 * i - 4] = S.x[i] >> 24;
-		p->secret_key[32 - 4 * i - 3] = S.x[i] >> 16;
-		p->secret_key[32 - 4 * i - 2] = S.x[i] >> 8;
-		p->secret_key[32 - 4 * i - 1] = S.x[i];
+		p->shared_secret[32 - 4 * i - 4] = S.x[i] >> 24;
+		p->shared_secret[32 - 4 * i - 3] = S.x[i] >> 16;
+		p->shared_secret[32 - 4 * i - 2] = S.x[i] >> 8;
+		p->shared_secret[32 - 4 * i - 1] = S.x[i];
 	}
 
 	ec_free(d);

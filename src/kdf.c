@@ -10,7 +10,7 @@ kdf(struct node *p)
 	inbuf[2] = 0;
 	inbuf[3] = 1;
 
-	memcpy(inbuf + 4, p->secret_key, 32);
+	memcpy(inbuf + 4, p->shared_secret, 32);
 
 	sha256(inbuf, 36, outbuf);
 
