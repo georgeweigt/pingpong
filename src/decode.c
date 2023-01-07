@@ -53,7 +53,7 @@ decode_nib(uint8_t *buf, int length)
 		len = 0;
 		for (i = 0; i < n; i++)
 			len = (len << 8) | buf[i + 1];
-		if (len > 1000000 || len + n + 1 > length) // cap at 1,000,000 bytes
+		if (len > 1000000 || len + n + 1 > length) // cap to prevent arithmetic overflow
 			return -1;
 		p = alloc_atom(len);
 		memcpy(p->string, buf + n + 1, len);
@@ -82,7 +82,7 @@ decode_nib(uint8_t *buf, int length)
 	len = 0;
 	for (i = 0; i < n; i++)
 		len = (len << 8) | buf[i + 1];
-	if (len > 1000000 || len + n + 1 > length) // cap at 1,000,000 bytes
+	if (len > 1000000 || len + n + 1 > length) // cap to prevent arithmetic overflow
 		return -1;
 	err = decode_list(buf + n + 1, len);
 	if (err)
