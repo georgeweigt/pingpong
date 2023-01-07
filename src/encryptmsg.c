@@ -11,7 +11,7 @@ where
 */
 
 uint8_t *
-encryptmsg(struct session *s, uint8_t *msg, int msglen, int *buflen)
+encryptmsg(struct session *s, uint8_t *msg, int msglen, int *plen)
 {
 	int i, n, len, pad;
 	uint8_t *buf;
@@ -52,6 +52,6 @@ encryptmsg(struct session *s, uint8_t *msg, int msglen, int *buflen)
 
 	hmac_sha256(s->hmac_key, 16, buf + 64, 16 * (n + 1), buf + len - 32);
 
-	*buflen = len;
+	*plen = len;
 	return buf;
 }

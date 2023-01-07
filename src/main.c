@@ -1,18 +1,23 @@
 int
 main()
 {
+	int fd;
+
 	init();
 	selftest();
-	nib();
+
+	fd = client_connect("127.0.0.1", 30303);
+
+	printf("fd %d\n", fd);
 }
 
-#define TIMEOUT 1000 // poll timeout in milliseconds
+#define TIMEOUT 10000 // poll timeout in milliseconds
 
 #define SRC_IP "127.0.0.1"
 #define DST_IP "127.0.0.1"
 
-#define SRC_PORT 29001
-#define DST_PORT 29002
+#define SRC_PORT 29000
+#define DST_PORT 30303
 
 void
 stub(void)
@@ -244,15 +249,17 @@ server_connect(int listen_fd)
 	return fd;
 }
 
-#define PORT 12345
+// node simulator
 
 void
 nib(void)
 {
 	int listen_fd, client_fd, server_fd;
 
-	listen_fd = start_listening(PORT);
-	client_fd = client_connect("127.0.0.1", PORT);
+	listen_fd = start_listening(30303);
+	client_fd = client_connect("127.0.0.1", 30303);
+
+	printf("client_fd %d\n", client_fd);
 
 	wait_for_pollin(listen_fd);
 

@@ -1,0 +1,18 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\parindent=0pt
+\begin{document}
+
+\begin{quote}
+To encrypt the message $m$, Alice generates a random number $r$
+and corresponding elliptic curve public key $R=r*G$ and computes the
+shared secret $S=P_x$ where $(P_x,P_y)=r*K_B$.
+She derives key material for encryption and authentication as
+$k_E\,\|\,k_M=\text{\tt KDF}(S,32)$
+as well as a random initialization vector \verb$iv$.
+Alice sends the encrypted message $R\,\|\,\text{\tt iv}\,\|\,c\,\|\,d$
+where $c=\text{\tt AES}(k_E,\text{\tt iv},m)$
+and $d=\text{\tt MAC}(\text{\tt sha256}(k_M),\text{\tt iv}\,\|\,c)$ to Bob.
+\end{quote}
+
+\end{document}
