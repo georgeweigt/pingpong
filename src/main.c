@@ -1,14 +1,10 @@
 int
 main()
 {
-	int fd;
-
+	ec_init();
 	init();
 	selftest();
-
-	fd = client_connect("127.0.0.1", 30303);
-
-	printf("fd %d\n", fd);
+	sim();
 }
 
 #define TIMEOUT 10000 // poll timeout in milliseconds

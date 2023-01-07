@@ -25,7 +25,7 @@ def eciesKDF(key_material, key_len):
 */
 
 void
-key_derivation_function(struct session *s)
+key_derivation_function(struct node *p)
 {
 	uint8_t inbuf[36], outbuf[32];
 
@@ -34,10 +34,10 @@ key_derivation_function(struct session *s)
 	inbuf[2] = 0;
 	inbuf[3] = 1;
 
-	memcpy(inbuf + 4, s->shared_secret, 32);
+	memcpy(inbuf + 4, p->shared_secret, 32);
 
 	sha256(inbuf, 36, outbuf);
 
-	memcpy(s->encryption_key, outbuf, 16);
-	memcpy(s->hmac_key, outbuf + 16, 16);
+	memcpy(p->encryption_key, outbuf, 16);
+	memcpy(p->hmac_key, outbuf + 16, 16);
 }

@@ -11,14 +11,14 @@ where
 */
 
 uint8_t *
-encryptmsg(struct session *s, uint8_t *msg, int msglen, int *plen)
+encryptmsg(struct node *p, uint8_t *msg, int msglen, int *plen)
 {
 	int i, n, len, pad;
 	uint8_t *buf;
 
-	generate_ephemeral_keyset(s);
-	key_derivation_function(s);
-	aes128_init(s);
+	generate_ephemeral_keyset(p);
+	key_derivation_function(p);
+	aes128_init(p);
 
 	// get buffer
 
@@ -30,7 +30,7 @@ encryptmsg(struct session *s, uint8_t *msg, int msglen, int *plen)
 
 	// ephemeral key R
 
-	memcpy(buf, s->ephemeral_public_key, 64);
+	memcpy(buf, p->ephemeral_public_key, 64);
 
 	// iv
 
@@ -46,11 +46,11 @@ encryptmsg(struct session *s, uint8_t *msg, int msglen, int *plen)
 	pad = 15 - (msglen & 0xf); // pad byte value (0..15)
 	memset(buf + 80 + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
 
-	aes128_encrypt(s, buf + 64, n + 1); // n + 1 for iv
+	aes128_encrypt(p, buf + 64, n + 1); // n + 1 for iv
 
 	// hmac
 
-	hmac_sha256(s->hmac_key, 16, buf + 64, 16 * (n + 1), buf + len - 32);
+	hmac_sha256(p->hmac_key, 16, buf + 64, 16 * (n + 1), buf + len - 32);
 
 	*plen = len;
 	return buf;

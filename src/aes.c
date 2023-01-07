@@ -15,7 +15,7 @@
 // expanded key + 544
 
 void
-aes128_init(struct session *p)
+aes128_init(struct node *p)
 {
 	uint32_t w[44], v[44];
 	p->expanded_key = p->expanded_key_tab;
@@ -27,7 +27,7 @@ aes128_init(struct session *p)
 }
 
 void
-aes128_encrypt(struct session *p, uint8_t *buf, int num_blocks)
+aes128_encrypt(struct node *p, uint8_t *buf, int num_blocks)
 {
 	int i, j;
 
@@ -45,7 +45,7 @@ aes128_encrypt(struct session *p, uint8_t *buf, int num_blocks)
 }
 
 void
-aes128_decrypt(struct session *p, unsigned char *buf, int num_blocks)
+aes128_decrypt(struct node *p, unsigned char *buf, int num_blocks)
 {
 	int i, j;
 	uint8_t iv[16];

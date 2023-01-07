@@ -4,7 +4,6 @@ struct account account_table[2];
 void
 init(void)
 {
-	ec_init();
 	read_account(account_table + 0, "Account1");
 	print_account(account_table + 0);
 }
