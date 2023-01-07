@@ -18,7 +18,7 @@ geth --dev --datadir .
 ^C
 ```
 
-To run `geth` normally
+To run `geth` after setup
 
 ```
 geth --goerli --nodiscover --allow-insecure-unlock --http --ws
