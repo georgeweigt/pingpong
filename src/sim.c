@@ -6,7 +6,7 @@ struct node recipient; // Bob
 void
 sim(void)
 {
-	int i, len, listen_fd;
+	int err, i, len, listen_fd;
 	uint8_t *buf;
 
 	// generate keys
@@ -31,13 +31,15 @@ sim(void)
 
 	printf("fd %d %d\n", initiator.fd, recipient.fd);
 
-	send_auth(&initiator); // send to Bob
+	send_auth(&initiator); // Alice sends to Bob
 
 	wait_for_pollin(recipient.fd);
 
-	buf = receive(recipient.fd, &len); // receive from Alice
-	receive_auth(&recipient, buf, len);
+	buf = receive(recipient.fd, &len); // Bob receives from Alice
+	err = receive_auth(&recipient, buf, len);
 	free(buf);
+
+	printf("%s\n", err ? "err" : "ok");
 
 	close(initiator.fd);
 	close(recipient.fd);

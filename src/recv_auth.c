@@ -1,8 +1,16 @@
-void
+int
 receive_auth(struct node *p, uint8_t *buf, int len)
 {
 	int err;
 	uint8_t hmac[32];
+
+	// check length (2 + 64 + 16 + 32 = 114)
+
+	if (len < 114)
+		return -1;
+
+	if ((buf[0] << 8 | buf[1]) != len - 2)
+		return -1;
 
 	// obtain 32 byte shared secret from k * R
 
@@ -12,11 +20,12 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	hmac_sha256(p->hmac_key, 16, buf + 66, len - 98, hmac);
 
-	printf("checking shared secret ");
-	err = memcmp(initiator.shared_secret, recipient.shared_secret, 32);
-	printf("%s\n", err ? "err" : "ok");
+	// check hmac
 
-	printf("checking hmac ");
 	err = memcmp(hmac, buf + len - 32, 32);
-	printf("%s\n", err ? "err" : "ok");
+
+	if (err)
+		return -1;
+
+	return 0;
 }

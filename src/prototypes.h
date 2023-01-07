@@ -108,7 +108,7 @@ int client_connect(char *ipaddr, int portnumber);
 int server_connect(int listen_fd);
 void nib(void);
 void wait_for_pollin(int fd);
-void receive_auth(struct node *p, uint8_t *buf, int len);
+int receive_auth(struct node *p, uint8_t *buf, int len);
 void selftest(void);
 int test_public_key(char *public_key_x, char *public_key_y);
 void send_auth(struct node *p);

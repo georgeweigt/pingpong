@@ -16,7 +16,7 @@ send_auth(struct node *p)
 
 	// set length in big endian
 
-	buf[0] = (len - 2) >> 2;
+	buf[0] = (len - 2) >> 8;
 	buf[1] = len - 2;
 
 	// send
