@@ -5,7 +5,7 @@ void
 init(void)
 {
 	read_account(account_table + 0, "Account1");
-	print_account(account_table + 0);
+//	print_account(account_table + 0);
 }
 
 void
