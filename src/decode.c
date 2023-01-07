@@ -4,14 +4,13 @@ int
 decode(uint8_t *buf, int length)
 {
 	int n = decode_nib(buf, length);
-	if (n < 0)
+	if (n == -1)
 		return -1; // decode error
-	if (n == length)
-		return 0;
-	else {
-		free_list(pop());
+	else if (n < length) {
+		free_list(pop()); // buffer underrun, discard result
 		return -1;
-	}
+	} else
+		return 0; // ok
 }
 
 // returns number of bytes read from buf or -1 on error
