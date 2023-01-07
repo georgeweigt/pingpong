@@ -39,7 +39,21 @@ sim(void)
 	err = receive_auth(&recipient, buf, len);
 	free(buf);
 
-	printf("%s\n", err ? "err" : "ok");
+	if (err) {
+		printf("err file %s, line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	// compare keys
+
+	err = memcmp(initiator.public_key, recipient.peer_public_key, 64);
+
+	if (err) {
+		printf("err file %s, line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	printf("ok\n");
 
 	close(initiator.fd);
 	close(recipient.fd);

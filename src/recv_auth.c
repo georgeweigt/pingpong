@@ -51,7 +51,11 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 		return -1;
 
 	list = pop();
-	print_list(list);
+
+	// save peer public key
+
+	memcpy(p->peer_public_key, list->cdr->car->string, 64);
+
 	free_list(list);
 
 	return 0;
