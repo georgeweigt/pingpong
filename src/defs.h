@@ -49,7 +49,7 @@ struct node {
 	uint8_t public_key[64]; // X || Y
 	uint8_t peer_public_key[64];
 	uint8_t nonce[32];
-	uint8_t shared_secret[32];
+	uint8_t secret_key[32];
 	uint8_t ephemeral_private_key[32];
 	uint8_t ephemeral_public_key[64];
 	uint8_t encryption_key[16]; // k_E

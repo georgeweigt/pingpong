@@ -1,4 +1,6 @@
-/* encrypted message is
+/* Elliptic Curve Integrated Encryption Scheme
+
+Encrypted message is
 
 	R || iv || c || d
 
@@ -7,17 +9,17 @@ where
 	R	ephemeral public key (64 bytes)
 	iv	initialization vector (16 bytes)
 	c	ciphertext (multiple of 16 bytes)
-	d	hmac over iv || c (32 bytes)
+	d	hmac (32 bytes)
 */
 
 uint8_t *
-encryptmsg(struct node *p, uint8_t *msg, int msglen, int *plen)
+ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int *plen)
 {
 	int i, n, len, pad;
 	uint8_t *buf;
 
-	generate_ephemeral_keyset(p);
-	key_derivation_function(p);
+	geneph(p); // generate ephemeral keyset
+	kdf(p); // key derivation function
 	aes128_init(p);
 
 	// get buffer

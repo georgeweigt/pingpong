@@ -1,5 +1,7 @@
+// generate ephemeral keyset
+
 void
-generate_ephemeral_keyset(struct node *p)
+geneph(struct node *p)
 {
 	int i;
 	uint32_t *d;
@@ -67,7 +69,7 @@ generate_ephemeral_keyset(struct node *p)
 		p->ephemeral_public_key[64 - 4 * i - 1] = S.y[i];
 	}
 
-	// generate shared secret
+	// generate secret key
 
 	R.x = ec_buf_to_bignum(p->peer_public_key, 32);
 	R.y = ec_buf_to_bignum(p->peer_public_key + 32, 32);
@@ -78,10 +80,10 @@ generate_ephemeral_keyset(struct node *p)
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
 			break; // err
-		p->shared_secret[32 - 4 * i - 4] = S.x[i] >> 24;
-		p->shared_secret[32 - 4 * i - 3] = S.x[i] >> 16;
-		p->shared_secret[32 - 4 * i - 2] = S.x[i] >> 8;
-		p->shared_secret[32 - 4 * i - 1] = S.x[i];
+		p->secret_key[32 - 4 * i - 4] = S.x[i] >> 24;
+		p->secret_key[32 - 4 * i - 3] = S.x[i] >> 16;
+		p->secret_key[32 - 4 * i - 2] = S.x[i] >> 8;
+		p->secret_key[32 - 4 * i - 1] = S.x[i];
 	}
 
 	ec_free(d);
