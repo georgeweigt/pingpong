@@ -46,17 +46,16 @@ struct node {
 	int fd;
 
 	uint8_t private_key[32];
-	uint8_t public_key[64]; // public_key_x || public_key_y
-
-	uint8_t remote_public_key[64];
-
+	uint8_t public_key[64]; // X || Y
+	uint8_t peer_public_key[64];
+	uint8_t nonce[32];
 	uint8_t shared_secret[32];
 	uint8_t ephemeral_private_key[32];
 	uint8_t ephemeral_public_key[64];
 	uint8_t encryption_key[16]; // k_E
 	uint8_t hmac_key[16]; // k_M
 	uint8_t *expanded_key; // points to 16 byte align in expanded key tab
-	uint8_t expanded_key_tab[560]; // 16 bytes for alignment pad, 32 bytes for 2 iv, 16 + 512 + 32 = 560
+	uint8_t expanded_key_tab[544 + 16]; // 16 bytes for alignment pad
 };
 
 extern int tos;

@@ -69,8 +69,8 @@ generate_ephemeral_keyset(struct node *p)
 
 	// generate shared secret
 
-	R.x = ec_buf_to_bignum(p->remote_public_key, 32);
-	R.y = ec_buf_to_bignum(p->remote_public_key + 32, 32);
+	R.x = ec_buf_to_bignum(p->peer_public_key, 32);
+	R.y = ec_buf_to_bignum(p->peer_public_key + 32, 32);
 
 	ec_mult(&S, d, &R, p256);
 	ec_affinify(&S, p256);

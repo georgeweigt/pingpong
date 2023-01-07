@@ -1,5 +1,7 @@
+// private_key is 32 bytes, public key is 64 bytes (X || Y)
+
 void
-ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
+ec_genkey(uint8_t *private_key, uint8_t *public_key)
 {
 	int i;
 	uint32_t *d;
@@ -50,25 +52,24 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key_x, uint8_t *public_key_y)
 
 	// save public key
 
-	memset(public_key_x, 0, 32);
-	memset(public_key_y, 0, 32);
+	memset(public_key, 0, 64);
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
 			break; // err
-		public_key_x[32 - 4 * i - 4] = S.x[i] >> 24;
-		public_key_x[32 - 4 * i - 3] = S.x[i] >> 16;
-		public_key_x[32 - 4 * i - 2] = S.x[i] >> 8;
-		public_key_x[32 - 4 * i - 1] = S.x[i];
+		public_key[32 - 4 * i - 4] = S.x[i] >> 24;
+		public_key[32 - 4 * i - 3] = S.x[i] >> 16;
+		public_key[32 - 4 * i - 2] = S.x[i] >> 8;
+		public_key[32 - 4 * i - 1] = S.x[i];
 	}
 
 	for (i = 0; i < len(S.y); i++) {
 		if (32 - 4 * i - 4 < 0)
 			break; // err
-		public_key_y[32 - 4 * i - 4] = S.y[i] >> 24;
-		public_key_y[32 - 4 * i - 3] = S.y[i] >> 16;
-		public_key_y[32 - 4 * i - 2] = S.y[i] >> 8;
-		public_key_y[32 - 4 * i - 1] = S.y[i];
+		public_key[64 - 4 * i - 4] = S.y[i] >> 24;
+		public_key[64 - 4 * i - 3] = S.y[i] >> 16;
+		public_key[64 - 4 * i - 2] = S.y[i] >> 8;
+		public_key[64 - 4 * i - 1] = S.y[i];
 	}
 
 	ec_free(d);
@@ -128,19 +129,19 @@ void
 test_ec_genkey(void)
 {
 	int err, i;
-	static uint8_t private_key[32], public_key_x[32], public_key_y[32];
+	static uint8_t private_key[32], public_key[64];
 	static uint8_t r[32], s[32], hash[32];
 
 	printf("Testing ec_genkey ");
 
-	ec_genkey(private_key, public_key_x, public_key_y);
+	ec_genkey(private_key, public_key);
 
 	for (i = 0; i < 32; i++)
 		hash[i] = i;
 
 	ec_sign(r, s, hash, private_key);
 
-	err = ec_verify(hash, r, s, public_key_x, public_key_y);
+	err = ec_verify(hash, r, s, public_key, public_key + 32);
 
 	printf("%s\n", err ? "err" : "ok");
 
