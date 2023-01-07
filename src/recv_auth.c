@@ -4,12 +4,9 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	int err;
 	uint8_t hmac[32];
 
-	// check length (2 + 64 + 16 + 32 = 114)
+	// check length (2 + 64 + 16 + 16 + 32 = 130)
 
-	if (len < 114)
-		return -1;
-
-	if ((buf[0] << 8 | buf[1]) != len - 2)
+	if (len < 130 || (buf[0] << 8 | buf[1]) != len - 2)
 		return -1;
 
 	// obtain 32 byte shared secret from k * R
