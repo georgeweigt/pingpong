@@ -1,0 +1,3 @@
+#!/bin/bash
+# creates directories geth and keystore
+geth --dev --datadir .
