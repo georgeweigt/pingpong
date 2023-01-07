@@ -1,4 +1,4 @@
-[Documentation] (https://georgeweigt.github.io/pingpong.pdf)
+[Documentation](https://georgeweigt.github.io/pingpong.pdf)
 
 #
 
