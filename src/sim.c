@@ -6,7 +6,8 @@ struct node recipient; // Bob
 void
 sim(void)
 {
-	int listen_fd;
+	int i, len, listen_fd;
+	uint8_t *buf;
 
 	// generate keys
 
@@ -14,6 +15,11 @@ sim(void)
 	ec_genkey(recipient.private_key, recipient.public_key);
 
 	memcpy(initiator.peer_public_key, recipient.public_key, 64); // Alice knows Bob's public key
+
+	for (i = 0; i < 32; i++) {
+		initiator.nonce[i] = random();
+		recipient.nonce[i] = random();
+	}
 
 	// establish connection
 
@@ -25,8 +31,38 @@ sim(void)
 
 	printf("fd %d %d\n", initiator.fd, recipient.fd);
 
-	send_auth_msg(&initiator); // send from Alice to Bob
+	send_auth(&initiator); // send to Bob
+
+	wait_for_pollin(recipient.fd);
+
+	buf = receive(recipient.fd, &len); // receive from Alice
+	receive_auth(&recipient, buf, len);
+	free(buf);
 
 	close(initiator.fd);
 	close(recipient.fd);
+}
+
+uint8_t *
+receive(int fd, int *plen)
+{
+	int n;
+	uint8_t *buf;
+
+	buf = malloc(1280);
+
+	if (buf == NULL)
+		exit(1);
+
+	n = recv(fd, buf, 1280, 0);
+
+	if (n < 0) {
+		perror("recv");
+		exit(1);
+	}
+
+	printf("%d bytes received\n", n);
+
+	*plen = n;
+	return buf;
 }

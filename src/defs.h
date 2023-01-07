@@ -49,6 +49,7 @@ struct node {
 	uint8_t public_key[64]; // X || Y
 	uint8_t peer_public_key[64];
 	uint8_t nonce[32];
+	uint8_t peer_none[32];
 	uint8_t shared_secret[32];
 	uint8_t ephemeral_private_key[32];
 	uint8_t ephemeral_public_key[64];
@@ -64,3 +65,4 @@ extern int ec_malloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
 extern uint8_t private_key[32], public_key_x[32], public_key_y[32];
 extern struct account account_table[];
+extern struct node initiator, recipient;

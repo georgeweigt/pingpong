@@ -272,11 +272,10 @@ ec_affinify(struct point *S, uint32_t *p)
 void
 ec_double(struct point *R, struct point *S, uint32_t *p)
 {
-#if SECP256K1
-	ec_double_v2k1(R, S, p);
-#else
-	ec_double_v2r1(R, S, p, a256);
-#endif
+	if (ec_equal(a256, 0))
+		ec_double_v2k1(R, S, p);
+	else
+		ec_double_v2r1(R, S, p, a256);
 }
 
 // Ref. Shay Gueron, Vlad Krasnov paper
