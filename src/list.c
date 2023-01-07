@@ -45,6 +45,14 @@ pop(void)
 }
 
 void
+pop_all(int n)
+{
+	int i;
+	for (i = 0; i < n; i++)
+		free_list(pop());
+}
+
+void
 push_string(uint8_t *string, int length)
 {
 	struct atom *p;

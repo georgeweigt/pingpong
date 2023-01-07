@@ -94,7 +94,7 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 void
 test_ping_payload(struct account *acct)
 {
-	int err, len, n;
+	int err, len;
 	uint8_t buf[60], hash[32], *payload;
 
 	printf("Testing ping_payload");
@@ -115,20 +115,23 @@ test_ping_payload(struct account *acct)
 	// check signature
 
 	printf(" signature ");
-	if (decode_check(payload + HASHLEN, SIGLEN) == SIGLEN) {
+	err = decode(payload + HASHLEN, SIGLEN);
+	if (!err) {
+		free_list(pop());
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
 		keccak256(buf + 28, payload + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
 		keccak256(hash, buf, 60);
 		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key_x, acct->public_key_y);
-	} else
-		err = 1;
+	}
 	printf("%s", err ? "err" : "ok");
 
 	// check data
 
 	printf(" data ");
-	n = decode_check(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
-	printf("%s", n == len - HASHLEN - SIGLEN - 1 ? "ok" : "err");
+	err = decode(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
+	if (!err)
+		free_list(pop());
+	printf("%s", err ? "err" : "ok");
 
 	printf("\n");
 

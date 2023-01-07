@@ -35,13 +35,15 @@ test_sign(struct account *acct)
 
 	sign(sig, (uint8_t *) "hello", 5, acct);
 
-	if (decode_check(sig, SIGLEN) == SIGLEN) {
+	err = decode(sig, SIGLEN);
+
+	if (!err) {
+		free_list(pop());
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
 		keccak256(buf + 28, (uint8_t *) "hello", 5);
 		keccak256(hash, buf, 60);
 		err = ec_verify(hash, sig + 3, sig + 36, acct->public_key_x, acct->public_key_y);
-	} else
-		err = 1;
+	}
 
 	printf("%s\n", err ? "err" : "ok");
 }
