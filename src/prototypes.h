@@ -123,3 +123,4 @@ void sha256_hash_block(uint8_t *buf, uint32_t *hash);
 void test_sha256(void);
 void sign(uint8_t *sig, uint8_t *msg, int msglen, struct account *acct);
 void test_sign(struct account *acct);
+void sim(void);

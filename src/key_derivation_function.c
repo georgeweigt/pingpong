@@ -29,10 +29,10 @@ key_derivation_function(struct session *s)
 {
 	uint8_t inbuf[36], outbuf[32];
 
-	inbuf[0] = 1; // counter = 1
+	inbuf[0] = 0; // counter = 1 in big endian
 	inbuf[1] = 0;
 	inbuf[2] = 0;
-	inbuf[3] = 0;
+	inbuf[3] = 1;
 
 	memcpy(inbuf + 4, s->shared_secret, 32);
 
