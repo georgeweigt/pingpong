@@ -137,3 +137,4 @@ void test_ecdh(void);
 void test_kdf(void);
 void test_hmac(void);
 void test_pubkey(void);
+void test_decrypt(void);

@@ -4,11 +4,10 @@ main()
 	aes_init();
 	ec_init();
 	init();
-
 	test();
 
 //	node();
-//	sim();
+	sim();
 }
 
 #define TIMEOUT 10000 // poll timeout in milliseconds

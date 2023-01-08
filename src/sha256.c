@@ -172,8 +172,6 @@ uint32_t K256[64] = {
 	0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2,
 };
 
-#define K K256
-
 void
 sha256_hash_block(uint8_t *buf, uint32_t *hash)
 {
@@ -198,7 +196,7 @@ sha256_hash_block(uint8_t *buf, uint32_t *hash)
 	h = hash[7];
 
 	for (t = 0; t < 64; t++) {
-		T1 = h + Sigma1(e) + Ch(e, f, g) + K[t] + W[t];
+		T1 = h + Sigma1(e) + Ch(e, f, g) + K256[t] + W[t];
 		T2 = Sigma0(a) + Maj(a, b, c);
 		h = g;
 		g = f;
