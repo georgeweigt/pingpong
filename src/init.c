@@ -11,9 +11,8 @@ init(void)
 void
 read_account(struct account *p, char *filename)
 {
-	int d, i;
 	char *buf;
-	uint8_t hash[32], key[64];
+	uint8_t hash[32];
 
 	buf = read_file(filename);
 
@@ -25,23 +24,17 @@ read_account(struct account *p, char *filename)
 		return;
 	}
 
-	for (i = 0; i < 32; i++) {
-		sscanf(buf + 2 * i, "%2x", &d);
-		p->private_key[i] = d;
-	}
+	hextobin(p->private_key, 32, buf);
 
 	free(buf);
 
-	ec_get_public_key(p->public_key_x, p->public_key_y, p->private_key);
+	ec_pubkey(p->public_key, p->private_key);
 
 	// account number is hash of public keys
 
-	memcpy(key, p->public_key_x, 32);
-	memcpy(key + 32, p->public_key_y, 32);
-	keccak256(hash, key, 64);
+	keccak256(hash, p->public_key, 64);
 
-	for (i = 0; i < 20; i++)
-		p->account_number[i] = hash[12 + i];
+	memcpy(p->account_number, hash + 12, 20);
 }
 
 char *
@@ -101,10 +94,10 @@ print_account(struct account *p)
 	printf("\n");
 
 	for (i = 0; i < 32; i++)
-		printf("%02x", p->public_key_x[i]);
+		printf("%02x", p->public_key[i]);
 	printf("\n");
 
 	for (i = 0; i < 32; i++)
-		printf("%02x", p->public_key_y[i]);
+		printf("%02x", p->public_key[32 + i]);
 	printf("\n");
 }

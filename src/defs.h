@@ -37,8 +37,7 @@ struct atom {
 struct account {
 	uint8_t account_number[20];
 	uint8_t private_key[32];
-	uint8_t public_key_x[32];
-	uint8_t public_key_y[32];
+	uint8_t public_key[64];
 };
 
 struct node {

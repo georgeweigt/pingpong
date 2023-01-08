@@ -13,7 +13,7 @@ sign(uint8_t *sig, uint8_t *msg, int msglen, struct account *acct)
 
 	ec_sign(r, s, hash, acct->private_key);
 
-	v = 27 + (acct->public_key_y[31] & 1); // 27 even, 28 odd
+	v = 27 + (acct->public_key[63] & 1); // 27 even, 28 odd
 
 	push_string(r, 32);
 	push_string(s, 32);
@@ -62,7 +62,7 @@ test_sign(struct account *acct)
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
 		keccak256(buf + 28, (uint8_t *) "hello", 5);
 		keccak256(hash, buf, 60);
-		err = ec_verify(hash, sig + 3, sig + 36, acct->public_key_x, acct->public_key_y);
+		err = ec_verify(hash, sig + 3, sig + 36, acct->public_key, acct->public_key + 32);
 	}
 
 	printf("%s\n", err ? "err" : "ok");

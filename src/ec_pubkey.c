@@ -1,12 +1,13 @@
-// private_key	32 bytes (result)
-// public_key	64 bytes (result)
+// derive public_key from private_key
 
 void
-ec_genkey(uint8_t *private_key, uint8_t *public_key)
+ec_pubkey(uint8_t *public_key, uint8_t *private_key)
 {
 	int i;
 	uint32_t *d;
 	struct point R, S;
+
+	d = ec_buf_to_bignum(private_key, 32);
 
 	R.x = gx256;
 	R.y = gy256;
@@ -16,39 +17,8 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 	S.y = NULL;
 	S.z = NULL;
 
-	d = NULL;
-
-	do {
-		ec_free(d);
-		d = ec_new(8);
-
-		// generate private key d
-
-		for (i = 0; i < 8; i++)
-			d[i] = random();
-
-		ec_norm(d);
-		ec_mod(d, q256);
-
-	} while (ec_equal(d, 0));
-
-	// generate public key
-
 	ec_mult(&S, d, &R, p256);
 	ec_affinify(&S, p256);
-
-	// save private key
-
-	memset(private_key, 0, 32);
-
-	for (i = 0; i < len(d); i++) {
-		if (32 - 4 * i - 4 < 0)
-			break; // err
-		private_key[32 - 4 * i - 4] = d[i] >> 24;
-		private_key[32 - 4 * i - 3] = d[i] >> 16;
-		private_key[32 - 4 * i - 2] = d[i] >> 8;
-		private_key[32 - 4 * i - 1] = d[i];
-	}
 
 	// save public key
 

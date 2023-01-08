@@ -6,7 +6,7 @@ selftest(void)
 	test_keccak256();
 	test_rencode();
 	test_rdecode();
-	test_ec_genkey();
+	test_genkey();
 	test_sign(account_table + 0);
 	test_ping_payload(account_table + 0);
 }
@@ -476,6 +476,36 @@ test_rdecode(void)
 	printf("ok\n");
 }
 
+void
+test_genkey(void)
+{
+	int err;
+	uint8_t private_key[32], public_key[64];
+	uint8_t r[32], s[32], hash[32];
+
+	printf("Testing genkey ");
+
+	ec_genkey(private_key, public_key);
+
+	memset(hash, 0xf5, sizeof hash);
+
+	ec_sign(r, s, hash, private_key);
+
+	err = ec_verify(hash, r, s, public_key, public_key + 32);
+
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	if (ec_malloc_count != 0) {
+		printf("memory leak err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
+}
+
 /*
 def test_agree():
     secret = fromHex("0x332143e9629eedff7d142d741f896258f5a1bfab54dab2121d3ec5000093d74b")
@@ -532,8 +562,11 @@ def test_kdf():
     assert(kdfTest2 == kdfExpect2)
 */
 
-#define A "961c065873443014e0371f1ed656c586c6730bf927415757f389d92acf8268df"
-#define B "4050c52e6d9c08755e5a818ac66fabe478b825b1836fd5efc4d44e40d04dabcc"
+#define A1 "0de72f1223915fa8b8bf45dffef67aef8d89792d116eb61c9a1eb02c422a4663"
+#define B1 "1d0c446f9899a3426f2b89a8cb75c14b"
+
+#define A2 "961c065873443014e0371f1ed656c586c6730bf927415757f389d92acf8268df"
+#define B2 "4050c52e6d9c08755e5a818ac66fabe478b825b1836fd5efc4d44e40d04dabcc"
 
 void
 test_kdf(void)
@@ -542,8 +575,8 @@ test_kdf(void)
 
 	printf("Testing kdf ");
 
-	hextobin(a, 32, A);
-	hextobin(b, 32, B);
+	hextobin(a, 32, A1);
+	hextobin(b, 16, B1);
 
 	buf[0] = 0;
 	buf[1] = 0;
@@ -552,13 +585,139 @@ test_kdf(void)
 
 	memcpy(buf + 4, a, 32);
 
-	sha256(buf, 36, buf); // from first buf to second buf
+	sha256(buf, 36, buf);
 
-	if (memcmp(b, buf, 32) == 0)
-		printf("ok\n");
-	else
-		printf("err\n");
+	if (memcmp(b, buf, 16) != 0) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	hextobin(a, 32, A2);
+	hextobin(b, 32, B2);
+
+	buf[0] = 0;
+	buf[1] = 0;
+	buf[2] = 0;
+	buf[3] = 1;
+
+	memcpy(buf + 4, a, 32);
+
+	sha256(buf, 36, buf);
+
+	if (memcmp(b, buf, 32) != 0) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
 }
 
-#undef A
-#undef B
+#undef A1
+#undef B1
+
+#undef A2
+#undef B2
+
+/*
+def test_hmac():
+    k_mac = fromHex("0x07a4b6dfa06369a570f2dcba2f11a18f")
+    indata = fromHex("0x4dcb92ed4fc67fe86832")
+    hmacExpected = fromHex("0xc90b62b1a673b47df8e395e671a68bfa68070d6e2ef039598bb829398b89b9a9")
+    hmacOut = crypto.hmac_sha256(k_mac, indata)
+    assert(hmacExpected == hmacOut)
+
+    # go messageTag
+    tagSecret = fromHex("0xaf6623e52208c596e17c72cea6f1cb09")
+    tagInput = fromHex("0x3461282bcedace970df2")
+    tagExpected = fromHex("0xb3ce623bce08d5793677ba9441b22bb34d3e8a7de964206d26589df3e8eb5183")
+    hmacOut = crypto.hmac_sha256(tagSecret, tagInput)
+    assert(hmacOut == tagExpected)
+*/
+
+#define KMAC1 "07a4b6dfa06369a570f2dcba2f11a18f"
+#define DATA1 "4dcb92ed4fc67fe86832"
+#define HMAC1 "c90b62b1a673b47df8e395e671a68bfa68070d6e2ef039598bb829398b89b9a9"
+
+#define KMAC2 "af6623e52208c596e17c72cea6f1cb09"
+#define DATA2 "3461282bcedace970df2"
+#define HMAC2 "b3ce623bce08d5793677ba9441b22bb34d3e8a7de964206d26589df3e8eb5183"
+
+void
+test_hmac(void)
+{
+	uint8_t kmac[16], data[10], hmac[32], out[32];
+
+	printf("Testing hmac ");
+
+	hextobin(kmac, 16, KMAC1);
+	hextobin(data, 10, DATA1);
+	hextobin(hmac, 32, HMAC1);
+
+	hmac_sha256(kmac, 16, data, 10, out);
+
+	if (memcmp(hmac, out, 32) != 0) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	hextobin(kmac, 16, KMAC2);
+	hextobin(data, 10, DATA2);
+	hextobin(hmac, 32, HMAC2);
+
+	hmac_sha256(kmac, 16, data, 10, out);
+
+	if (memcmp(hmac, out, 32) != 0) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
+}
+
+#undef KMAC1
+#undef DATA1
+#undef HMAC1
+
+#undef KMAC2
+#undef DATA2
+#undef HMAC2
+
+/*
+def test_privtopub():
+    kenc = fromHex("0x472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b")
+    penc = fromHex(
+        "0x7a2aa2951282279dc1171549a7112b07c38c0d97c0fe2c0ae6c4588ba15be74a04efc4f7da443f6d61f68a9279bc82b73e0cc8d090048e9f87e838ae65dd8d4c")
+    assert(penc == crypto.privtopub(kenc))
+    return kenc, penc
+*/
+
+#define K "472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b"
+#define P "7a2aa2951282279dc1171549a7112b07c38c0d97c0fe2c0ae6c4588ba15be74a04efc4f7da443f6d61f68a9279bc82b73e0cc8d090048e9f87e838ae65dd8d4c"
+
+void
+test_pubkey(void)
+{
+	uint8_t k[32], p[64], q[64];
+
+	printf("Testing pubkey ");
+
+	hextobin(k, 32, K);
+	hextobin(p, 64, P);
+
+	ec_pubkey(q, k);
+
+	if (memcmp(p, q, 64) != 0) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	if (ec_malloc_count != 0) {
+		printf("memory leak err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
+}
+
+#undef K
+#undef P

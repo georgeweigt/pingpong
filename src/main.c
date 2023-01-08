@@ -6,7 +6,11 @@ main()
 //	init();
 //	selftest();
 
+	test_genkey();
+	test_pubkey();
+
 	test_kdf();
+	test_hmac();
 
 //	node();
 //	sim();

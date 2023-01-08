@@ -121,7 +121,7 @@ test_ping_payload(struct account *acct)
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
 		keccak256(buf + 28, payload + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
 		keccak256(hash, buf, 60);
-		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key_x, acct->public_key_y);
+		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key, acct->public_key + 32);
 	}
 	printf("%s", err ? "err" : "ok");
 
