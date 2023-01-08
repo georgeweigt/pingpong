@@ -36,12 +36,15 @@ send_auth(struct node *p)
 struct atom *
 auth_body(struct node *p)
 {
-	uint8_t sig[32];
+	int i;
+	uint8_t buf[32], sig[65];
 
-	// sig
+	// sig (see rlpx.go line 557)
 
-	keccak256(sig, p->ephemeral_public_key, 64);
-	push_string(sig, 32);
+	for (i = 0; i < 32; i++)
+		buf[i] = p->shared_secret[i] ^ p->nonce[i];
+	signbuf(sig, buf, p->ephemeral_private_key, p->ephemeral_public_key);
+	push_string(sig, 65);
 
 	// initiator public key
 

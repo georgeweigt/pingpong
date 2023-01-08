@@ -127,6 +127,7 @@ void sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out);
 void sha256_hash_block(uint8_t *buf, uint32_t *hash);
 void test_sha256(void);
 void sign(uint8_t *sig, uint8_t *msg, int msglen, struct account *acct);
+void signbuf(uint8_t *sig, uint8_t *buf, uint8_t *private_key, uint8_t *public_key);
 void test_sign(struct account *acct);
 void sim(void);
 uint8_t * receive(int fd, int *plen);
