@@ -8,4 +8,4 @@ prototypes.h: *.c
 	../tools/make-prototypes . > prototypes.h
 
 clean:
-	rm -f a.out
+	rm -f pingpong

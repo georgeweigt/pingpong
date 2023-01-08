@@ -53,7 +53,7 @@ struct node {
 	uint8_t shared_secret[32];
 	uint8_t ephemeral_private_key[32];
 	uint8_t ephemeral_public_key[64];
-	uint8_t encryption_key[16]; // k_E
+	uint8_t aes_key[16]; // k_E
 	uint8_t hmac_key[32]; // k_M
 	uint8_t *expanded_key; // points to 16 byte align in expanded key tab
 	uint8_t expanded_key_tab[544 + 16]; // 16 bytes for alignment pad

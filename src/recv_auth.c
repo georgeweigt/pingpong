@@ -24,13 +24,13 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	if (len < C + 16 + 32 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 3) % 16) // len - 3 beacuse of R format byte
 		return -1;
 
-	// obtain 32 byte shared secret from k * R
+	// derive 32 byte shared secret from private_key and R
 
-	ec_secret(p->shared_secret, p->private_key, buf + R + 1); // R + 1 to skip over format byte
+	ec_ecdh(p->shared_secret, p->private_key, buf + R + 1); // R + 1 to skip over format byte
 
-	// derive encryption_key, hmac_key from shared_secret
+	// derive encryption_key and hmac_key from shared_secret
 
-	kdf(p);
+	kdf(p->aes_key, p->hmac_key, p->shared_secret);
 
 	// check 32 byte hmac
 

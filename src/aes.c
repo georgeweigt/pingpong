@@ -21,7 +21,7 @@ aes128_init(struct node *p)
 	p->expanded_key = p->expanded_key_tab;
 	while (((uint64_t) p->expanded_key) & 0xf)
 		p->expanded_key++; // align
-	key_expansion(p->encryption_key, w, v); // aes128 key is 16 bytes
+	key_expansion(p->aes_key, w, v); // aes128 key is 16 bytes
 	memcpy(p->expanded_key, w, 176);
 	memcpy(p->expanded_key + 272, v, 176);
 }
@@ -422,7 +422,7 @@ test_aes(void)
 	printf("Testing aes ");
 
 	for (i = 0; i < 16; i++)
-		node.encryption_key[i] = random();
+		node.aes_key[i] = random();
 
 	for (i = 0; i < 32; i++)
 		plain[i] = random();
