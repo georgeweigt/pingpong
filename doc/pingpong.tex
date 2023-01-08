@@ -25,4 +25,45 @@ where $c=\text{\tt AES}(k_E,\text{\tt iv},m)$
 and $d=\text{\tt MAC}\big(\text{\tt sha256}(k_M),\text{\tt iv}\,\|\,c\big)$ to Bob.
 \end{quote}
 
+Let
+\begin{align*}
+r&=\text{\footnotesize\tt ephemeral\_private\_key}
+\\
+R&=\text{\footnotesize\tt ephemeral\_public\_key}
+\\
+S&=\text{\footnotesize\tt shared\_secret}
+\\
+K_B&=\text{\footnotesize\tt peer\_public\_key}
+\\
+k_E&=\text{\footnotesize\tt aes\_key}
+\\
+k_M&=\text{\footnotesize\tt hmac\_key}
+\end{align*}
+
+Then this is the code for $r$ and $R=r*G$.
+{\footnotesize
+\begin{verbatim}
+// generate ephemeral_private_key and ephemeral_public_key
+ec_genkey(ephemeral_private_key, ephemeral_public_key);
+\end{verbatim}
+}
+
+\bigskip
+This is the code for $S=P_x$ where $(P_x,P_y)=r*K_B$.
+{\footnotesize
+\begin{verbatim}
+// derive shared_secret from ephemeral_private_key and peer_public_key
+ec_ecdh(shared_secret, ephemeral_private_key, peer_public_key);
+\end{verbatim}
+}
+
+\bigskip
+And this is the code for $k_E\,\|\,k_M=\text{\tt KDF}(S,32)$.
+{\footnotesize
+\begin{verbatim}
+// derive AES and HMAC keys from shared_secret
+kdf(aes_key, hmac_key, shared_secret);
+\end{verbatim}
+}
+
 \end{document}
