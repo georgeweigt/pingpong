@@ -22,7 +22,7 @@ sign(uint8_t *sig, uint8_t *msg, int msglen, struct account *acct)
 
 	p = pop();
 
-	encode(sig, SIGLEN, p);
+	rencode(sig, SIGLEN, p);
 }
 
 // sig		65 bytes
@@ -55,7 +55,7 @@ test_sign(struct account *acct)
 
 	sign(sig, (uint8_t *) "hello", 5, acct);
 
-	err = decode(sig, SIGLEN);
+	err = rdecode(sig, SIGLEN);
 
 	if (!err) {
 		free_list(pop());

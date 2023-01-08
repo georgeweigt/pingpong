@@ -1,22 +1,34 @@
 // returns result on stack or -1 on error
 
 int
-decode(uint8_t *buf, int length)
+rdecode(uint8_t *buf, int length)
 {
-	int n = decode_nib(buf, length);
+	int n = rdecode_nib(buf, length);
 	if (n == -1)
 		return -1; // decode error
 	else if (n < length) {
-		free_list(pop()); // buffer underrun, discard result
-		return -1;
+		free_list(pop());
+		return -1; // buffer underrun
 	} else
+		return 0; // ok
+}
+
+// ok to have trailing data
+
+int
+rdecode_relax(uint8_t *buf, int length)
+{
+	int n = rdecode_nib(buf, length);
+	if (n == -1)
+		return -1; // decode error
+	else
 		return 0; // ok
 }
 
 // returns number of bytes read from buf or -1 on error
 
 int
-decode_nib(uint8_t *buf, int length)
+rdecode_nib(uint8_t *buf, int length)
 {
 	int err, i, n;
 	uint64_t len;
@@ -67,7 +79,7 @@ decode_nib(uint8_t *buf, int length)
 		len = buf[0] - 0xc0;
 		if (len + 1 > length)
 			return -1;
-		err = decode_list(buf + 1, len);
+		err = rdecode_list(buf + 1, len);
 		if (err)
 			return -1;
 		else
@@ -84,7 +96,7 @@ decode_nib(uint8_t *buf, int length)
 		len = (len << 8) | buf[i + 1];
 	if (len > 0xffffff || len + n + 1 > length) // cap len to prevent arithmetic overflow
 		return -1;
-	err = decode_list(buf + n + 1, len);
+	err = rdecode_list(buf + n + 1, len);
 	if (err)
 		return -1;
 	else
@@ -94,13 +106,13 @@ decode_nib(uint8_t *buf, int length)
 // if length is zero then NULL is pushed (empty list)
 
 int
-decode_list(uint8_t *buf, int length)
+rdecode_list(uint8_t *buf, int length)
 {
 	int h, len, n;
 	h = tos;
 	len = 0;
 	while (len < length) {
-		n = decode_nib(buf + len, length - len);
+		n = rdecode_nib(buf + len, length - len);
 		if (n < 0) {
 			pop_all(tos - h);
 			return -1; // err

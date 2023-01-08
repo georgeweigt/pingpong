@@ -3,17 +3,26 @@
 void
 kdf(struct node *p)
 {
-	uint8_t inbuf[36], outbuf[32];
+	uint8_t buf[36];
 
-	inbuf[0] = 0; // counter = 1 in big endian
-	inbuf[1] = 0;
-	inbuf[2] = 0;
-	inbuf[3] = 1;
+	// big endian counter = 1
 
-	memcpy(inbuf + 4, p->shared_secret, 32);
+	buf[0] = 0;
+	buf[1] = 0;
+	buf[2] = 0;
+	buf[3] = 1;
 
-	sha256(inbuf, 36, outbuf);
+	memcpy(buf + 4, p->shared_secret, 32);
 
-	memcpy(p->encryption_key, outbuf, 16);
-	memcpy(p->hmac_key, outbuf + 16, 16);
+	sha256(buf, 36, buf);
+
+	// first 16 bytes are the AES key
+
+	memcpy(p->encryption_key, buf, 16);
+
+	// hash last 16 bytes to get 32 byte HMAC key
+
+	sha256(buf + 16, 16, buf);
+
+	memcpy(p->hmac_key, buf, 32);
 }

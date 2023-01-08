@@ -33,7 +33,7 @@ ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen, 
 	buf = malloc(HASHLEN + SIGLEN + len + 1);
 	if (buf == NULL)
 		exit(1);
-	encode(buf + HASHLEN + SIGLEN + 1, len, p);
+	rencode(buf + HASHLEN + SIGLEN + 1, len, p);
 	free_list(p);
 
 	// packet type (ping)
@@ -115,7 +115,7 @@ test_ping_payload(struct account *acct)
 	// check signature
 
 	printf(" signature ");
-	err = decode(payload + HASHLEN, SIGLEN);
+	err = rdecode(payload + HASHLEN, SIGLEN);
 	if (!err) {
 		free_list(pop());
 		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
@@ -128,7 +128,7 @@ test_ping_payload(struct account *acct)
 	// check data
 
 	printf(" data ");
-	err = decode(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
+	err = rdecode(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
 	if (!err)
 		free_list(pop());
 	printf("%s", err ? "err" : "ok");

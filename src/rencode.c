@@ -1,23 +1,23 @@
 int
-encode(uint8_t *buf, int len, struct atom *p)
+rencode(uint8_t *buf, int len, struct atom *p)
 {
 	if (enlength(p) > len)
 		return 0;
 	else
-		return encode_nib(buf, p);
+		return rencode_nib(buf, p);
 }
 
 int
-encode_nib(uint8_t *buf, struct atom *p)
+rencode_nib(uint8_t *buf, struct atom *p)
 {
 	if (p == NULL || p->length < 0)
-		return encode_list(buf, p);
+		return rencode_list(buf, p);
 	else
-		return encode_string(buf, p);
+		return rencode_string(buf, p);
 }
 
 int
-encode_list(uint8_t *buf, struct atom *p)
+rencode_list(uint8_t *buf, struct atom *p)
 {
 	int padlen, sublen;
 	uint8_t *t;
@@ -29,7 +29,7 @@ encode_list(uint8_t *buf, struct atom *p)
 	t = buf + padlen;
 
 	while (p) {
-		t += encode_nib(t, p->car);
+		t += rencode_nib(t, p->car);
 		p = p->cdr;
 	}
 
@@ -58,7 +58,7 @@ encode_list(uint8_t *buf, struct atom *p)
 }
 
 int
-encode_string(uint8_t *buf, struct atom *p)
+rencode_string(uint8_t *buf, struct atom *p)
 {
 	int padlen, sublen;
 

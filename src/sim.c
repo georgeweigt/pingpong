@@ -29,8 +29,6 @@ sim(void)
 	recipient.fd = server_connect(listen_fd);
 	close(listen_fd);
 
-	printf("fd %d %d\n", initiator.fd, recipient.fd);
-
 	send_auth(&initiator); // Alice sends to Bob
 
 	wait_for_pollin(recipient.fd);

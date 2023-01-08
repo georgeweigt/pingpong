@@ -8,8 +8,8 @@ selftest(void)
 	test_aes();
 	test_sha256();
 	test_keccak256();
-	test_encode();
-	test_decode();
+	test_rencode();
+	test_rdecode();
 	test_ec_genkey();
 	test_sign(account_table + 0);
 	test_ping_payload(account_table + 0);
@@ -33,19 +33,19 @@ test_public_key(char *public_key_x, char *public_key_y)
 }
 
 void
-test_encode(void)
+test_rencode(void)
 {
 	int err, i, n;
 	struct atom *p;
 	uint8_t buf[256], enc[256];
 
-	printf("Testing encode ");
+	printf("Testing rencode ");
 
 	// items
 
 	push_string(NULL, 0);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x80", n)) {
 		printf("err line %d\n", __LINE__);
@@ -54,7 +54,7 @@ test_encode(void)
 
 	push_string((uint8_t *) "", 0);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x80", n)) {
 		printf("err line %d\n", __LINE__);
@@ -63,7 +63,7 @@ test_encode(void)
 
 	push_string((uint8_t *) "a", 1);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "a", n)) {
 		printf("err line %d\n", __LINE__);
@@ -72,7 +72,7 @@ test_encode(void)
 
 	push_string((uint8_t *) "ab", 2);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 3 || memcmp(buf, "\x82" "ab", n)) {
 		printf("err line %d\n", __LINE__);
@@ -81,7 +81,7 @@ test_encode(void)
 
 	push_string((uint8_t *) "aaaaaaaaaa" "bbbbbbbbbb" "cccccccccc" "dddddddddd" "eeeeeeeeee" "fffff", 55);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 56 || memcmp(buf, "\xb7" "aaaaaaaaaa" "bbbbbbbbbb" "cccccccccc" "dddddddddd" "eeeeeeeeee" "fffff", n)) {
 		printf("err line %d\n", __LINE__);
@@ -90,7 +90,7 @@ test_encode(void)
 
 	push_string((uint8_t *) "aaaaaaaaaa" "bbbbbbbbbb" "cccccccccc" "dddddddddd" "eeeeeeeeee" "ffffff", 56);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 58 || memcmp(buf, "\xb8\x38" "aaaaaaaaaa" "bbbbbbbbbb" "cccccccccc" "dddddddddd" "eeeeeeeeee" "ffffff", n)) {
 		printf("err line %d\n", __LINE__);
@@ -99,7 +99,7 @@ test_encode(void)
 
 	push_number(0);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x00", n)) {
 		printf("err line %d\n", __LINE__);
@@ -108,7 +108,7 @@ test_encode(void)
 
 	push_number(1);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x01", n)) {
 		printf("err line %d\n", __LINE__);
@@ -117,7 +117,7 @@ test_encode(void)
 
 	push_number(127);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x7f", n)) {
 		printf("err line %d\n", __LINE__);
@@ -126,7 +126,7 @@ test_encode(void)
 
 	push_number(128);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 2 || memcmp(buf, "\x81\x80", n)) {
 		printf("err line %d\n", __LINE__);
@@ -135,7 +135,7 @@ test_encode(void)
 
 	push_number(255);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 2 || memcmp(buf, "\x81\xff", n)) {
 		printf("err line %d\n", __LINE__);
@@ -144,7 +144,7 @@ test_encode(void)
 
 	push_number(256);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 3 || memcmp(buf, "\x82\x01\x00", n)) {
 		printf("err line %d\n", __LINE__);
@@ -153,7 +153,7 @@ test_encode(void)
 
 	push_number(65535);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 3 || memcmp(buf, "\x82\xff\xff", n)) {
 		printf("err line %d\n", __LINE__);
@@ -162,7 +162,7 @@ test_encode(void)
 
 	push_number(65536);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 4 || memcmp(buf, "\x83\x01\x00\x00", n)) {
 		printf("err line %d\n", __LINE__);
@@ -173,7 +173,7 @@ test_encode(void)
 
 	list(0);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\xc0", n)) {
 		printf("err line %d\n", __LINE__);
@@ -185,7 +185,7 @@ test_encode(void)
 	list(0);
 	list(1);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 2 || memcmp(buf, "\xc1\xc0", n)) {
 		printf("err line %d\n", __LINE__);
@@ -199,7 +199,7 @@ test_encode(void)
 	push_number(2);
 	list(3);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 4 || memcmp(buf, "\xc3\x01\xc0\x02", n)) {
 		printf("err line %d\n", __LINE__);
@@ -213,7 +213,7 @@ test_encode(void)
 	push_string(buf, 54);
 	list(1);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 56) {
 		printf("err on line %d\n", __LINE__);
@@ -236,7 +236,7 @@ test_encode(void)
 	push_string(buf, 55);
 	list(1);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 58) {
 		printf("err on line %d\n", __LINE__);
@@ -260,7 +260,7 @@ test_encode(void)
 	push_string(buf, 56);
 	list(1);
 	p = pop();
-	n = encode(buf, sizeof buf, p);
+	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 60) {
 		printf("err on line %d\n", __LINE__);
@@ -287,20 +287,20 @@ test_encode(void)
 }
 
 void
-test_decode(void)
+test_rdecode(void)
 {
 	int err, len, n;
 	struct atom *p, *q;
 	uint8_t buf[2000];
 
-	printf("Testing decode ");
+	printf("Testing rdecode ");
 
 	// []
 
 	list(0);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -319,8 +319,8 @@ test_decode(void)
 	list(0);
 	list(1);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -340,8 +340,8 @@ test_decode(void)
 	list(0);
 	list(2);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -359,8 +359,8 @@ test_decode(void)
 
 	push_string(NULL, 0);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -379,8 +379,8 @@ test_decode(void)
 	for (n = 0; n <= 1000; n++) {
 		push_string(buf, n);
 		p = pop();
-		len = encode(buf, sizeof buf, p);
-		err = decode(buf, len);
+		len = rencode(buf, sizeof buf, p);
+		err = rdecode(buf, len);
 		if (err)
 			q = NULL;
 		else {
@@ -400,8 +400,8 @@ test_decode(void)
 	push_string(buf, 54);
 	list(1);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -420,8 +420,8 @@ test_decode(void)
 	push_string(buf, 55);
 	list(1);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -440,8 +440,8 @@ test_decode(void)
 	push_string(buf, 56);
 	list(1);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {
@@ -460,8 +460,8 @@ test_decode(void)
 	push_string(buf, 57);
 	list(1);
 	p = pop();
-	len = encode(buf, sizeof buf, p);
-	err = decode(buf, len);
+	len = rencode(buf, sizeof buf, p);
+	err = rdecode(buf, len);
 	if (err)
 		q = NULL;
 	else {

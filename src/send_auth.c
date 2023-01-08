@@ -5,15 +5,22 @@ send_auth(struct node *p)
 	uint8_t *buf, *msg;
 	struct atom *list;
 
+	// pad with random amount of data, at least 100 bytes
+
+	n = 100 + random() % 100;
+
 	list = auth_body(p);
 	msglen = enlength(list);
-	msg = malloc(msglen);
+	msg = malloc(msglen + n);
 	if (msg == NULL)
 		exit(1);
-	encode(msg, msglen, list);
+	rencode(msg, msglen, list);
 	free_list(list);
+	memset(msg + msglen, 0, n); // pad with n zeroes
+	msglen += n;
 
 	buf = ecies_encrypt(p, msg, msglen, 2, &len); // header length = 2
+	free(msg);
 
 	// set length in big endian
 
@@ -23,14 +30,12 @@ send_auth(struct node *p)
 	// send
 
 	n = send(p->fd, buf, len, 0);
+	free(buf);
 
 	if (n < 0)
 		perror("send");
 
 	printf("%d bytes sent\n", n);
-
-	free(msg);
-	free(buf);
 }
 
 struct atom *

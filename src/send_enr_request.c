@@ -33,7 +33,7 @@ enr_request_payload(int *plen, struct account *acct)
 	buf = malloc(HASHLEN + SIGLEN + len + 1);
 	if (buf == NULL)
 		exit(1);
-	encode(buf + HASHLEN + SIGLEN + 1, len, p);
+	rencode(buf + HASHLEN + SIGLEN + 1, len, p);
 	free_list(p);
 
 	// packet type (enr request)

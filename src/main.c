@@ -3,8 +3,10 @@ main()
 {
 	aes_init();
 	ec_init();
-	init();
-	selftest();
+//	init();
+//	selftest();
+
+//	node();
 	sim();
 }
 
@@ -44,7 +46,7 @@ stub(void)
 	// bind (sets src port also)
 
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	addr.sin_port = htons(SRC_PORT);
 
 	err = bind(fd1, (struct sockaddr *) &addr, sizeof addr);
@@ -55,7 +57,7 @@ stub(void)
 	}
 
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	addr.sin_port = htons(DST_PORT);
 
 	err = bind(fd2, (struct sockaddr *) &addr, sizeof addr);
@@ -182,7 +184,7 @@ client_connect(char *ipaddr, int portnumber)
 
 	if (fd < 0) {
 		perror("socket");
-		return -1;
+		exit(1);
 	}
 
 	// struct sockaddr {
@@ -210,7 +212,7 @@ client_connect(char *ipaddr, int portnumber)
 	if (err) {
 		close(fd);
 		perror("connect");
-		return -1;
+		exit(1);
 	}
 
 	// set nonblocking
@@ -220,7 +222,7 @@ client_connect(char *ipaddr, int portnumber)
 	if (err == -1) {
 		close(fd);
 		perror("fcntl");
-		return -1;
+		exit(1);
 	}
 #endif
 	return fd;
@@ -238,33 +240,12 @@ server_connect(int listen_fd)
 
 	if (fd < 0) {
 		perror("accept");
-		return -1;
+		exit(1);
 	}
 
 //	printf("connect from %s\n", inet_ntoa(addr.sin_addr));
 
 	return fd;
-}
-
-// node simulator
-
-void
-nib(void)
-{
-	int listen_fd, client_fd, server_fd;
-
-	listen_fd = start_listening(30303);
-	client_fd = client_connect("127.0.0.1", 30303);
-
-	printf("client_fd %d\n", client_fd);
-
-	wait_for_pollin(listen_fd);
-
-	server_fd = server_connect(listen_fd);
-
-	close(listen_fd);
-	close(client_fd);
-	close(server_fd);
 }
 
 void
@@ -287,4 +268,13 @@ wait_for_pollin(int fd)
 		printf("timeout\n");
 		exit(1);
 	}
+}
+
+void
+printmem(uint8_t *mem, int n)
+{
+	int i;
+	for (i = 0; i < n; i++)
+		printf("%02x", mem[i]);
+	printf("\n");
 }

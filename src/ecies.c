@@ -6,11 +6,21 @@ Encrypted message is
 
 where
 
-	R	ephemeral public key (64 bytes)
+	R	ephemeral public key (65 bytes)
 	iv	initialization vector (16 bytes)
 	c	ciphertext (multiple of 16 bytes)
 	d	hmac (32 bytes)
 */
+
+#undef R
+#undef IV
+#undef C
+#undef D
+
+#define R hdrlen
+#define IV (hdrlen + 65)
+#define C (hdrlen + 65 + 16)
+#define D (len - 32)
 
 uint8_t *
 ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
@@ -21,38 +31,43 @@ ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	geneph(p); // generate ephemeral keyset
 	kdf(p); // key derivation function
 
-	// get buffer
+printmem(p->shared_secret, 32);//FIXME
 
-	n = (msglen + 1 + 15) / 16; // n is number of blocks (msglen + 1 for minimum pad)
-	len = hdrlen + 64 + 16 * (n + 1) + 32; // n + 1 for iv
+	// get malloc'd buffer
+
+	n = (msglen + 1 + 15) / 16; // n is number of 16 byte blocks (msglen + 1 for minimum pad)
+	len = C + 16 * n + 32;
 	buf = malloc(len);
 	if (buf == NULL)
 		exit(1);
 
 	// ephemeral key R
 
-	memcpy(buf + hdrlen, p->ephemeral_public_key, 64);
+	buf[R] = 4; // uncompressed format
+	memcpy(buf + R + 1, p->ephemeral_public_key, 64);
 
 	// iv
 
 	for (i = 0; i < 16; i++)
-		buf[hdrlen + 64 + i] = random();
+		buf[IV + i] = random();
+
+//	memset(buf + IV, 0, 16);//FIXME
 
 	// encrypted message
 
-	memcpy(buf + hdrlen + 80, msg, msglen);
+	memcpy(buf + C, msg, msglen);
 
 	// pad last block
 
 	pad = 15 - (msglen & 0xf); // pad byte value (0..15)
-	memset(buf + hdrlen + 80 + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
+	memset(buf + C + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
 
 	aes128_init(p);
-	aes128_encrypt(p, buf + hdrlen + 64, n + 1); // n + 1 for iv
+	aes128_encrypt(p, buf + IV, n + 1); // n + 1 for iv
 
-	// hmac
+	// compute hmac over IV and C (length is D - IV bytes)
 
-	hmac_sha256(p->hmac_key, 16, buf + hdrlen + 64, 16 * (n + 1), buf + len - 32);
+	hmac_sha256(p->hmac_key, 32, buf + IV, D - IV, buf + D);
 
 	*plen = len;
 	return buf;
