@@ -7,11 +7,6 @@
 	hmac		32
 */
 
-#undef R
-#undef IV
-#undef C
-#undef D
-
 #define R 2
 #define IV (2 + 65)
 #define C (2 + 65 + 16)
@@ -70,3 +65,8 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	return 0;
 }
+
+#undef R
+#undef IV
+#undef C
+#undef D

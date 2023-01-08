@@ -12,11 +12,6 @@ where
 	d	hmac (32 bytes)
 */
 
-#undef R
-#undef IV
-#undef C
-#undef D
-
 #define R hdrlen
 #define IV (hdrlen + 65)
 #define C (hdrlen + 65 + 16)
@@ -30,8 +25,6 @@ ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 
 	geneph(p); // generate ephemeral keyset
 	kdf(p); // key derivation function
-
-printmem(p->shared_secret, 32);//FIXME
 
 	// get malloc'd buffer
 
@@ -72,3 +65,8 @@ printmem(p->shared_secret, 32);//FIXME
 	*plen = len;
 	return buf;
 }
+
+#undef R
+#undef IV
+#undef C
+#undef D
