@@ -516,3 +516,49 @@ test_ecdh(void)
 #undef X
 #undef Y
 #undef E
+
+/*
+def test_kdf():
+    input1 = fromHex("0x0de72f1223915fa8b8bf45dffef67aef8d89792d116eb61c9a1eb02c422a4663")
+    expect1 = fromHex("0x1d0c446f9899a3426f2b89a8cb75c14b")
+    test1 = crypto.eciesKDF(input1, 16)
+    assert len(test1) == len(expect1)
+    assert(test1 == expect1)
+
+    kdfInput2 = fromHex("0x961c065873443014e0371f1ed656c586c6730bf927415757f389d92acf8268df")
+    kdfExpect2 = fromHex("0x4050c52e6d9c08755e5a818ac66fabe478b825b1836fd5efc4d44e40d04dabcc")
+    kdfTest2 = crypto.eciesKDF(kdfInput2, 32)
+    assert(len(kdfTest2) == len(kdfExpect2))
+    assert(kdfTest2 == kdfExpect2)
+*/
+
+#define A "961c065873443014e0371f1ed656c586c6730bf927415757f389d92acf8268df"
+#define B "4050c52e6d9c08755e5a818ac66fabe478b825b1836fd5efc4d44e40d04dabcc"
+
+void
+test_kdf(void)
+{
+	uint8_t a[32], b[32], buf[36];
+
+	printf("Testing kdf ");
+
+	hextobin(a, 32, A);
+	hextobin(b, 32, B);
+
+	buf[0] = 0;
+	buf[1] = 0;
+	buf[2] = 0;
+	buf[3] = 1;
+
+	memcpy(buf + 4, a, 32);
+
+	sha256(buf, 36, buf); // from first buf to second buf
+
+	if (memcmp(b, buf, 32) == 0)
+		printf("ok\n");
+	else
+		printf("err\n");
+}
+
+#undef A
+#undef B

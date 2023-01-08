@@ -5,8 +5,11 @@ main()
 	ec_init();
 //	init();
 //	selftest();
+
+	test_kdf();
+
 //	node();
-	sim();
+//	sim();
 }
 
 #define TIMEOUT 10000 // poll timeout in milliseconds
