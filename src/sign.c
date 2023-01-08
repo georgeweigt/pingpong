@@ -51,19 +51,25 @@ test_sign(struct account *acct)
 	int err;
 	uint8_t buf[60], hash[32], sig[SIGLEN];
 
-	printf("Testing sign ");
+	printf("Test sign ");
 
 	sign(sig, (uint8_t *) "hello", 5, acct);
 
 	err = rdecode(sig, SIGLEN);
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+	free_list(pop()); // discard result from rdecode
 
-	if (!err) {
-		free_list(pop());
-		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
-		keccak256(buf + 28, (uint8_t *) "hello", 5);
-		keccak256(hash, buf, 60);
-		err = ec_verify(hash, sig + 3, sig + 36, acct->public_key, acct->public_key + 32);
+	memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
+	keccak256(buf + 28, (uint8_t *) "hello", 5);
+	keccak256(hash, buf, 60);
+	err = ec_verify(hash, sig + 3, sig + 36, acct->public_key, acct->public_key + 32);
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
 	}
 
-	printf("%s\n", err ? "err" : "ok");
+	printf("ok\n");
 }

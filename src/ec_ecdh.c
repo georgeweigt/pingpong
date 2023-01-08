@@ -2,7 +2,7 @@
 // private_key	32 bytes
 // public_key	64 bytes
 
-int
+void
 ec_ecdh(uint8_t *ecdh_key, uint8_t *private_key, uint8_t *public_key)
 {
 	int i;
@@ -18,11 +18,6 @@ ec_ecdh(uint8_t *ecdh_key, uint8_t *private_key, uint8_t *public_key)
 	S.x = NULL;
 	S.y = NULL;
 	S.z = NULL;
-
-	ec_mod(d, q256);
-
-	if (ec_equal(d, 0))
-		return -1;
 
 	// generate ecdh key
 
@@ -45,6 +40,4 @@ ec_ecdh(uint8_t *ecdh_key, uint8_t *private_key, uint8_t *public_key)
 	ec_free(d);
 	ec_free_xyz(&R);
 	ec_free_xyz(&S);
-
-	return 0;
 }

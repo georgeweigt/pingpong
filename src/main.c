@@ -3,14 +3,9 @@ main()
 {
 	aes_init();
 	ec_init();
-//	init();
-//	selftest();
+	init();
 
-	test_genkey();
-	test_pubkey();
-
-	test_kdf();
-	test_hmac();
+	test();
 
 //	node();
 //	sim();

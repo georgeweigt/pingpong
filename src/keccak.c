@@ -278,28 +278,48 @@ keccak256str(uint8_t *buf, int len)
 void
 test_keccak256(void)
 {
-	int err = 0;
-	char *Z;
-	static uint8_t buf[RATE + 1];
+	int err;
+	char *s;
+	uint8_t buf[RATE + 1];
 
-	printf("Testing keccak256 ");
+	printf("Test keccak256 ");
 
 	memset(buf, 'a', sizeof buf);
 
-	Z = keccak256str(NULL, 0);
-	err = err || strcmp(Z, "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+	s = keccak256str(NULL, 0);
+	err = strcmp(s, "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
-	Z = keccak256str((uint8_t *) "hello", 5);
-	err = err || strcmp(Z, "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8");
+	s = keccak256str((uint8_t *) "hello", 5);
+	err = strcmp(s, "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8");
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
-	Z = keccak256str(buf, RATE - 1);
-	err = err || strcmp(Z, "34367dc248bbd832f4e3e69dfaac2f92638bd0bbd18f2912ba4ef454919cf446");
+	s = keccak256str(buf, RATE - 1);
+	err = strcmp(s, "34367dc248bbd832f4e3e69dfaac2f92638bd0bbd18f2912ba4ef454919cf446");
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
-	Z = keccak256str(buf, RATE);
-	err = err || strcmp(Z, "a6c4d403279fe3e0af03729caada8374b5ca54d8065329a3ebcaeb4b60aa386e");
+	s = keccak256str(buf, RATE);
+	err = strcmp(s, "a6c4d403279fe3e0af03729caada8374b5ca54d8065329a3ebcaeb4b60aa386e");
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
-	Z = keccak256str(buf, RATE + 1);
-	err = err || strcmp(Z, "d869f639c7046b4929fc92a4d988a8b22c55fbadb802c0c66ebcd484f1915f39");
+	s = keccak256str(buf, RATE + 1);
+	err = strcmp(s, "d869f639c7046b4929fc92a4d988a8b22c55fbadb802c0c66ebcd484f1915f39");
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
-	printf("%s\n", err ? "err" : "ok");
+	printf("ok\n");
 }

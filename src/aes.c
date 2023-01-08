@@ -411,29 +411,3 @@ decrypt_nib(uint32_t *v, uint8_t *in, uint8_t *out)
 	out[14] = s3 >> 16;
 	out[15] = s3 >> 24;
 }
-
-void
-test_aes(void)
-{
-	int err, i;
-	struct node node;
-	uint8_t cipher[32], plain[32];
-
-	printf("Testing aes ");
-
-	for (i = 0; i < 16; i++)
-		node.aes_key[i] = random();
-
-	for (i = 0; i < 32; i++)
-		plain[i] = random();
-
-	memcpy(cipher, plain, 32);
-
-	aes128_init(&node);
-	aes128_encrypt(&node, cipher, 2);
-	aes128_decrypt(&node, cipher, 2);
-
-	err = memcmp(cipher, plain, 32);
-
-	printf("%s\n", err ? "err" : "ok");
-}

@@ -92,48 +92,63 @@ ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port)
 }
 
 void
-test_ping_payload(struct account *acct)
+test_ping(struct account *acct)
 {
 	int err, len;
 	uint8_t buf[60], hash[32], *payload;
 
-	printf("Testing ping_payload");
+	printf("Test ping ");
 
 	payload = ping_payload("1.2.3.4", "5.6.7.8", 1234, 5678, &len, acct);
 
 	// check length
 
-	printf(" length %s", len < HASHLEN + SIGLEN + 1 ? "err" : "ok");
+	if (len < HASHLEN + SIGLEN + 1) {
+		free(payload);
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
 	// check hash
 
-	printf(" hash ");
 	keccak256(hash, payload + 32, len - 32);
 	err = memcmp(hash, payload, 32);
-	printf("%s", err ? "err" : "ok");
+	if (err) {
+		free(payload);
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
 	// check signature
 
-	printf(" signature ");
 	err = rdecode(payload + HASHLEN, SIGLEN);
-	if (!err) {
-		free_list(pop());
-		memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
-		keccak256(buf + 28, payload + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
-		keccak256(hash, buf, 60);
-		err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key, acct->public_key + 32);
+	if (err) {
+		free(payload);
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
 	}
-	printf("%s", err ? "err" : "ok");
+	free_list(pop());
+	memcpy(buf, "\x19" "Ethereum Signed Message:\n32", 28);
+	keccak256(buf + 28, payload + HASHLEN + SIGLEN, len - HASHLEN - SIGLEN);
+	keccak256(hash, buf, 60);
+	err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key, acct->public_key + 32);
+	if (err) {
+		free(payload);
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
 	// check data
 
-	printf(" data ");
 	err = rdecode(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
-	if (!err)
-		free_list(pop());
-	printf("%s", err ? "err" : "ok");
-
-	printf("\n");
+	if (err) {
+		free(payload);
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+	free_list(pop()); // discard result from rdecode
 
 	free(payload);
+
+	printf("ok\n");
 }

@@ -1,5 +1,5 @@
 void
-selftest(void)
+test(void)
 {
 	test_aes();
 	test_sha256();
@@ -7,8 +7,11 @@ selftest(void)
 	test_rencode();
 	test_rdecode();
 	test_genkey();
+	test_pubkey();
+	test_kdf();
+	test_hmac();
 	test_sign(account_table + 0);
-	test_ping_payload(account_table + 0);
+	test_ping(account_table + 0);
 }
 
 // does this public key belong to secp256k1? (0 yes, -1 no)
@@ -31,13 +34,44 @@ test_public_key(char *public_key_x, char *public_key_y)
 }
 
 void
+test_aes(void)
+{
+	int err, i;
+	struct node node;
+	uint8_t cipher[32], plain[32];
+
+	printf("Test aes ");
+
+	for (i = 0; i < 16; i++)
+		node.aes_key[i] = random();
+
+	for (i = 0; i < 32; i++)
+		plain[i] = random();
+
+	memcpy(cipher, plain, 32);
+
+	aes128_init(&node);
+	aes128_encrypt(&node, cipher, 2);
+	aes128_decrypt(&node, cipher, 2);
+
+	err = memcmp(cipher, plain, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
+}
+
+void
 test_rencode(void)
 {
 	int err, i, n;
 	struct atom *p;
 	uint8_t buf[256], enc[256];
 
-	printf("Testing rencode ");
+	printf("Test rencode ");
 
 	// items
 
@@ -291,7 +325,7 @@ test_rdecode(void)
 	struct atom *p, *q;
 	uint8_t buf[2000];
 
-	printf("Testing rdecode ");
+	printf("Test rdecode ");
 
 	// []
 
@@ -483,7 +517,7 @@ test_genkey(void)
 	uint8_t private_key[32], public_key[64];
 	uint8_t r[32], s[32], hash[32];
 
-	printf("Testing genkey ");
+	printf("Test genkey ");
 
 	ec_genkey(private_key, public_key);
 
@@ -527,7 +561,7 @@ test_ecdh(void)
 {
 	uint8_t e[32], ecdh[32], priv[32], pub[64];
 
-	printf("Testing ecdh ");
+	printf("Test ecdh ");
 
 	hextobin(priv, 32, K);
 	hextobin(pub, 32, X);
@@ -573,7 +607,7 @@ test_kdf(void)
 {
 	uint8_t a[32], b[32], buf[36];
 
-	printf("Testing kdf ");
+	printf("Test kdf ");
 
 	hextobin(a, 32, A1);
 	hextobin(b, 16, B1);
@@ -647,7 +681,7 @@ test_hmac(void)
 {
 	uint8_t kmac[16], data[10], hmac[32], out[32];
 
-	printf("Testing hmac ");
+	printf("Test hmac ");
 
 	hextobin(kmac, 16, KMAC1);
 	hextobin(data, 10, DATA1);
@@ -699,7 +733,7 @@ test_pubkey(void)
 {
 	uint8_t k[32], p[64], q[64];
 
-	printf("Testing pubkey ");
+	printf("Test pubkey ");
 
 	hextobin(k, 32, K);
 	hextobin(p, 64, P);
