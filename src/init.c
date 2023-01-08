@@ -32,7 +32,7 @@ read_account(struct account *p, char *filename)
 
 	free(buf);
 
-	ec_public_key(p->public_key_x, p->public_key_y, p->private_key);
+	ec_get_public_key(p->public_key_x, p->public_key_y, p->private_key);
 
 	// account number is hash of public keys
 

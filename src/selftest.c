@@ -1,10 +1,6 @@
-#define X "1ecbbdb04f54b68d99a9fb0d60786d29164ffe9776bad9118ec896f2764ec9f7"
-#define Y "11ec2e6f8e0e21c1f0f9abe4515c45949e6bf776d84b54d08f7c32de60e8c480"
-
 void
 selftest(void)
 {
-	printf("test public key %s\n", test_public_key(X, Y) ? "err" : "ok");
 	test_aes();
 	test_sha256();
 	test_keccak256();
@@ -14,6 +10,8 @@ selftest(void)
 	test_sign(account_table + 0);
 	test_ping_payload(account_table + 0);
 }
+
+// does this public key belong to secp256k1? (0 yes, -1 no)
 
 int
 test_public_key(char *public_key_x, char *public_key_y)
@@ -477,3 +475,44 @@ test_rdecode(void)
 
 	printf("ok\n");
 }
+
+/*
+def test_agree():
+    secret = fromHex("0x332143e9629eedff7d142d741f896258f5a1bfab54dab2121d3ec5000093d74b")
+    public = fromHex(
+        "0xf0d2b97981bd0d415a843b5dfe8ab77a30300daab3658c578f2340308a2da1a07f0821367332598b6aa4e180a41e92f4ebbae3518da847f0b1c0bbfe20bcf4e1")
+    agreeExpected = fromHex("0xee1418607c2fcfb57fda40380e885a707f49000a5dda056d828b7d9bd1f29a08")
+    e = crypto.ECCx(raw_privkey=secret)
+    agreeTest = e.raw_get_ecdh_key(pubkey_x=public[:32], pubkey_y=public[32:])
+    assert(agreeExpected == agreeTest)
+*/
+
+#define K "332143e9629eedff7d142d741f896258f5a1bfab54dab2121d3ec5000093d74b"
+#define X "f0d2b97981bd0d415a843b5dfe8ab77a30300daab3658c578f2340308a2da1a0"
+#define Y "7f0821367332598b6aa4e180a41e92f4ebbae3518da847f0b1c0bbfe20bcf4e1"
+#define E "ee1418607c2fcfb57fda40380e885a707f49000a5dda056d828b7d9bd1f29a08"
+
+void
+test_ecdh(void)
+{
+	uint8_t e[32], ecdh[32], priv[32], pub[64];
+
+	printf("Testing ecdh ");
+
+	hextobin(priv, 32, K);
+	hextobin(pub, 32, X);
+	hextobin(pub + 32, 32, Y);
+	hextobin(e, 32, E);
+
+	ec_ecdh(ecdh, priv, pub);
+
+	if (memcmp(e, ecdh, 32) == 0)
+		printf("ok\n");
+	else
+		printf("err\n");
+}
+
+#undef K
+#undef X
+#undef Y
+#undef E

@@ -23,8 +23,17 @@ ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	int i, n, len, pad;
 	uint8_t *buf;
 
-	geneph(p); // generate ephemeral keyset
-	kdf(p); // key derivation function
+	// generate ephemeral keyset
+
+	ec_genkey(p->ephemeral_private_key, p->ephemeral_public_key);
+
+	// derive shared_secret
+
+	ec_ecdh(p->shared_secret, p->ephemeral_private_key, p->peer_public_key);
+
+	// derive AES and HMAC keys
+
+	kdf(p);
 
 	// get malloc'd buffer
 
