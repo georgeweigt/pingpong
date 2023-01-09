@@ -847,7 +847,7 @@ test_pubkey(void)
 void
 test_decrypt(void)
 {
-	int err, i, len;
+	int err, i, len, msglen;
 	struct node N;
 	uint8_t buf[200], hmac[32];
 
@@ -857,6 +857,8 @@ test_decrypt(void)
 	hextobin(buf, sizeof buf, C);
 
 	len = strlen(C) / 2;
+
+	msglen = len - 65 - 16 - 32; // R, iv, hmac
 
 	// derive shared_secret from private_key and R
 
@@ -868,7 +870,7 @@ test_decrypt(void)
 
 	// check hmac
 
-	hmac_sha256(N.hmac_key, 32, buf + 65, len - 65 - 32, hmac);
+	hmac_sha256(N.hmac_key, 32, buf + 65, msglen + 16, hmac);
 	err = memcmp(hmac, buf + len - 32, 32);
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
@@ -878,10 +880,10 @@ test_decrypt(void)
 	// decrypt
 
 	aes128ctr_keyinit(&N, buf + 65);
-	aes128ctr_encrypt(&N, buf + 65 + 16, len - 65 - 32);
+	aes128ctr_encrypt(&N, buf + 65 + 16, msglen);
 
-	for (i = 65 + 16; i < len - 32; i++)
-		if (buf[i] != 'a') {
+	for (i = 0; i < msglen; i++)
+		if (buf[65 + 16 + i] != 'a') {
 			printf("err %s line %d\n", __FILE__, __LINE__);
 			return;
 		}

@@ -12,11 +12,14 @@ send_auth(struct node *p)
 
 	list = auth_body(p);
 	msglen = enlength(list);
+
 	msg = malloc(msglen + n);
 	if (msg == NULL)
 		exit(1);
+
 	rencode(msg, msglen, list);
 	free_list(list);
+
 	memset(msg + msglen, 0, n); // pad with n zeroes
 	msglen += n;
 

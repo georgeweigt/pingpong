@@ -12,7 +12,7 @@ int
 receive_auth(struct node *p, uint8_t *buf, int len)
 {
 	int err, msglen;
-	uint8_t hmac[32], *msg;
+	uint8_t hmac[32];
 	struct atom *list;
 
 	msglen = len - 2 - 65 - 16 - 32; // hdr, R, iv, hmac
@@ -41,14 +41,15 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	aes128ctr_keyinit(p, buf + IV);
 	aes128ctr_encrypt(p, buf + C, msglen);
-	msg = buf + C;
 
-	err = rdecode_relax(msg, msglen);
+	err = rdecode(buf + C, msglen);
 
 	if (err)
 		return -1;
 
 	list = pop();
+
+	// FIXME validate list
 
 	// save peer public key
 
