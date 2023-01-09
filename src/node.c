@@ -3,18 +3,14 @@
 void
 node(void)
 {
-	int d, i, len;
+	int i, len;
 	uint8_t *buf;
-	char *geth_public_key = GETH_PUBLIC_KEY;
 
 	// init
 
 	ec_genkey(initiator.private_key, initiator.public_key);
 
-	for (i = 0; i < 64; i++) {
-		sscanf(geth_public_key + 2 * i, "%2x", &d);
-		initiator.peer_public_key[i] = d;
-	}
+	hextobin(initiator.peer_public_key, 64, GETH_PUBLIC_KEY);
 
 	for (i = 0; i < 32; i++)
 		initiator.nonce[i] = random();
@@ -32,7 +28,6 @@ node(void)
 	wait_for_pollin(initiator.fd);
 
 	buf = receive(initiator.fd, &len);
-
 
 	close(initiator.fd);
 }
