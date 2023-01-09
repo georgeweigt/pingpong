@@ -1,12 +1,11 @@
-/* Elliptic Curve Integrated Encryption Scheme
-
+/*
 Encrypted message is
 
-	R || iv || c || d
+	0x04 || R || 0x00 || iv || c || d
 
 where
 
-	R	ephemeral public key (65 bytes)
+	R	ephemeral public key (64 bytes)
 	iv	initialization vector (16 bytes)
 	c	ciphertext (multiple of 16 bytes)
 	d	hmac (32 bytes)
@@ -45,7 +44,7 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 
 	// ephemeral key R
 
-	buf[R] = 4; // uncompressed format
+	buf[R] = 0x04; // uncompressed format
 	memcpy(buf + R + 1, p->ephemeral_public_key, 64);
 	buf[R + 65] = 0x4b;//FIXME
 

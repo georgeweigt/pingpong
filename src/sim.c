@@ -38,7 +38,7 @@ sim(void)
 	free(buf);
 
 	if (err) {
-		printf("err file %s, line %d\n", __FILE__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		exit(1);
 	}
 
@@ -47,7 +47,7 @@ sim(void)
 	err = memcmp(initiator.public_key, recipient.peer_public_key, 64);
 
 	if (err) {
-		printf("err file %s, line %d\n", __FILE__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		exit(1);
 	}
 

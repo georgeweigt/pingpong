@@ -231,7 +231,7 @@ test_sha256(void)
 	for (i = 0; i < 32; i++)
 		sprintf(s + 2 * i, "%02x", hash[i]);
 	if (strcmp(s, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855") != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -239,7 +239,7 @@ test_sha256(void)
 	for (i = 0; i < 32; i++)
 		sprintf(s + 2 * i, "%02x", hash[i]);
 	if (strcmp(s, "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592") != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -247,7 +247,7 @@ test_sha256(void)
 	for (i = 0; i < 32; i++)
 		sprintf(s + 2 * i, "%02x", hash[i]);
 	if (strcmp(s, "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad") != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -255,7 +255,7 @@ test_sha256(void)
 	for (i = 0; i < 32; i++)
 		sprintf(s + 2 * i, "%02x", hash[i]);
 	if (strcmp(s, "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8") != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 

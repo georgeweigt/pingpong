@@ -57,7 +57,7 @@ test_sign(struct account *acct)
 
 	err = rdecode(sig, SIGLEN);
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 	free_list(pop()); // discard result from rdecode
@@ -67,7 +67,7 @@ test_sign(struct account *acct)
 	keccak256(hash, buf, 60);
 	err = ec_verify(hash, sig + 3, sig + 36, acct->public_key, acct->public_key + 32);
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 

@@ -6,7 +6,7 @@ main()
 	init();
 	test();
 
-	node();
+//	node();
 //	sim();
 }
 

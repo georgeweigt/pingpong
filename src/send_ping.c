@@ -105,7 +105,7 @@ test_ping(struct account *acct)
 
 	if (len < HASHLEN + SIGLEN + 1) {
 		free(payload);
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -115,7 +115,7 @@ test_ping(struct account *acct)
 	err = memcmp(hash, payload, 32);
 	if (err) {
 		free(payload);
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -124,7 +124,7 @@ test_ping(struct account *acct)
 	err = rdecode(payload + HASHLEN, SIGLEN);
 	if (err) {
 		free(payload);
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 	free_list(pop());
@@ -134,7 +134,7 @@ test_ping(struct account *acct)
 	err = ec_verify(hash, payload + R_INDEX, payload + S_INDEX, acct->public_key, acct->public_key + 32);
 	if (err) {
 		free(payload);
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -143,7 +143,7 @@ test_ping(struct account *acct)
 	err = rdecode(payload + HASHLEN + SIGLEN + 1, len - HASHLEN - SIGLEN - 1);
 	if (err) {
 		free(payload);
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 	free_list(pop()); // discard result from rdecode

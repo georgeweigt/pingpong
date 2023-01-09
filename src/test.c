@@ -58,7 +58,7 @@ test_aes(void)
 	err = memcmp(cipher, plain, 32);
 
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -81,7 +81,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x80", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -90,7 +90,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x80", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -99,7 +99,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "a", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -108,7 +108,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 3 || memcmp(buf, "\x82" "ab", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -117,7 +117,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 56 || memcmp(buf, "\xb7" "aaaaaaaaaa" "bbbbbbbbbb" "cccccccccc" "dddddddddd" "eeeeeeeeee" "fffff", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -126,7 +126,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 58 || memcmp(buf, "\xb8\x38" "aaaaaaaaaa" "bbbbbbbbbb" "cccccccccc" "dddddddddd" "eeeeeeeeee" "ffffff", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -135,7 +135,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x00", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -144,7 +144,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x01", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -153,7 +153,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\x7f", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -162,7 +162,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 2 || memcmp(buf, "\x81\x80", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -171,7 +171,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 2 || memcmp(buf, "\x81\xff", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -180,7 +180,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 3 || memcmp(buf, "\x82\x01\x00", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -189,7 +189,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 3 || memcmp(buf, "\x82\xff\xff", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -198,7 +198,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 4 || memcmp(buf, "\x83\x01\x00\x00", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -209,7 +209,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 1 || memcmp(buf, "\xc0", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -221,7 +221,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 2 || memcmp(buf, "\xc1\xc0", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -235,7 +235,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 4 || memcmp(buf, "\xc3\x01\xc0\x02", n)) {
-		printf("err line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -249,7 +249,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 56) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 	enc[0] = 0xc0 + 55; // 55 byte list
@@ -258,7 +258,7 @@ test_rencode(void)
 		enc[2 + i] = i;
 	err = memcmp(buf, enc, 56);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -272,7 +272,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 58) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 	enc[0] = 0xf8; // list with 1 length byte
@@ -282,7 +282,7 @@ test_rencode(void)
 		enc[3 + i] = i;
 	err = memcmp(buf, enc, 58);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -296,7 +296,7 @@ test_rencode(void)
 	n = rencode(buf, sizeof buf, p);
 	free_list(p);
 	if (n != 60) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 	enc[0] = 0xf8; // list with 1 length byte
@@ -307,12 +307,12 @@ test_rencode(void)
 		enc[4 + i] = i;
 	err = memcmp(buf, enc, 60);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	if (atom_count) {
-		printf("memory leak\n");
+		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -343,7 +343,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err\n");
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -363,7 +363,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err\n");
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -384,7 +384,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err\n");
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -403,7 +403,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err\n");
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -423,7 +423,7 @@ test_rdecode(void)
 		free_list(p);
 		free_list(q);
 		if (err) {
-			printf("err string, n = %d\n", n);
+			printf("err %s line %d", __FILE__, __LINE__);
 			return;
 		}
 	}
@@ -444,7 +444,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -464,7 +464,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -484,7 +484,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -504,7 +504,7 @@ test_rdecode(void)
 	free_list(p);
 	free_list(q);
 	if (err) {
-		printf("err on line %d\n", __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -529,12 +529,12 @@ test_genkey(void)
 	err = ec_verify(hash, r, s, public_key, public_key + 32);
 
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	if (ec_malloc_count != 0) {
-		printf("memory leak err %s line %d\n", __func__, __LINE__);
+		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -560,6 +560,7 @@ def test_agree():
 void
 test_ecdh(void)
 {
+	int err;
 	uint8_t e[32], ecdh[32], priv[32], pub[64];
 
 	printf("Test ecdh ");
@@ -571,10 +572,14 @@ test_ecdh(void)
 
 	ec_ecdh(ecdh, priv, pub);
 
-	if (memcmp(e, ecdh, 32) == 0)
-		printf("ok\n");
-	else
-		printf("err\n");
+	err = memcmp(e, ecdh, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
 }
 
 #undef K
@@ -623,7 +628,7 @@ test_kdf(void)
 	sha256(buf, 36, buf);
 
 	if (memcmp(b, buf, 16) != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -640,7 +645,7 @@ test_kdf(void)
 	sha256(buf, 36, buf);
 
 	if (memcmp(b, buf, 32) != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -691,7 +696,7 @@ test_hmac(void)
 	hmac_sha256(kmac, 16, data, 10, out);
 
 	if (memcmp(hmac, out, 32) != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -702,7 +707,7 @@ test_hmac(void)
 	hmac_sha256(kmac, 16, data, 10, out);
 
 	if (memcmp(hmac, out, 32) != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -742,12 +747,12 @@ test_pubkey(void)
 	ec_pubkey(q, k);
 
 	if (memcmp(p, q, 64) != 0) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	if (ec_malloc_count != 0) {
-		printf("memory leak err %s line %d\n", __func__, __LINE__);
+		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
@@ -775,10 +780,7 @@ test_decrypt(void)
 {
 	int err;
 	struct node N;
-	uint8_t buf[200], hmac[32];
-
-(void) err;
-(void) hmac;
+	uint8_t buf[114], hmac[32];
 
 	printf("Test decrypt ");
 
@@ -795,13 +797,28 @@ test_decrypt(void)
 
 	kdf(N.aes_key, N.hmac_key, N.shared_secret);
 
+	// check hmac
+
+printf("\n");
+printmem(buf + 114 - 16, 16);//FIXME
+
+	hmac_sha256(N.hmac_key, 32, buf + 66, 32, hmac);
+printmem(hmac, 16);
+printmem(hmac + 16, 16);
+
+	err = memcmp(hmac, buf + 114 - 16, 16);
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		return;
+	}
+
 	// decrypt
 
 	aes128_init(&N);
 	aes128_decrypt(&N, buf + 66, 2);
 
 	if (buf[66 + 16] != 'a') {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 

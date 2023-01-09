@@ -289,35 +289,35 @@ test_keccak256(void)
 	s = keccak256str(NULL, 0);
 	err = strcmp(s, "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	s = keccak256str((uint8_t *) "hello", 5);
 	err = strcmp(s, "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8");
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	s = keccak256str(buf, RATE - 1);
 	err = strcmp(s, "34367dc248bbd832f4e3e69dfaac2f92638bd0bbd18f2912ba4ef454919cf446");
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	s = keccak256str(buf, RATE);
 	err = strcmp(s, "a6c4d403279fe3e0af03729caada8374b5ca54d8065329a3ebcaeb4b60aa386e");
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
 	s = keccak256str(buf, RATE + 1);
 	err = strcmp(s, "d869f639c7046b4929fc92a4d988a8b22c55fbadb802c0c66ebcd484f1915f39");
 	if (err) {
-		printf("err %s line %d\n", __func__, __LINE__);
+		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
 
