@@ -43,7 +43,8 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 
 	for (i = 0; i < len(d); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err
+			break; // err, result greater than 32 bytes
+		// bignums are LE, this converts to BE
 		private_key[32 - 4 * i - 4] = d[i] >> 24;
 		private_key[32 - 4 * i - 3] = d[i] >> 16;
 		private_key[32 - 4 * i - 2] = d[i] >> 8;
@@ -56,7 +57,8 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err
+			break; // err, result greater than 32 bytes
+		// bignums are LE, this converts to BE
 		public_key[32 - 4 * i - 4] = S.x[i] >> 24;
 		public_key[32 - 4 * i - 3] = S.x[i] >> 16;
 		public_key[32 - 4 * i - 2] = S.x[i] >> 8;
@@ -65,7 +67,8 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 
 	for (i = 0; i < len(S.y); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err
+			break; // err, result greater than 32 bytes
+		// bignums are LE, this converts to BE
 		public_key[64 - 4 * i - 4] = S.y[i] >> 24;
 		public_key[64 - 4 * i - 3] = S.y[i] >> 16;
 		public_key[64 - 4 * i - 2] = S.y[i] >> 8;

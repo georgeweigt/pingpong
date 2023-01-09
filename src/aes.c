@@ -15,7 +15,7 @@
 // expanded key + 544
 
 void
-aes128_init(struct node *p)
+aes128_keyinit(struct node *p)
 {
 	uint32_t w[44], v[44];
 	p->expanded_key = p->expanded_key_tab;

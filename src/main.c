@@ -6,7 +6,7 @@ main()
 	init();
 	test();
 //	node();
-//	sim();
+	sim();
 }
 
 #define TIMEOUT 10000 // poll timeout in milliseconds

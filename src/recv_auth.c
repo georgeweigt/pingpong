@@ -38,7 +38,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	// decrypt
 
-	aes128_init(p);
+	aes128_keyinit(p);
 	aes128_decrypt(p, buf + IV, (D - IV) / 16);
 	msg = buf + C;
 	msglen = D - C;

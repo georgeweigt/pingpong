@@ -27,17 +27,17 @@ and $d=\text{\tt MAC}\big(\text{\tt sha256}(k_M),\text{\tt iv}\,\|\,c\big)$ to B
 
 Let
 \begin{align*}
-r&=\text{\footnotesize\tt ephemeral\_private\_key}
+r&=\text{\footnotesize\tt ephemeral\_private\_key} & \text{\footnotesize 32 bytes}
 \\
-R&=\text{\footnotesize\tt ephemeral\_public\_key}
+R&=\text{\footnotesize\tt ephemeral\_public\_key} & \text{\footnotesize 64 bytes}
 \\
-S&=\text{\footnotesize\tt shared\_secret}
+S&=\text{\footnotesize\tt shared\_secret} & \text{\footnotesize 32 bytes}
 \\
-K_B&=\text{\footnotesize\tt peer\_public\_key}
+K_B&=\text{\footnotesize\tt peer\_public\_key} & \text{\footnotesize 64 bytes}
 \\
-k_E&=\text{\footnotesize\tt aes\_key}
+k_E&=\text{\footnotesize\tt aes\_key} & \text{\footnotesize 16 bytes}
 \\
-k_M&=\text{\footnotesize\tt hmac\_key}
+k_M&=\text{\footnotesize\tt hmac\_key} & \text{\footnotesize 32 bytes}
 \end{align*}
 
 Then this is the code for $r$ and $R=r*G$.

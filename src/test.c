@@ -38,22 +38,22 @@ void
 test_aes(void)
 {
 	int err, i;
-	struct node node;
+	struct node N;
 	uint8_t cipher[32], plain[32];
 
 	printf("Test aes ");
 
 	for (i = 0; i < 16; i++)
-		node.aes_key[i] = random();
+		N.aes_key[i] = random();
 
 	for (i = 0; i < 32; i++)
 		plain[i] = random();
 
 	memcpy(cipher, plain, 32);
 
-	aes128_init(&node);
-	aes128_encrypt(&node, cipher, 2);
-	aes128_decrypt(&node, cipher, 2);
+	aes128_keyinit(&N);
+	aes128_encrypt(&N, cipher, 2);
+	aes128_decrypt(&N, cipher, 2);
 
 	err = memcmp(cipher, plain, 32);
 
@@ -811,7 +811,7 @@ test_decrypt(void)
 #endif
 	// decrypt
 
-	aes128_init(&N);
+	aes128_keyinit(&N);
 	aes128_decrypt(&N, buf + 65, 2);
 
 printf("\n");

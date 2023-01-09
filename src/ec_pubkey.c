@@ -1,4 +1,5 @@
-// derive public_key from private_key
+// public_key	64 bytes (result)
+// private_key	32 bytes
 
 void
 ec_pubkey(uint8_t *public_key, uint8_t *private_key)
@@ -26,7 +27,8 @@ ec_pubkey(uint8_t *public_key, uint8_t *private_key)
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err
+			break; // err, result greater than 32 bytes
+		// bignums are LE, this converts to BE
 		public_key[32 - 4 * i - 4] = S.x[i] >> 24;
 		public_key[32 - 4 * i - 3] = S.x[i] >> 16;
 		public_key[32 - 4 * i - 2] = S.x[i] >> 8;
@@ -35,7 +37,8 @@ ec_pubkey(uint8_t *public_key, uint8_t *private_key)
 
 	for (i = 0; i < len(S.y); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err
+			break; // err, result greater than 32 bytes
+		// bignums are LE, this converts to BE
 		public_key[64 - 4 * i - 4] = S.y[i] >> 24;
 		public_key[64 - 4 * i - 3] = S.y[i] >> 16;
 		public_key[64 - 4 * i - 2] = S.y[i] >> 8;

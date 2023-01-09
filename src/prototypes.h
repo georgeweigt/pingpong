@@ -1,4 +1,4 @@
-void aes128_init(struct node *p);
+void aes128_keyinit(struct node *p);
 void aes128_encrypt(struct node *p, uint8_t *buf, int num_blocks);
 void aes128_decrypt(struct node *p, uint8_t *buf, int num_blocks);
 int mul(int a, int b);
@@ -44,12 +44,6 @@ uint32_t * ec_dup(uint32_t *u);
 void ec_norm(uint32_t *u);
 uint32_t * ec_hexstr_to_bignum(char *s);
 uint32_t * ec_buf_to_bignum(uint8_t *buf, int len);
-void test_ec();
-void test_ec_full_add();
-void test_ec_full_sub();
-void test_ec_double();
-void test_ec_mult();
-void test_ec_twin_mult();
 int test_public_key_secp256k1(uint32_t *x, uint32_t *y);
 int test_public_key_secp256r1(uint32_t *x, uint32_t *y);
 void ec_init(void);
