@@ -13,8 +13,8 @@ where
 */
 
 #define R hdrlen
-#define IV (hdrlen + 65)
-#define C (hdrlen + 65 + 16)
+#define IV (hdrlen + 66)
+#define C (hdrlen + 66 + 16)
 #define D (len - 32)
 
 uint8_t *
@@ -47,6 +47,7 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 
 	buf[R] = 4; // uncompressed format
 	memcpy(buf + R + 1, p->ephemeral_public_key, 64);
+	buf[R + 65] = 0x4b;//FIXME
 
 	// iv
 

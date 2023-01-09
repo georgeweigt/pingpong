@@ -8,8 +8,8 @@
 */
 
 #define R 2
-#define IV (2 + 65)
-#define C (2 + 65 + 16)
+#define IV (2 + 66)
+#define C (2 + 66 + 16)
 #define D (len - 32)
 
 int
@@ -19,9 +19,9 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	uint8_t hmac[32], *msg;
 	struct atom *list;
 
-	// check length (at least 1 ciphertext block)
+	// check length (at least 1 cipher block)
 
-	if (len < C + 16 + 32 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 3) % 16) // len - 3 beacuse of R format byte
+	if (len < C + 48 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 4) % 16) // len - 4 beacuse of R format
 		return -1;
 
 	// derive shared_secret from private_key and R
