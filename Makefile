@@ -7,4 +7,4 @@ pingpong.c: src/defs.h src/prototypes.h src/*.c
 	cat src/defs.h src/prototypes.h src/*.c > pingpong.c
 
 clean:
-	rm -f pingpong.c a.out
+	rm -f pingpong pingpong.c

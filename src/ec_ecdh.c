@@ -1,9 +1,9 @@
-// ecdh_key	32 bytes (result)
-// private_key	32 bytes
-// public_key	64 bytes
+// shared_secret	32 bytes (result)
+// private_key		32 bytes
+// public_key		64 bytes
 
 void
-ec_ecdh(uint8_t *ecdh_key, uint8_t *private_key, uint8_t *public_key)
+ec_ecdh(uint8_t *shared_secret, uint8_t *private_key, uint8_t *public_key)
 {
 	int i;
 	uint32_t *d;
@@ -19,22 +19,22 @@ ec_ecdh(uint8_t *ecdh_key, uint8_t *private_key, uint8_t *public_key)
 	S.y = NULL;
 	S.z = NULL;
 
-	// generate ecdh key
+	// generate ecdh
 
 	ec_mult(&S, d, &R, p256);
 	ec_affinify(&S, p256);
 
-	// save ecdh key
+	// save ecdh
 
-	memset(ecdh_key, 0, 32);
+	memset(shared_secret, 0, 32);
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
 			break; // err
-		ecdh_key[32 - 4 * i - 4] = S.x[i] >> 24;
-		ecdh_key[32 - 4 * i - 3] = S.x[i] >> 16;
-		ecdh_key[32 - 4 * i - 2] = S.x[i] >> 8;
-		ecdh_key[32 - 4 * i - 1] = S.x[i];
+		shared_secret[32 - 4 * i - 4] = S.x[i] >> 24;
+		shared_secret[32 - 4 * i - 3] = S.x[i] >> 16;
+		shared_secret[32 - 4 * i - 2] = S.x[i] >> 8;
+		shared_secret[32 - 4 * i - 1] = S.x[i];
 	}
 
 	ec_free(d);

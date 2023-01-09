@@ -18,7 +18,7 @@ where
 #define D (len - 32)
 
 uint8_t *
-ecies_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
+ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 {
 	int i, n, len, pad;
 	uint8_t *buf;

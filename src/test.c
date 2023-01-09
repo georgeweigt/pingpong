@@ -767,54 +767,43 @@ def test_decrypt():
     assert(kmExpected == kmPlain)
 */
 
-//#define K "57baf2c62005ddec64c357d96183ebc90bf9100583280e848aa31d683cad73cb"
-//#define C "04ff2c874d0a47917c84eea0b2a4141ca95233720b5c70f81a8415bae1dc7b746b61df7558811c1d6054333907333ef9bb0cc2fbf8b34abb9730d14e0140f4553f4b15d705120af46cf653a1dc5b95b312cf8444714f95a4f7a0425b67fc064d18f4d0a528761565ca02d97faffdac23de10"
-
-#define K "472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b"
-#define C "046f647e1bd8a5cd1446d31513bac233e18bdc28ec0e59d46de453137a72599533f1e97c98154343420d5f16e171e5107999a7c7f1a6e26f57bcb0d2280655d08fb148d36f1d4b28642d3bb4a136f0e33e3dd2e3cffe4b45a03fb7c5b5ea5e65617250fdc89e1a315563c20504b9d3a72555"
+#define K "57baf2c62005ddec64c357d96183ebc90bf9100583280e848aa31d683cad73cb"
+#define C "04ff2c874d0a47917c84eea0b2a4141ca95233720b5c70f81a8415bae1dc7b746b61df7558811c1d6054333907333ef9bb0cc2fbf8b34abb9730d14e0140f4553f4b15d705120af46cf653a1dc5b95b312cf8444714f95a4f7a0425b67fc064d18f4d0a528761565ca02d97faffdac23de10"
 
 void
 test_decrypt(void)
 {
 	int err;
-	struct node node;
-	uint8_t buf[114], hmac[32];
+	struct node N;
+	uint8_t buf[200], hmac[32];
 
 (void) err;
 (void) hmac;
 
 	printf("Test decrypt ");
 
-	hextobin(node.private_key, 32, K);
+	memset(&N, 0, sizeof N);
+
+	hextobin(N.private_key, 32, K);
 	hextobin(buf, sizeof buf, C);
 
 	// derive shared_secret from private_key and R
 
-	ec_ecdh(node.shared_secret, node.private_key, buf + 1);
+	ec_ecdh(N.shared_secret, N.private_key, buf + 1);
 
 	// derive aes_key and hmac_key from shared_secret
 
-	kdf(node.aes_key, node.hmac_key, node.shared_secret);
-
-	// check hmac
-
-//	hmac_sha256(node.hmac_key, 32, buf + 65, sizeof buf - 32, hmac);
-//	err = memcmp(hmac, buf + sizeof buf - 32, 32);
-//	if (err) {
-//		printf("err %s line %d\n", __func__, __LINE__);
-//		return;
-//	}
+	kdf(N.aes_key, N.hmac_key, N.shared_secret);
 
 	// decrypt
 
-	aes128_init(&node);
-	aes128_decrypt(&node, buf + 65, 3);
+	aes128_init(&N);
+	aes128_decrypt(&N, buf + 66, 2);
 
-	printf("\n");
-
-	printmem(buf + 65, 16);
-	printmem(buf + 65 + 16, 16);
-	printmem(buf + 65 + 32, 16);
+	if (buf[66 + 16] != 'a') {
+		printf("err %s line %d\n", __func__, __LINE__);
+		return;
+	}
 
 	printf("ok\n");
 }

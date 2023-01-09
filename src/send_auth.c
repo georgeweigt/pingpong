@@ -19,7 +19,7 @@ send_auth(struct node *p)
 	memset(msg + msglen, 0, n); // pad with n zeroes
 	msglen += n;
 
-	buf = ecies_encrypt(p, msg, msglen, 2, &len); // header length = 2
+	buf = ec_encrypt(p, msg, msglen, 2, &len); // header length = 2
 	free(msg);
 
 	// set length in big endian
