@@ -5,7 +5,6 @@ main()
 	ec_init();
 	init();
 	test();
-
 //	node();
 //	sim();
 }

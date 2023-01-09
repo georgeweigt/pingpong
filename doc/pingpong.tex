@@ -43,7 +43,6 @@ k_M&=\text{\footnotesize\tt hmac\_key}
 Then this is the code for $r$ and $R=r*G$.
 {\footnotesize
 \begin{verbatim}
-// generate ephemeral_private_key and ephemeral_public_key
 ec_genkey(ephemeral_private_key, ephemeral_public_key);
 \end{verbatim}
 }
@@ -52,7 +51,6 @@ ec_genkey(ephemeral_private_key, ephemeral_public_key);
 This is the code for $S=P_x$ where $(P_x,P_y)=r*K_B$.
 {\footnotesize
 \begin{verbatim}
-// derive shared_secret from ephemeral_private_key and peer_public_key
 ec_ecdh(shared_secret, ephemeral_private_key, peer_public_key);
 \end{verbatim}
 }
@@ -61,7 +59,6 @@ ec_ecdh(shared_secret, ephemeral_private_key, peer_public_key);
 And this is the code for $k_E\,\|\,k_M=\text{\tt KDF}(S,32)$.
 {\footnotesize
 \begin{verbatim}
-// derive AES and HMAC keys from shared_secret
 kdf(aes_key, hmac_key, shared_secret);
 \end{verbatim}
 }

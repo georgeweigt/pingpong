@@ -1,7 +1,7 @@
 .PHONY: clean
 
 pingpong: defs.h prototypes.h *.c
-	gcc -Wall -O0 -o pingpong -include defs.h -include prototypes.h *.c
+	gcc -O0 -o pingpong -include defs.h -include prototypes.h *.c
 
 prototypes.h: *.c
 	make -s -C ../tools make-prototypes

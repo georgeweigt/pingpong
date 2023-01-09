@@ -1,15 +1,12 @@
-/*	buf contents
-
-	length		2 bytes
-	public key	65
-	iv		16
-	ciphertext	n * 16
-	hmac		32
-*/
+//	length		2 bytes
+//	public key	65 bytes
+//	iv		16 bytes
+//	ciphertext	n * 16 bytes
+//	hmac		32 bytes
 
 #define R 2
-#define IV (2 + 66)
-#define C (2 + 66 + 16)
+#define IV (2 + 65)
+#define C (2 + 65 + 16)
 #define D (len - 32)
 
 int
@@ -21,7 +18,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	// check length (at least 1 cipher block)
 
-	if (len < C + 48 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 4) % 16) // len - 4 beacuse of R format
+	if (len < C + 48 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 3) % 16)
 		return -1;
 
 	// derive shared_secret from private_key and R
