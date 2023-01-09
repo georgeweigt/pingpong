@@ -1,3 +1,5 @@
+void aes128ctr_keyinit(struct node *p, uint8_t *iv);
+void aes128ctr_encrypt(struct node *p, uint8_t *buf, int num_blocks);
 void aes128_keyinit(struct node *p);
 void aes128_encrypt(struct node *p, uint8_t *buf, int num_blocks);
 void aes128_decrypt(struct node *p, uint8_t *buf, int num_blocks);

@@ -39,21 +39,25 @@ test_aes(void)
 {
 	int err, i;
 	struct node N;
-	uint8_t cipher[32], plain[32];
+	uint8_t cipher[32], plain[32], iv[16];
 
 	printf("Test aes ");
 
-	for (i = 0; i < 16; i++)
+	for (i = 0; i < 16; i++) {
 		N.aes_key[i] = random();
+		iv[i] = random();
+	}
 
 	for (i = 0; i < 32; i++)
 		plain[i] = random();
 
 	memcpy(cipher, plain, 32);
 
-	aes128_keyinit(&N);
-	aes128_encrypt(&N, cipher, 2);
-	aes128_decrypt(&N, cipher, 2);
+	aes128ctr_keyinit(&N, iv);
+	aes128ctr_encrypt(&N, cipher, 2);
+
+	aes128ctr_keyinit(&N, iv);
+	aes128ctr_encrypt(&N, cipher, 2);
 
 	err = memcmp(cipher, plain, 32);
 
@@ -837,35 +841,22 @@ test_pubkey(void)
 #undef K
 #undef P
 
-/*
-def test_decrypt():
-    kmK = fromHex("0x57baf2c62005ddec64c357d96183ebc90bf9100583280e848aa31d683cad73cb")
-    kmCipher = fromHex(
-        "0x04ff2c874d0a47917c84eea0b2a4141ca95233720b5c70f81a8415bae1dc7b746b61df7558811c1d6054333907333ef9bb0cc2fbf8b34abb9730d14e0140f4553f4b15d705120af46cf653a1dc5b95b312cf8444714f95a4f7a0425b67fc064d18f4d0a528761565ca02d97faffdac23de10")
-    kmExpected = b"a"
-    kmPlain = crypto.ECCx(raw_privkey=kmK).ecies_decrypt(kmCipher)
-    assert(kmExpected == kmPlain)
-*/
-
-#define K "57baf2c62005ddec64c357d96183ebc90bf9100583280e848aa31d683cad73cb"
-#define C "04ff2c874d0a47917c84eea0b2a4141ca95233720b5c70f81a8415bae1dc7b746b61df7558811c1d6054333907333ef9bb0cc2fbf8b34abb9730d14e0140f4553f4b15d705120af46cf653a1dc5b95b312cf8444714f95a4f7a0425b67fc064d18f4d0a528761565ca02d97faffdac23de10"
-
-//#define K "472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b"
-//#define C "046f647e1bd8a5cd1446d31513bac233e18bdc28ec0e59d46de453137a72599533f1e97c98154343420d5f16e171e5107999a7c7f1a6e26f57bcb0d2280655d08fb148d36f1d4b28642d3bb4a136f0e33e3dd2e3cffe4b45a03fb7c5b5ea5e65617250fdc89e1a315563c20504b9d3a72555"
+#define K "472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b"
+#define C "04c4e40c86bb5324e017e598c6d48c19362ae527af8ab21b077284a4656c8735e62d73fb3d740acefbec30ca4c024739a1fcdff69ecaf03301eebf156eb5f17cca6f9d7a7e214a1f3f6e34d1ee0ec00ce0ef7d2b242fbfec0f276e17941f9f1bfbe26de10a15a6fac3cda039904ddd1d7e06e7b96b4878f61860e47f0b84c8ceb64f6a900ff23844f4359ae49b44154980a626d3c73226c19e"
 
 void
 test_decrypt(void)
 {
-	int err;
+	int err, i, len;
 	struct node N;
-	uint8_t buf[114], hmac[32];
+	uint8_t buf[200], hmac[32];
 
 	printf("Test decrypt ");
 
-	memset(&N, 0, sizeof N);
-
 	hextobin(N.private_key, 32, K);
 	hextobin(buf, sizeof buf, C);
+
+	len = strlen(C) / 2;
 
 	// derive shared_secret from private_key and R
 
@@ -874,30 +865,26 @@ test_decrypt(void)
 	// derive aes_key and hmac_key from shared_secret
 
 	kdf(N.aes_key, N.hmac_key, N.shared_secret);
-#if 0
+
 	// check hmac
 
-	hmac_sha256(N.hmac_key, 32, buf + 65, 32, hmac);
-	err = memcmp(hmac, buf + 114 - 32, 32);
+	hmac_sha256(N.hmac_key, 32, buf + 65, len - 65 - 32, hmac);
+	err = memcmp(hmac, buf + len - 32, 32);
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
-#endif
+
 	// decrypt
 
-	aes128_keyinit(&N);
-	aes128_decrypt(&N, buf + 65, 2);
+	aes128ctr_keyinit(&N, buf + 65);
+	aes128ctr_encrypt(&N, buf + 65 + 16, 3);
 
-printf("\n");
-printmem(buf + 65, 16);
-printmem(buf + 65 + 16, 16);
-
-
-	if (buf[65 + 16] != 'a') {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
+	for (i = 65 + 16; i < len - 32; i++)
+		if (buf[i] != 'a') {
+			printf("err %s line %d\n", __FILE__, __LINE__);
+			return;
+		}
 
 	printf("ok\n");
 }

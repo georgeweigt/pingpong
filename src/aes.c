@@ -15,6 +15,46 @@
 // expanded key + 544
 
 void
+aes128ctr_keyinit(struct node *p, uint8_t *iv)
+{
+	uint32_t w[44], v[44];
+	p->expanded_key = p->expanded_key_tab;
+	while (((uint64_t) p->expanded_key) & 0xf)
+		p->expanded_key++; // align
+	key_expansion(p->aes_key, w, v); // aes128 key is 16 bytes
+	memcpy(p->expanded_key, w, 176);
+	memcpy(p->expanded_key + 272, v, 176);
+	memcpy(p->aes_counter, iv, 16);
+}
+
+// used for both encryption and decryption
+
+void
+aes128ctr_encrypt(struct node *p, uint8_t *buf, int num_blocks)
+{
+	int i, j;
+	uint8_t block[16];
+
+	for (i = 0; i < num_blocks; i++) {
+
+		encrypt_nib((uint32_t *) p->expanded_key, p->aes_counter, block);
+
+		for (j = 0; j < 16; j++)
+			buf[j] ^= block[j];
+
+		buf += 16; // next block
+
+		// increment counter
+
+		for (j = 15; j >= 0; j--)
+			if (++p->aes_counter[j] > 0)
+				break;
+	}
+}
+
+// cbc mode
+
+void
 aes128_keyinit(struct node *p)
 {
 	uint32_t w[44], v[44];

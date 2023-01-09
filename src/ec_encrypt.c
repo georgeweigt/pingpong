@@ -63,8 +63,8 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	pad = 15 - (msglen & 0xf); // pad byte value (0..15)
 	memset(buf + C + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
 
-	aes128_keyinit(p);
-	aes128_encrypt(p, buf + IV, n + 1); // n + 1 for iv
+	aes128ctr_keyinit(p, buf + IV);
+	aes128ctr_encrypt(p, buf + C, n);
 
 	// compute hmac over IV and C (length is D - IV bytes)
 
