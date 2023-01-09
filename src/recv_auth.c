@@ -1,8 +1,8 @@
-//	length		2 bytes
-//	public key	65 bytes
-//	iv		16 bytes
-//	ciphertext	n * 16 bytes
-//	hmac		32 bytes
+// length	2 bytes
+// public key	65 bytes
+// iv		16 bytes
+// ciphertext	n bytes
+// hmac		32 bytes
 
 #define R 2
 #define IV (2 + 65)
@@ -12,13 +12,13 @@
 int
 receive_auth(struct node *p, uint8_t *buf, int len)
 {
-	int err, msglen, pad;
+	int err, msglen;
 	uint8_t hmac[32], *msg;
 	struct atom *list;
 
-	// check length (at least 1 cipher block)
+	// check length
 
-	if (len < C + 48 || (buf[0] << 8 | buf[1]) != len - 2 || (len - 3) % 16)
+	if (len < C + 32 || (buf[0] << 8 | buf[1]) != len - 2)
 		return -1;
 
 	// derive shared_secret from private_key and R
@@ -39,13 +39,9 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	// decrypt
 
 	aes128ctr_keyinit(p, buf + IV);
-	aes128ctr_encrypt(p, buf + C, (D - C) / 16);
+	aes128ctr_encrypt(p, buf + C, D - C);
 	msg = buf + C;
 	msglen = D - C;
-	pad = msg[msglen - 1];
-	if (pad > 15)
-		return -1;
-	msglen = msglen - (pad + 1); // pad length is 1..16 bytes
 
 	err = rdecode_relax(msg, msglen);
 

@@ -18,37 +18,38 @@ void
 aes128ctr_keyinit(struct node *p, uint8_t *iv)
 {
 	uint32_t w[44], v[44];
-	p->expanded_key = p->expanded_key_tab;
-	while (((uint64_t) p->expanded_key) & 0xf)
-		p->expanded_key++; // align
-	key_expansion(p->aes_key, w, v); // aes128 key is 16 bytes
-	memcpy(p->expanded_key, w, 176);
+
+	key_expansion(p->aes_key, w, v);
+
+	memcpy(p->expanded_key, w, 176); // see diagram above
 	memcpy(p->expanded_key + 272, v, 176);
+
 	memcpy(p->aes_counter, iv, 16);
 }
 
 // used for both encryption and decryption
 
 void
-aes128ctr_encrypt(struct node *p, uint8_t *buf, int num_blocks)
+aes128ctr_encrypt(struct node *p, uint8_t *buf, int len)
 {
-	int i, j;
+	int i;
 	uint8_t block[16];
 
-	for (i = 0; i < num_blocks; i++) {
+	while (len > 0) {
 
 		encrypt_nib((uint32_t *) p->expanded_key, p->aes_counter, block);
 
-		for (j = 0; j < 16; j++)
-			buf[j] ^= block[j];
-
-		buf += 16; // next block
+		for (i = 0; i < 16; i++)
+			buf[i] ^= block[i];
 
 		// increment counter
 
-		for (j = 15; j >= 0; j--)
-			if (++p->aes_counter[j] > 0)
+		for (i = 15; i >= 0; i--)
+			if (++p->aes_counter[i] > 0)
 				break;
+
+		buf += 16;
+		len -= 16;
 	}
 }
 
@@ -58,11 +59,10 @@ void
 aes128_keyinit(struct node *p)
 {
 	uint32_t w[44], v[44];
-	p->expanded_key = p->expanded_key_tab;
-	while (((uint64_t) p->expanded_key) & 0xf)
-		p->expanded_key++; // align
-	key_expansion(p->aes_key, w, v); // aes128 key is 16 bytes
-	memcpy(p->expanded_key, w, 176);
+
+	key_expansion(p->aes_key, w, v);
+
+	memcpy(p->expanded_key, w, 176); // see diagram above
 	memcpy(p->expanded_key + 272, v, 176);
 }
 

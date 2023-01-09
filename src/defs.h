@@ -55,8 +55,7 @@ struct node {
 	uint8_t aes_key[16]; // k_E
 	uint8_t hmac_key[32]; // k_M
 	uint8_t aes_counter[16];
-	uint8_t *expanded_key; // points to 16 byte align in expanded key tab
-	uint8_t expanded_key_tab[544 + 16]; // 16 bytes for alignment pad
+	uint8_t expanded_key[544];
 };
 
 extern int tos;

@@ -7,7 +7,7 @@ where
 
 	R	ephemeral public key (64 bytes)
 	iv	initialization vector (16 bytes)
-	c	ciphertext (multiple of 16 bytes)
+	c	ciphertext
 	d	hmac (32 bytes)
 */
 
@@ -19,7 +19,7 @@ where
 uint8_t *
 ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 {
-	int i, n, len, pad;
+	int i, len;
 	uint8_t *buf;
 
 	// generate ephemeral_private_key and ephemeral_public_key
@@ -36,8 +36,7 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 
 	// get malloc'd buffer
 
-	n = (msglen + 1 + 15) / 16; // n is number of 16 byte blocks (msglen + 1 for minimum pad)
-	len = C + 16 * n + 32;
+	len = C + msglen + 32;
 	buf = malloc(len);
 	if (buf == NULL)
 		exit(1);
@@ -52,19 +51,11 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	for (i = 0; i < 16; i++)
 		buf[IV + i] = random();
 
-//	memset(buf + IV, 0, 16);//FIXME
-
-	// encrypted message
+	// encrypt the message
 
 	memcpy(buf + C, msg, msglen);
-
-	// pad last block
-
-	pad = 15 - (msglen & 0xf); // pad byte value (0..15)
-	memset(buf + C + msglen, pad, pad + 1); // 1..16 bytes are set with pad value
-
 	aes128ctr_keyinit(p, buf + IV);
-	aes128ctr_encrypt(p, buf + C, n);
+	aes128ctr_encrypt(p, buf + C, msglen);
 
 	// compute hmac over IV and C (length is D - IV bytes)
 

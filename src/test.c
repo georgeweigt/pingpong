@@ -54,10 +54,10 @@ test_aes(void)
 	memcpy(cipher, plain, 32);
 
 	aes128ctr_keyinit(&N, iv);
-	aes128ctr_encrypt(&N, cipher, 2);
+	aes128ctr_encrypt(&N, cipher, 32);
 
 	aes128ctr_keyinit(&N, iv);
-	aes128ctr_encrypt(&N, cipher, 2);
+	aes128ctr_encrypt(&N, cipher, 32);
 
 	err = memcmp(cipher, plain, 32);
 
@@ -878,7 +878,7 @@ test_decrypt(void)
 	// decrypt
 
 	aes128ctr_keyinit(&N, buf + 65);
-	aes128ctr_encrypt(&N, buf + 65 + 16, 3);
+	aes128ctr_encrypt(&N, buf + 65 + 16, len - 65 - 32);
 
 	for (i = 65 + 16; i < len - 32; i++)
 		if (buf[i] != 'a') {
