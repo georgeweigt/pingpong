@@ -14,7 +14,6 @@ where
 #define R hdrlen
 #define IV (hdrlen + 65)
 #define C (hdrlen + 65 + 16)
-#define D (len - 32)
 
 uint8_t *
 ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
@@ -57,9 +56,9 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	aes128ctr_keyinit(p, buf + IV);
 	aes128ctr_encrypt(p, buf + C, msglen);
 
-	// compute hmac over IV and C (length is D - IV bytes)
+	// compute hmac over IV and C
 
-	hmac_sha256(p->hmac_key, 32, buf + IV, D - IV, buf + D);
+	hmac_sha256(p->hmac_key, 32, buf + IV, msglen + 16, buf + len - 32);
 
 	*plen = len;
 	return buf;
@@ -68,4 +67,3 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 #undef R
 #undef IV
 #undef C
-#undef D
