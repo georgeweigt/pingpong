@@ -7,7 +7,7 @@ void
 ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 {
 	int i;
-	uint32_t *d, *h, *k, *r, *s, *t;
+	uint32_t *d, *h, *k, *r, *s, *t, *u;
 	struct point G, R;
 
 	d = ec_buf_to_bignum(private_key, 32);
@@ -41,17 +41,17 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 	// s = k * (h + r * d) mod n
 
-	s = ec_mul(r, d);
-	ec_mod(s, q256);
+	t = ec_mul(r, d);
 
-	t = ec_add(h, s);
-	ec_free(s);
-	s = t;
-	ec_mod(s, q256);
+	ec_mod(t, q256);
 
-	t = ec_mul(k, s);
-	ec_free(s);
-	s = t;
+	u = ec_add(h, t);
+	ec_free(t);
+	t = u;
+
+	s = ec_mul(k, t);
+	ec_free(t);
+
 	ec_mod(s, q256);
 
 	// save r
@@ -219,6 +219,7 @@ ec_rand_check(uint8_t *V, uint8_t *hash, uint8_t *private_key)
 	// s = k * (h + r * d) mod n
 
 	t = ec_mul(r, d);
+
 	ec_mod(t, q256);
 
 	u = ec_add(h, t);
