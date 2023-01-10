@@ -42,7 +42,7 @@ enr_request_payload(int *plen, struct account *acct)
 
 	// signature
 
-	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1, acct);
+//	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1, acct); //FIXME
 
 	// hash
 

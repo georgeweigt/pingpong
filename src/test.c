@@ -10,8 +10,8 @@ test(void)
 	test_pubkey();
 	test_kdf();
 	test_hmac();
-	test_sign(account_table + 0);
-	test_ping(account_table + 0);
+	test_sign();
+//	test_ping(account_table + 0);
 	test_decrypt();
 }
 

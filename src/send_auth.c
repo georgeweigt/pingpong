@@ -9,7 +9,7 @@ send_auth(struct node *p)
 
 	n = 100 + random() % 100;
 
-	n = 0; //FIXME
+	n = 150; //FIXME
 
 	list = auth_body(p);
 	msglen = enlength(list);
@@ -53,9 +53,6 @@ auth_body(struct node *p)
 
 	for (i = 0; i < 32; i++)
 		hash[i] = p->shared_secret[i] ^ p->nonce[i];
-
-	// recipient recovers buf from sig
-
 	ec_signv(sig, hash, p->ephemeral_private_key, p->ephemeral_public_key);
 	push_string(sig, 65);
 

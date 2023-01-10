@@ -1,4 +1,4 @@
-// sig		65 bytes
+// sig		65 bytes (result)
 // hash		32 bytes
 // private_key	32 bytes
 // public_key	64 bytes
@@ -9,11 +9,13 @@ void
 ec_signv(uint8_t *sig, uint8_t *hash, uint8_t *private_key, uint8_t *public_key)
 {
 	ec_sign(sig, sig + 32, hash, private_key);
-	sig[64] = 27 + (public_key[63] & 1); // 27 even, 28 odd
+	sig[64] = public_key[63] & 1;
 }
 
-// rbuf		32 bytes
-// sbuf		32 bytes
+// rbuf		32 bytes (result)
+// sbuf		32 bytes (result)
+// hash		32 bytes
+// private_key	32 bytes
 
 // (hash, private_key) --> (rbuf, sbuf)
 
@@ -24,8 +26,8 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 	uint32_t *d, *h, *k, *r, *s, *t;
 	struct point G, R;
 
-	memset(rbuf, 0, 32);
-	memset(sbuf, 0, 32);
+	d = ec_buf_to_bignum(private_key, 32);
+	h = ec_buf_to_bignum(hash, 32);
 
 	G.x = gx256;
 	G.y = gy256;
@@ -38,10 +40,6 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 	k = NULL;
 	r = NULL;
 	s = NULL;
-
-	d = ec_buf_to_bignum(private_key, 32);
-
-	h = ec_buf_to_bignum(hash, 32);
 
 	for (;;) {
 
@@ -66,7 +64,6 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 		ec_mult(&R, k, &G, p256);
 		err = ec_affinify(&R, p256);
-
 		if (err)
 			continue;
 
@@ -74,7 +71,6 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 		r = ec_dup(R.x);
 		ec_mod(r, q256);
-
 		if (ec_equal(r, 0))
 			continue;
 
@@ -105,6 +101,10 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 		break;
 	}
 
+	// save r
+
+	memset(rbuf, 0, 32);
+
 	for (i = 0; i < len(r); i++) {
 		if (32 - 4 * i - 4 < 0)
 			break; // err
@@ -113,6 +113,10 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 		rbuf[32 - 4 * i - 2] = r[i] >> 8;
 		rbuf[32 - 4 * i - 1] = r[i];
 	}
+
+	// save s
+
+	memset(sbuf, 0, 32);
 
 	for (i = 0; i < len(s); i++) {
 		if (32 - 4 * i - 4 < 0)

@@ -42,7 +42,7 @@ ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen, 
 
 	// signature
 
-	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1, acct);
+//	sign(buf + HASHLEN, buf + HASHLEN + SIGLEN, len + 1, acct); //FIXME
 
 	// hash
 
