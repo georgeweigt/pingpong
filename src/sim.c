@@ -15,6 +15,13 @@ sim(void)
 	ec_genkey(recipient.private_key, recipient.public_key);
 
 	memcpy(initiator.peer_public_key, recipient.public_key, 64); // Alice knows Bob's public key
+	memcpy(recipient.peer_public_key, initiator.public_key, 64); // Bob knows Alice's public key
+
+	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.peer_public_key);
+	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.peer_public_key);
+
+	printmem(initiator.static_shared_secret, 32);
+	printmem(recipient.static_shared_secret, 32);
 
 	for (i = 0; i < 32; i++) {
 		initiator.nonce[i] = random();
