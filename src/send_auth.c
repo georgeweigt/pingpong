@@ -52,7 +52,7 @@ auth_body(struct node *p)
 	// sig (see rlpx.go line 557)
 
 	for (i = 0; i < 32; i++)
-		hash[i] = p->shared_secret[i] ^ p->nonce[i];
+		hash[i] = p->static_shared_secret[i] ^ p->nonce[i];
 	ec_signv(sig, hash, p->ephemeral_private_key, p->ephemeral_public_key);
 	push_string(sig, 65);
 

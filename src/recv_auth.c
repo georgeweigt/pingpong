@@ -51,6 +51,9 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	// FIXME validate list
 
+	printf("%d bytes\n", list->car->length);
+	printmem(list->car->string, list->car->length);
+
 	printf("%d bytes\n", list->cdr->car->length);
 	printmem(list->cdr->car->string, list->cdr->car->length);
 

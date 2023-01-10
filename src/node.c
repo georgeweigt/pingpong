@@ -12,6 +12,8 @@ node(void)
 
 	hextobin(initiator.peer_public_key, 64, GETH_PUBLIC_KEY);
 
+	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.peer_public_key);
+
 	for (i = 0; i < 32; i++)
 		initiator.nonce[i] = random();
 
