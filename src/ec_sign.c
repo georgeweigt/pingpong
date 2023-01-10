@@ -6,12 +6,14 @@
 void
 ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 {
-	int err, i;
+	int i;
 	uint32_t *d, *h, *k, *r, *s, *t;
 	struct point G, R;
 
 	d = ec_buf_to_bignum(private_key, 32);
 	h = ec_buf_to_bignum(hash, 32);
+
+	k = ec_rand(hash, private_key);
 
 	G.x = gx256;
 	G.y = gy256;
@@ -21,69 +23,36 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 	R.y = NULL;
 	R.z = NULL;
 
-	k = NULL;
-	r = NULL;
-	s = NULL;
+	// R = k * G
 
-	for (;;) {
+	ec_mult(&R, k, &G, p256);
+	ec_affinify(&R, p256);
 
-		ec_free(k);
-		ec_free(r);
-		ec_free(s);
+	// r = R.x mod n
 
-		k = ec_new(8);
-		r = NULL;
-		s = NULL;
+	r = ec_dup(R.x);
+	ec_mod(r, q256);
 
-		// choose k from [1, n - 1]
+	// k = 1 / k
 
-		for (i = 0; i < 8; i++)
-			k[i] = random();
-		ec_norm(k);
-		ec_mod(k, q256);
-		if (ec_equal(k, 0))
-			continue;
+	t = ec_modinv(k, q256);
+	ec_free(k);
+	k = t;
 
-		// R = k * G
+	// s = k * (h + r * d) mod n
 
-		ec_mult(&R, k, &G, p256);
-		err = ec_affinify(&R, p256);
-		if (err)
-			continue;
+	s = ec_mul(r, d);
+	ec_mod(s, q256);
 
-		// r = R.x mod n
+	t = ec_add(h, s);
+	ec_free(s);
+	s = t;
+	ec_mod(s, q256);
 
-		r = ec_dup(R.x);
-		ec_mod(r, q256);
-		if (ec_equal(r, 0))
-			continue;
-
-		// k = 1 / k
-
-		t = ec_modinv(k, q256);
-		ec_free(k);
-		k = t;
-
-		// s = k * (h + r * d) mod n
-
-		s = ec_mul(r, d);
-		ec_mod(s, q256);
-
-		t = ec_add(h, s);
-		ec_free(s);
-		s = t;
-		ec_mod(s, q256);
-
-		t = ec_mul(k, s);
-		ec_free(s);
-		s = t;
-		ec_mod(s, q256);
-
-		if (ec_equal(s, 0))
-			continue;
-
-		break;
-	}
+	t = ec_mul(k, s);
+	ec_free(s);
+	s = t;
+	ec_mod(s, q256);
 
 	// save r
 
@@ -118,4 +87,167 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 	ec_free(s);
 	ec_free(G.z);
 	ec_free_xyz(&R);
+}
+
+uint32_t *
+ec_rand(uint8_t *m, uint8_t *x)
+{
+	uint8_t h1[32], V[97], K[32];
+
+	// see RFC 6979 section 3.2
+
+	// a. h1 = H(m)
+
+	sha256(m, 32, h1);
+
+	// b. V = 0x01 0x01 0x01 ... 0x01
+
+	memset(V, 0x01, 32);
+
+	// c. K = 0x00 0x00 0x00 ... 0x00
+
+	memset(K, 0x00, 32);
+
+	// d. K = HMAC_K(V || 0x00 || x || h1)
+
+	V[32] = 0x00;
+
+	memcpy(V + 33, x, 32);
+	memcpy(V + 65, h1, 32);
+
+	hmac_sha256(K, 32, V, 97, K);
+
+	// e. V = HMAC_K(V)
+
+	hmac_sha256(K, 32, V, 32, V);
+
+	// f. K = HMAC_K(V || 0x01 || x || h1)
+
+	V[32] = 0x01;
+
+	hmac_sha256(K, 32, V, 97, K);
+
+	// g. V = HMAC_K(V)
+
+	hmac_sha256(K, 32, V, 32, V);
+
+	// h.
+
+	V[32] = 0x00;
+
+	for (;;) {
+
+		// V = HMAC_K(V)
+
+		hmac_sha256(K, 32, V, 32, V);
+
+		if (ec_rand_check(V, m, x))
+			break;
+
+		// K = HMAC_K(V || 0x00)
+
+		hmac_sha256(K, 32, V, 33, K);
+	}
+
+	return ec_buf_to_bignum(V, 32);
+}
+
+int
+ec_rand_check(uint8_t *V, uint8_t *hash, uint8_t *private_key)
+{
+	int err;
+	uint32_t *d, *h, *k, *r, *s, *t, *u;
+	struct point G, R;
+
+	d = ec_buf_to_bignum(private_key, 32);
+	h = ec_buf_to_bignum(hash, 32);
+	k = ec_buf_to_bignum(V, 32);
+
+	G.x = gx256;
+	G.y = gy256;
+	G.z = ec_int(1);
+
+	R.x = NULL;
+	R.y = NULL;
+	R.z = NULL;
+
+	// 0 < k < q256 ?
+
+	if (ec_equal(k, 0) || ec_cmp(k, q256) >= 0) {
+		ec_free(d);
+		ec_free(h);
+		ec_free(k);
+		ec_free(G.z);
+		return 0;
+	}
+
+	// R = k * G
+
+	ec_mult(&R, k, &G, p256);
+	err = ec_affinify(&R, p256);
+
+	if (err) {
+		ec_free(d);
+		ec_free(h);
+		ec_free(k);
+		ec_free(G.z);
+		ec_free_xyz(&R);
+		return 0;
+	}
+
+	// r = R.x mod n
+
+	r = ec_dup(R.x);
+	ec_mod(r, q256);
+
+	if (ec_equal(r, 0)) {
+		ec_free(d);
+		ec_free(h);
+		ec_free(k);
+		ec_free(r);
+		ec_free(G.z);
+		ec_free_xyz(&R);
+		return 0;
+	}
+
+	// k = 1 / k
+
+	t = ec_modinv(k, q256);
+	ec_free(k);
+	k = t;
+
+	// s = k * (h + r * d) mod n
+
+	t = ec_mul(r, d);
+	ec_mod(t, q256);
+
+	u = ec_add(h, t);
+	ec_free(t);
+	t = u;
+
+	s = ec_mul(k, t);
+	ec_free(t);
+
+	ec_mod(s, q256);
+
+	if (ec_equal(s, 0)) {
+		ec_free(d);
+		ec_free(h);
+		ec_free(k);
+		ec_free(r);
+		ec_free(s);
+		ec_free(G.z);
+		ec_free_xyz(&R);
+		return 0;
+	}
+
+	ec_free(d);
+	ec_free(h);
+	ec_free(k);
+	ec_free(r);
+	ec_free(s);
+	ec_free(G.z);
+	ec_free_xyz(&R);
+
+	return 1;
 }

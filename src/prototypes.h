@@ -52,6 +52,8 @@ uint8_t * ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *
 void ec_genkey(uint8_t *private_key, uint8_t *public_key);
 void ec_pubkey(uint8_t *public_key, uint8_t *private_key);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
+uint32_t * ec_rand(uint8_t *m, uint8_t *x);
+int ec_rand_check(uint8_t *V, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
 int enlength(struct atom *p);
 int sublength(struct atom *p);
