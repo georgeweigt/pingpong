@@ -843,35 +843,38 @@ test_pubkey(void)
 
 #define K "472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b"
 #define C "04c4e40c86bb5324e017e598c6d48c19362ae527af8ab21b077284a4656c8735e62d73fb3d740acefbec30ca4c024739a1fcdff69ecaf03301eebf156eb5f17cca6f9d7a7e214a1f3f6e34d1ee0ec00ce0ef7d2b242fbfec0f276e17941f9f1bfbe26de10a15a6fac3cda039904ddd1d7e06e7b96b4878f61860e47f0b84c8ceb64f6a900ff23844f4359ae49b44154980a626d3c73226c19e"
+#define P "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 void
 test_decrypt(void)
 {
-	int err, i, len, msglen;
+	int err, len, msglen;
 	struct node N;
-	uint8_t buf[200], hmac[32];
+	uint8_t buf[153], hmac[32];
 
 	printf("Test decrypt ");
 
 	hextobin(N.private_key, 32, K);
-	hextobin(buf, sizeof buf, C);
+	hextobin(buf, 153, C);
 
-	len = strlen(C) / 2;
+	len = 153;
 
 	msglen = len - 65 - 16 - 32; // R, iv, hmac
 
-	// derive shared_secret from private_key and R
+	// derive static_shared_secret from private_key and R
 
-	ec_ecdh(N.shared_secret, N.private_key, buf + 1);
+	ec_ecdh(N.static_shared_secret, N.private_key, buf + 1);
 
-	// derive aes_key and hmac_key from shared_secret
+	// derive aes_key and hmac_key from static_shared_secret
 
-	kdf(N.aes_key, N.hmac_key, N.shared_secret);
+	kdf(N.aes_key, N.hmac_key, N.static_shared_secret);
 
 	// check hmac
 
 	hmac_sha256(N.hmac_key, 32, buf + 65, msglen + 16, hmac);
+
 	err = memcmp(hmac, buf + len - 32, 32);
+
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
@@ -882,14 +885,16 @@ test_decrypt(void)
 	aes128ctr_keyinit(&N, buf + 65);
 	aes128ctr_encrypt(&N, buf + 65 + 16, msglen);
 
-	for (i = 0; i < msglen; i++)
-		if (buf[65 + 16 + i] != 'a') {
-			printf("err %s line %d\n", __FILE__, __LINE__);
-			return;
-		}
+	err = memcmp(buf + 65 + 16, P, 40);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		return;
+	}
 
 	printf("ok\n");
 }
 
 #undef K
 #undef C
+#undef P

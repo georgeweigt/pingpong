@@ -22,13 +22,13 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	if (msglen < 0 || (buf[0] << 8 | buf[1]) != len - 2)
 		return -1;
 
-	// derive shared_secret from private_key and R
+	// derive ephemeral_shared_secret from private_key and R
 
-	ec_ecdh(p->shared_secret, p->private_key, buf + R + 1); // R + 1 to skip over format byte
+	ec_ecdh(p->ephemeral_shared_secret, p->private_key, buf + R + 1); // R + 1 to skip over format byte
 
-	// derive aes_key and hmac_key from shared_secret
+	// derive aes_key and hmac_key from ephemeral_shared_secret
 
-	kdf(p->aes_key, p->hmac_key, p->shared_secret);
+	kdf(p->aes_key, p->hmac_key, p->ephemeral_shared_secret);
 
 	// check hmac
 
@@ -50,7 +50,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	list = pop();
 
 	// FIXME validate list
-
+#if 0
 	printf("%d bytes\n", list->car->length);
 	printmem(list->car->string, list->car->length);
 
@@ -62,7 +62,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	printf("%d bytes\n", list->cdr->cdr->cdr->car->length);
 	printmem(list->cdr->cdr->cdr->car->string, list->cdr->cdr->cdr->car->length);
-
+#endif
 	// save peer public key
 
 	memcpy(p->peer_public_key, list->cdr->car->string, 64);
