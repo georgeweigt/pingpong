@@ -1,4 +1,21 @@
-// hash, private_key --> ec_sign --> r, s
+// sig		65 bytes
+// hash		32 bytes
+// private_key	32 bytes
+// public_key	64 bytes
+
+// (hash, private_key, public_key) --> sig
+
+void
+ec_signv(uint8_t *sig, uint8_t *hash, uint8_t *private_key, uint8_t *public_key)
+{
+	ec_sign(sig, sig + 32, hash, private_key);
+	sig[64] = 27 + (public_key[63] & 1); // 27 even, 28 odd
+}
+
+// rbuf		32 bytes
+// sbuf		32 bytes
+
+// (hash, private_key) --> (rbuf, sbuf)
 
 void
 ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)

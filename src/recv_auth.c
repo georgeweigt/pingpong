@@ -42,7 +42,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	aes128ctr_keyinit(p, buf + IV);
 	aes128ctr_encrypt(p, buf + C, msglen);
 
-	err = rdecode(buf + C, msglen);
+	err = rdecode_relax(buf + C, msglen);
 
 	if (err)
 		return -1;
@@ -50,6 +50,18 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 	list = pop();
 
 	// FIXME validate list
+
+	printf("%d bytes\n", list->car->length);
+	printmem(list->car->string, list->car->length);
+
+	printf("%d bytes\n", list->cdr->car->length);
+	printmem(list->cdr->car->string, list->cdr->car->length);
+
+	printf("%d bytes\n", list->cdr->cdr->car->length);
+	printmem(list->cdr->cdr->car->string, list->cdr->cdr->car->length);
+
+	printf("%d bytes\n", list->cdr->cdr->cdr->car->length);
+	printmem(list->cdr->cdr->cdr->car->string, list->cdr->cdr->cdr->car->length);
 
 	// save peer public key
 

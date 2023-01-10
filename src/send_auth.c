@@ -8,6 +8,7 @@ send_auth(struct node *p)
 	// pad with random amount of data, at least 100 bytes
 
 	n = 100 + random() % 100;
+
 	n = 0; //FIXME
 
 	list = auth_body(p);
@@ -46,13 +47,16 @@ struct atom *
 auth_body(struct node *p)
 {
 	int i;
-	uint8_t buf[32], sig[65];
+	uint8_t hash[32], sig[65];
 
 	// sig (see rlpx.go line 557)
 
 	for (i = 0; i < 32; i++)
-		buf[i] = p->shared_secret[i] ^ p->nonce[i];
-	signbuf(sig, buf, p->ephemeral_private_key, p->ephemeral_public_key);
+		hash[i] = p->shared_secret[i] ^ p->nonce[i];
+
+	// recipient recovers buf from sig
+
+	ec_signv(sig, hash, p->ephemeral_private_key, p->ephemeral_public_key);
 	push_string(sig, 65);
 
 	// initiator public key
