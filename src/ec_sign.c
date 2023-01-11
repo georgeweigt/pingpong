@@ -1,6 +1,6 @@
 // rbuf		32 bytes (result)
 // sbuf		32 bytes (result)
-// hash		32 bytes
+// hash		32 bytes typically the sha256 of text or binary data
 // private_key	32 bytes
 
 void
@@ -63,15 +63,15 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 	V[32] = 0x00;
 
-	for (;;) {
+	for (;;) { // loop until return r, s
 
 		// V = HMAC_K(V)
 
 		hmac_sha256(K, 32, V, 32, V);
 
-		// for this V, attempt to derive r and s
+		// for this V, attempt to derive r, s
 
-		for (;;) {
+		for (;;) { // doesn't actually loop, code will either break or return
 
 			k = ec_buf_to_bignum(V, 32);
 

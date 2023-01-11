@@ -9,6 +9,8 @@ send_auth(struct node *p)
 
 	n = 100 + random() % 100;
 
+	n = 150; // FIXME
+
 	list = auth_body(p);
 	msglen = enlength(list);
 
@@ -54,7 +56,7 @@ auth_body(struct node *p)
 
 	ec_sign(sig, sig + 32, hash, p->ephemeral_private_key);
 
-	sig[64] = 27 + p->ephemeral_public_key[63] & 1;
+	sig[64] = p->ephemeral_public_key[63] & 1;
 
 	push_string(sig, 65);
 

@@ -39,7 +39,7 @@ aes128ctr_encrypt(struct node *p, uint8_t *buf, int len)
 
 		encrypt_nib((uint32_t *) p->expanded_key, p->aes_counter, block);
 
-		for (i = 0; i < 16; i++)
+		for (i = 0; i < 16 && i < len; i++)
 			buf[i] ^= block[i];
 
 		// increment counter
