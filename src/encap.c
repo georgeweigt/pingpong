@@ -13,7 +13,7 @@ encap(uint8_t *buf, int len, struct node *p)
 {
 	int i, msglen;
 	uint8_t *msg;
-	uint8_t ephemeral_public_key[64];
+	uint8_t auth_public_key[64];
 	uint8_t shared_secret[32];
 	uint8_t hmac_key[32];
 	uint8_t aes_key[16];
@@ -24,11 +24,11 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	// generate ephemeral keys
 
-	ec_genkey(p->ephemeral_private_key, ephemeral_public_key);
+	ec_genkey(p->auth_private_key, auth_public_key);
 
 	// derive shared secret
 
-	ec_ecdh(shared_secret, p->ephemeral_private_key, p->peer_public_key);
+	ec_ecdh(shared_secret, p->auth_private_key, p->peer_public_key);
 
 	// derive AES and HMAC keys
 
@@ -42,7 +42,7 @@ encap(uint8_t *buf, int len, struct node *p)
 	// ephemeral key R
 
 	buf[ENCAP_R] = 0x04; // uncompressed format
-	memcpy(buf + ENCAP_R + 1, ephemeral_public_key, 64);
+	memcpy(buf + ENCAP_R + 1, auth_public_key, 64);
 
 	// iv
 

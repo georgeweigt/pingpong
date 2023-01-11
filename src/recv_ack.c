@@ -20,7 +20,7 @@ recv_ack(struct node *p, uint8_t *buf, int len)
 
 	q = pop(); // result from rdecode
 
-	err = recv_ack_list(p, q);
+	err = recv_ack_data(p, q);
 
 	free_list(q);
 
@@ -30,12 +30,11 @@ recv_ack(struct node *p, uint8_t *buf, int len)
 // returns 0 ok, -1 err
 
 int
-recv_ack_list(struct node *p, struct atom *q)
+recv_ack_data(struct node *p, struct atom *q)
 {
 	struct atom *q1, *q2;
-	uint8_t *remote_ephemeral_public_key;
-	uint8_t *remote_nonce;
-	uint8_t ephemeral_key[32];
+	uint8_t *ack_public_key;
+	uint8_t *ack_nonce;
 
 	// length == -1 indicates a list item
 
@@ -51,18 +50,10 @@ recv_ack_list(struct node *p, struct atom *q)
 	if (q1->length != 64 || q2->length != 32)
 		return -1;
 
-	remote_ephemeral_public_key = q1->string;
-	remote_nonce = q2->string;
+	ack_public_key = q1->string;
+	ack_nonce = q2->string;
 
-	printf("recipient ephemeral public key\n");
-	printmem(remote_ephemeral_public_key, 64);
-
-	printf("recipient nonce\n");
-	printmem(remote_nonce, 32);
-
-	// derive ephemeral key
-
-	ec_ecdh(ephemeral_key, p->ephemeral_private_key, remote_ephemeral_public_key);
+	secrets(p, ack_public_key, ack_nonce);
 
 	return 0;
 }
