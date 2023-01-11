@@ -1,13 +1,12 @@
-// prefix	2 bytes
-// public key	65 bytes
-// iv		16 bytes
-// ciphertext	msglen bytes
-// hmac		32 bytes
-
-#define R 2
-#define IV (2 + 65)
-#define C (2 + 65 + 16)
-#define OVERHEAD (2 + 65 + 16 + 32)
+// encap format
+//
+// prefix || 0x04 || R || iv || c || d
+//
+// prefix	length (2 bytes)
+// R		ephemeral public key (64 bytes)
+// iv		initialization vector (16 bytes)
+// c		ciphertext
+// d		hmac (32 bytes)
 
 // returns 0 ok, -1 err
 
@@ -15,12 +14,14 @@ int
 decap(uint8_t *buf, int len, uint8_t *private_key)
 {
 	int err, msglen;
+	uint8_t *msg;
 	uint8_t shared_secret[32];
 	uint8_t hmac[32], hmac_key[32];
 	uint8_t aes_key[16];
 	uint32_t aes_expanded_key[64];
 
-	msglen = len - OVERHEAD;
+	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
+	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
 	// check length
 
@@ -29,7 +30,7 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 
 	// derive shared_secret from private_key and R
 
-	ec_ecdh(shared_secret, private_key, buf + R + 1); // R + 1 to skip over format byte
+	ec_ecdh(shared_secret, private_key, buf + ENCAP_R + 1); // R + 1 to skip over format byte
 
 	// derive aes_key and hmac_key from ephemeral_shared_secret
 
@@ -42,7 +43,7 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 	buf[len - 32] = buf[0]; // copy prefix
 	buf[len - 31] = buf[1];
 
-	hmac_sha256(hmac_key, 32, buf + IV, msglen + 16 + 2, buf + len - 32); // overwrite received hmac
+	hmac_sha256(hmac_key, 32, buf + ENCAP_IV, msglen + 16 + 2, buf + len - 32); // overwrite received hmac
 
 	err = memcmp(hmac, buf + len - 32, 32); // compare
 
@@ -51,13 +52,8 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 
 	// decrypt
 
-	aes128ctr_expandkey(aes_expanded_key, aes_key, buf + IV);
-	aes128ctr_encrypt(aes_expanded_key, buf + C, msglen); // encrypt does decrypt in CTR mode
+	aes128ctr_expandkey(aes_expanded_key, aes_key, buf + ENCAP_IV);
+	aes128ctr_encrypt(aes_expanded_key, msg, msglen); // encrypt does decrypt in CTR mode
 
 	return 0;
 }
-
-#undef R
-#undef IV
-#undef C
-#undef OVERHEAD

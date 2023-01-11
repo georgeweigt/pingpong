@@ -20,6 +20,10 @@
 #define SIGLEN 69
 #define R_INDEX (HASHLEN + 3)
 #define S_INDEX (HASHLEN + 36)
+
+#define ENCAP_R 2
+#define ENCAP_IV (2 + 65)
+#define ENCAP_C (2 + 65 + 16)
 #define ENCAP_OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
 
 #define len(p) (p)[-1]
