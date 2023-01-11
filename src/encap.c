@@ -28,7 +28,7 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	// derive shared secret
 
-	ec_ecdh(shared_secret, p->auth_private_key, p->peer_public_key);
+	ec_ecdh(shared_secret, p->auth_private_key, p->geth_public_key);
 
 	// derive AES and HMAC keys
 

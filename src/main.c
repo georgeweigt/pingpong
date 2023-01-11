@@ -21,15 +21,15 @@ nib(void)
 
 	memset(&N, 0, sizeof N);
 
-	hextobin(N.peer_public_key, 64, GETH_PUBLIC_KEY);
+	hextobin(N.geth_public_key, 64, GETH_PUBLIC_KEY);
 
 	// generate keyset
 
 	ec_genkey(N.private_key, N.public_key);
 
-	// derive static_shared_secret
+	// static_shared_secret = private_key * geth_public_key
 
-	ec_ecdh(N.static_shared_secret, N.private_key, N.peer_public_key);
+	ec_ecdh(N.static_shared_secret, N.private_key, N.geth_public_key);
 
 	// establish connection
 

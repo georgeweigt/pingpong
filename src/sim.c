@@ -1,4 +1,4 @@
-// node simulator
+// node simulator for debugging stuff
 
 void
 sim(void)
@@ -17,11 +17,11 @@ sim(void)
 	ec_genkey(initiator.private_key, initiator.public_key);
 	ec_genkey(recipient.private_key, recipient.public_key);
 
-	memcpy(initiator.peer_public_key, recipient.public_key, 64); // Alice knows Bob's public key
-	memcpy(recipient.peer_public_key, initiator.public_key, 64); // Bob knows Alice's public key
+	memcpy(initiator.geth_public_key, recipient.public_key, 64); // Alice knows Bob's public key
+	memcpy(recipient.geth_public_key, initiator.public_key, 64); // Bob knows Alice's public key
 
-	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.peer_public_key);
-	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.peer_public_key);
+	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.geth_public_key);
+	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.geth_public_key);
 
 	// establish connection
 
@@ -48,7 +48,7 @@ sim(void)
 
 	// compare keys
 
-	err = memcmp(initiator.public_key, recipient.peer_public_key, 64);
+	err = memcmp(initiator.public_key, recipient.geth_public_key, 64);
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);

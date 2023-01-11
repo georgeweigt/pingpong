@@ -59,7 +59,7 @@ struct node {
 
 	uint8_t private_key[32];
 	uint8_t public_key[64];
-	uint8_t peer_public_key[64];
+	uint8_t geth_public_key[64];
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
 	uint8_t auth_nonce[32];
 	uint8_t auth_private_key[32];
@@ -2851,7 +2851,7 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	// derive shared secret
 
-	ec_ecdh(shared_secret, p->auth_private_key, p->peer_public_key);
+	ec_ecdh(shared_secret, p->auth_private_key, p->geth_public_key);
 
 	// derive AES and HMAC keys
 
@@ -3617,15 +3617,15 @@ nib(void)
 
 	memset(&N, 0, sizeof N);
 
-	hextobin(N.peer_public_key, 64, GETH_PUBLIC_KEY);
+	hextobin(N.geth_public_key, 64, GETH_PUBLIC_KEY);
 
 	// generate keyset
 
 	ec_genkey(N.private_key, N.public_key);
 
-	// derive static_shared_secret
+	// static_shared_secret = private_key * geth_public_key
 
-	ec_ecdh(N.static_shared_secret, N.private_key, N.peer_public_key);
+	ec_ecdh(N.static_shared_secret, N.private_key, N.geth_public_key);
 
 	// establish connection
 
@@ -3865,7 +3865,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	// save peer public key
 
-	memcpy(p->peer_public_key, list->cdr->car->string, 64);
+	memcpy(p->geth_public_key, list->cdr->car->string, 64);
 
 	free_list(list);
 
@@ -4412,7 +4412,7 @@ test_sign(void)
 
 	printf("ok\n");
 }
-// node simulator
+// node simulator for debugging stuff
 
 void
 sim(void)
@@ -4431,11 +4431,11 @@ sim(void)
 	ec_genkey(initiator.private_key, initiator.public_key);
 	ec_genkey(recipient.private_key, recipient.public_key);
 
-	memcpy(initiator.peer_public_key, recipient.public_key, 64); // Alice knows Bob's public key
-	memcpy(recipient.peer_public_key, initiator.public_key, 64); // Bob knows Alice's public key
+	memcpy(initiator.geth_public_key, recipient.public_key, 64); // Alice knows Bob's public key
+	memcpy(recipient.geth_public_key, initiator.public_key, 64); // Bob knows Alice's public key
 
-	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.peer_public_key);
-	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.peer_public_key);
+	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.geth_public_key);
+	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.geth_public_key);
 
 	// establish connection
 
@@ -4462,7 +4462,7 @@ sim(void)
 
 	// compare keys
 
-	err = memcmp(initiator.public_key, recipient.peer_public_key, 64);
+	err = memcmp(initiator.public_key, recipient.geth_public_key, 64);
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);

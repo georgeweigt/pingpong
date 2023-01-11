@@ -33,7 +33,7 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	// save peer public key
 
-	memcpy(p->peer_public_key, list->cdr->car->string, 64);
+	memcpy(p->geth_public_key, list->cdr->car->string, 64);
 
 	free_list(list);
 
