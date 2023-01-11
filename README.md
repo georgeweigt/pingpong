@@ -2,6 +2,8 @@
 
 The code is under construction. Currently the `auth/ack` message exchange is working.
 
+`pingpong.c` is the cat of source files in `src`
+
 #
 
 To build and run
