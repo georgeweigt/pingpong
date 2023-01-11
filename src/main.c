@@ -23,7 +23,7 @@ nib(void)
 
 	hextobin(N.peer_public_key, 64, GETH_PUBLIC_KEY);
 
-	// generate private key
+	// generate keyset
 
 	ec_genkey(N.private_key, N.public_key);
 
