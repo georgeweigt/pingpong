@@ -1,9 +1,8 @@
-
-// Keccak-256 (see Table 3 on page 22 of FIPS PUB 202)
+// Keccak-256 (see Table 3 on page 22 of FIPS PUB 202 for rate and capacity)
 //
-// Rate      r = 1088 bits (136 bytes)
+// Rate		r = 1088 bits (136 bytes)
 //
-// Capacity  c =  512 bits ( 64 bytes)
+// Capacity	c = 512 bits (64 bytes)
 
 #define RATE 136
 
@@ -323,3 +322,7 @@ test_keccak256(void)
 
 	printf("ok\n");
 }
+
+#undef RATE
+#undef A
+#undef Aprime

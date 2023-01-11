@@ -623,13 +623,13 @@ test_public_key_secp256r1(uint32_t *x, uint32_t *y)
 
 /*
 def test_agree():
-    secret = fromHex("0x332143e9629eedff7d142d741f896258f5a1bfab54dab2121d3ec5000093d74b")
-    public = fromHex(
-        "0xf0d2b97981bd0d415a843b5dfe8ab77a30300daab3658c578f2340308a2da1a07f0821367332598b6aa4e180a41e92f4ebbae3518da847f0b1c0bbfe20bcf4e1")
-    agreeExpected = fromHex("0xee1418607c2fcfb57fda40380e885a707f49000a5dda056d828b7d9bd1f29a08")
-    e = crypto.ECCx(raw_privkey=secret)
-    agreeTest = e.raw_get_ecdh_key(pubkey_x=public[:32], pubkey_y=public[32:])
-    assert(agreeExpected == agreeTest)
+secret = fromHex("0x332143e9629eedff7d142d741f896258f5a1bfab54dab2121d3ec5000093d74b")
+public = fromHex(
+"0xf0d2b97981bd0d415a843b5dfe8ab77a30300daab3658c578f2340308a2da1a07f0821367332598b6aa4e180a41e92f4ebbae3518da847f0b1c0bbfe20bcf4e1")
+agreeExpected = fromHex("0xee1418607c2fcfb57fda40380e885a707f49000a5dda056d828b7d9bd1f29a08")
+e = crypto.ECCx(raw_privkey=secret)
+agreeTest = e.raw_get_ecdh_key(pubkey_x=public[:32], pubkey_y=public[32:])
+assert(agreeExpected == agreeTest)
 */
 
 #define K "332143e9629eedff7d142d741f896258f5a1bfab54dab2121d3ec5000093d74b"
@@ -669,17 +669,17 @@ test_ecdh(void)
 
 /*
 def test_kdf():
-    input1 = fromHex("0x0de72f1223915fa8b8bf45dffef67aef8d89792d116eb61c9a1eb02c422a4663")
-    expect1 = fromHex("0x1d0c446f9899a3426f2b89a8cb75c14b")
-    test1 = crypto.eciesKDF(input1, 16)
-    assert len(test1) == len(expect1)
-    assert(test1 == expect1)
+input1 = fromHex("0x0de72f1223915fa8b8bf45dffef67aef8d89792d116eb61c9a1eb02c422a4663")
+expect1 = fromHex("0x1d0c446f9899a3426f2b89a8cb75c14b")
+test1 = crypto.eciesKDF(input1, 16)
+assert len(test1) == len(expect1)
+assert(test1 == expect1)
 
-    kdfInput2 = fromHex("0x961c065873443014e0371f1ed656c586c6730bf927415757f389d92acf8268df")
-    kdfExpect2 = fromHex("0x4050c52e6d9c08755e5a818ac66fabe478b825b1836fd5efc4d44e40d04dabcc")
-    kdfTest2 = crypto.eciesKDF(kdfInput2, 32)
-    assert(len(kdfTest2) == len(kdfExpect2))
-    assert(kdfTest2 == kdfExpect2)
+kdfInput2 = fromHex("0x961c065873443014e0371f1ed656c586c6730bf927415757f389d92acf8268df")
+kdfExpect2 = fromHex("0x4050c52e6d9c08755e5a818ac66fabe478b825b1836fd5efc4d44e40d04dabcc")
+kdfTest2 = crypto.eciesKDF(kdfInput2, 32)
+assert(len(kdfTest2) == len(kdfExpect2))
+assert(kdfTest2 == kdfExpect2)
 */
 
 #define A1 "0de72f1223915fa8b8bf45dffef67aef8d89792d116eb61c9a1eb02c422a4663"
@@ -740,18 +740,18 @@ test_kdf(void)
 
 /*
 def test_hmac():
-    k_mac = fromHex("0x07a4b6dfa06369a570f2dcba2f11a18f")
-    indata = fromHex("0x4dcb92ed4fc67fe86832")
-    hmacExpected = fromHex("0xc90b62b1a673b47df8e395e671a68bfa68070d6e2ef039598bb829398b89b9a9")
-    hmacOut = crypto.hmac_sha256(k_mac, indata)
-    assert(hmacExpected == hmacOut)
+k_mac = fromHex("0x07a4b6dfa06369a570f2dcba2f11a18f")
+indata = fromHex("0x4dcb92ed4fc67fe86832")
+hmacExpected = fromHex("0xc90b62b1a673b47df8e395e671a68bfa68070d6e2ef039598bb829398b89b9a9")
+hmacOut = crypto.hmac_sha256(k_mac, indata)
+assert(hmacExpected == hmacOut)
 
-    # go messageTag
-    tagSecret = fromHex("0xaf6623e52208c596e17c72cea6f1cb09")
-    tagInput = fromHex("0x3461282bcedace970df2")
-    tagExpected = fromHex("0xb3ce623bce08d5793677ba9441b22bb34d3e8a7de964206d26589df3e8eb5183")
-    hmacOut = crypto.hmac_sha256(tagSecret, tagInput)
-    assert(hmacOut == tagExpected)
+# go messageTag
+tagSecret = fromHex("0xaf6623e52208c596e17c72cea6f1cb09")
+tagInput = fromHex("0x3461282bcedace970df2")
+tagExpected = fromHex("0xb3ce623bce08d5793677ba9441b22bb34d3e8a7de964206d26589df3e8eb5183")
+hmacOut = crypto.hmac_sha256(tagSecret, tagInput)
+assert(hmacOut == tagExpected)
 */
 
 #define KMAC1 "07a4b6dfa06369a570f2dcba2f11a18f"
@@ -804,11 +804,11 @@ test_hmac(void)
 
 /*
 def test_privtopub():
-    kenc = fromHex("0x472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b")
-    penc = fromHex(
-        "0x7a2aa2951282279dc1171549a7112b07c38c0d97c0fe2c0ae6c4588ba15be74a04efc4f7da443f6d61f68a9279bc82b73e0cc8d090048e9f87e838ae65dd8d4c")
-    assert(penc == crypto.privtopub(kenc))
-    return kenc, penc
+kenc = fromHex("0x472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b")
+penc = fromHex(
+"0x7a2aa2951282279dc1171549a7112b07c38c0d97c0fe2c0ae6c4588ba15be74a04efc4f7da443f6d61f68a9279bc82b73e0cc8d090048e9f87e838ae65dd8d4c")
+assert(penc == crypto.privtopub(kenc))
+return kenc, penc
 */
 
 #define K "472413e97f1fd58d84e28a559479e6b6902d2e8a0cee672ef38a3a35d263886b"
