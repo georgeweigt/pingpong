@@ -91,6 +91,7 @@ int rdecode(uint8_t *buf, int length);
 int rdecode_relax(uint8_t *buf, int length);
 int rdecode_nib(uint8_t *buf, int length);
 int rdecode_list(uint8_t *buf, int length);
+int recv_ack(struct node *p, uint8_t *buf, int len);
 int receive_auth(struct node *p, uint8_t *buf, int len);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);

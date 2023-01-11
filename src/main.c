@@ -3,8 +3,13 @@ main(int argc, char *argv[])
 {
 	aes_init();
 	ec_init();
-	sim();
-//	nib();
+
+	if (argc > 1 && strcmp(argv[1], "test") == 0) {
+		test();
+		exit(1);
+	}
+
+	nib();
 }
 
 void
@@ -42,6 +47,8 @@ nib(void)
 	wait_for_pollin(N.fd);
 
 	buf = receive(N.fd, &len);
+
+	recv_ack(&N, buf, len);
 
 	free(buf);
 
