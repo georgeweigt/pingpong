@@ -26,7 +26,7 @@ send_auth(struct node *p)
 
 	free_list(list);
 
-	encap(buf, len, p->peer_public_key);
+	encap(buf, len, p);
 
 	// send
 
