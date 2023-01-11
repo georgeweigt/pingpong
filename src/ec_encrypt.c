@@ -56,9 +56,12 @@ ec_encrypt(struct node *p, uint8_t *msg, int msglen, int hdrlen, int *plen)
 	aes128ctr_keyinit(p, buf + IV);
 	aes128ctr_encrypt(p, buf + C, msglen);
 
-	// compute hmac over IV and C
+	// compute hmac over IV || C || prefix
 
-	hmac_sha256(p->hmac_key, 32, buf + IV, msglen + 16, buf + len - 32);
+	buf[C + msglen] = (len - hdrlen) >> 8;
+	buf[C + msglen + 1] = len - hdrlen;
+
+	hmac_sha256(p->hmac_key, 32, buf + IV, msglen + 16 + 2, buf + len - 32);
 
 	*plen = len;
 	return buf;

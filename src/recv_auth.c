@@ -32,8 +32,15 @@ receive_auth(struct node *p, uint8_t *buf, int len)
 
 	// check hmac
 
-	hmac_sha256(p->hmac_key, 32, buf + IV, msglen + 16, hmac);
-	err = memcmp(hmac, buf + len - 32, 32);
+	memcpy(hmac, buf + len - 32, 32); // save hmac
+
+	buf[C + msglen] = buf[0]; // length prefix
+	buf[C + msglen + 1] = buf[1];
+
+	hmac_sha256(p->hmac_key, 32, buf + IV, msglen + 16 + 2, buf + len - 32); // overwrite received hmac
+
+	err = memcmp(hmac, buf + len - 32, 32); // compare
+
 	if (err)
 		return -1;
 
