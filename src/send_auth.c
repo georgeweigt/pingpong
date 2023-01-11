@@ -1,30 +1,31 @@
-#define C (2 + 65 + 16) // prefix + R + iv
-#define OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
-
 void
 send_auth(struct node *p)
 {
-	int len, msglen, n;
+	int i, len, msglen, n;
 	uint8_t *buf;
-	struct atom *list;
+	struct atom *q;
 
-	list = auth_body(p);
-	msglen = enlength(list);
+	for (i = 0; i < 32; i++)
+		p->auth_nonce[i] = random();
+
+	q = auth_body(p);
+
+	msglen = enlength(q);
 
 	// pad with random amount of data, at least 100 bytes
 
 	n = 100 + random() % 100;
 
-	len = msglen + n + OVERHEAD;
+	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
 	buf = malloc(len);
 
 	if (buf == NULL)
 		exit(1);
 
-	rencode(buf + C, msglen, list);
+	rencode(buf + ENCAP_C, msglen, q); // ENCAP_C == 2 + 65 + 16
 
-	free_list(list);
+	free_list(q);
 
 	encap(buf, len, p);
 
@@ -49,7 +50,7 @@ auth_body(struct node *p)
 	// sig (see rlpx.go line 557)
 
 	for (i = 0; i < 32; i++)
-		hash[i] = p->static_shared_secret[i] ^ p->nonce[i];
+		hash[i] = p->static_shared_secret[i] ^ p->auth_nonce[i];
 
 	ec_sign(sig, sig + 32, hash, p->private_key);
 
@@ -63,7 +64,7 @@ auth_body(struct node *p)
 
 	// initiator nonce
 
-	push_string(p->nonce, 32);
+	push_string(p->auth_nonce, 32);
 
 	// auth version
 
@@ -73,6 +74,3 @@ auth_body(struct node *p)
 
 	return pop();
 }
-
-#undef C
-#undef OVERHEAD

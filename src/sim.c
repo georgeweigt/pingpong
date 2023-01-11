@@ -1,13 +1,16 @@
 // node simulator
 
-struct node initiator; // Alice
-struct node recipient; // Bob
-
 void
 sim(void)
 {
-	int err, i, len, listen_fd;
+	int err, len, listen_fd;
 	uint8_t *buf;
+
+	struct node initiator; // Alice
+	struct node recipient; // Bob
+
+	memset(&initiator, 0, sizeof initiator);
+	memset(&recipient, 0, sizeof recipient);
 
 	// generate keys
 
@@ -19,14 +22,6 @@ sim(void)
 
 	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.peer_public_key);
 	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.peer_public_key);
-
-//	printmem(initiator.static_shared_secret, 32);
-//	printmem(recipient.static_shared_secret, 32);
-
-	for (i = 0; i < 32; i++) {
-		initiator.nonce[i] = random();
-		recipient.nonce[i] = random();
-	}
 
 	// establish connection
 

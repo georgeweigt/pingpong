@@ -15,7 +15,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int i, len;
+	int len;
 	uint8_t *buf;
 	struct node N;
 
@@ -30,9 +30,6 @@ nib(void)
 	// derive static_shared_secret
 
 	ec_ecdh(N.static_shared_secret, N.private_key, N.peer_public_key);
-
-	for (i = 0; i < 32; i++)
-		N.nonce[i] = random();
 
 	// establish connection
 
@@ -52,5 +49,5 @@ nib(void)
 
 	free(buf);
 
-	close(initiator.fd);
+	close(N.fd);
 }
