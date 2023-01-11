@@ -1,8 +1,5 @@
 void aes128ctr_expandkey(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
 void aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
-void aes128_keyinit(struct node *p);
-void aes128_encrypt(struct node *p, uint8_t *buf, int num_blocks);
-void aes128_decrypt(struct node *p, uint8_t *buf, int num_blocks);
 int mul(int a, int b);
 void aes_init();
 void key_expansion(uint8_t *key, uint32_t *w, uint32_t *v);

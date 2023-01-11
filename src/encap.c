@@ -17,7 +17,7 @@ encap(uint8_t *buf, int len, struct node *p)
 	uint8_t shared_secret[32];
 	uint8_t hmac_key[32];
 	uint8_t aes_key[16];
-	uint32_t aes_expanded_key[64];
+	uint32_t aes_expanded_key[48];
 
 	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
 	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
