@@ -1,4 +1,4 @@
-[Documentation](https://georgeweigt.github.io/pingpong.pdf)
+`pingpong` communicates with a local `geth` instance over the loopback interface 127.0.0.1
 
 #
 
@@ -35,3 +35,8 @@ In `pingpong.c`, set `GETH_PUBLIC_KEY` accordingly and run `make`
 ```
 #define GETH_PUBLIC_KEY "1ecbbdb04f54b68d99a9fb0d60786d29164ffe9776bad9118ec896f2764ec9f711ec2e6f8e0e21c1f0f9abe4515c45949e6bf776d84b54d08f7c32de60e8c480"
 ```
+
+#
+
+[Documentation](https://georgeweigt.github.io/pingpong.pdf)
+
