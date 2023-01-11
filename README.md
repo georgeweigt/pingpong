@@ -11,6 +11,12 @@ make
 ./pingpong
 ```
 
+To run a self test
+
+```
+./pingpong test
+```
+
 #
 
 To install `geth`
