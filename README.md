@@ -1,5 +1,7 @@
 `pingpong` communicates with a local `geth` process over the loopback interface 127.0.0.1
 
+The code is under construction. Currently the AUTH/ACK exchange is working.
+
 #
 
 To build and run
