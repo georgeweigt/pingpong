@@ -26,7 +26,7 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 	// a. h1 = H(m)
 
-	sha256(hash, 32, h1);
+	sha256(hash, 32, h1); // hash == m
 
 	// b. V = 0x01 0x01 0x01 ... 0x01
 
@@ -40,7 +40,7 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 	V[32] = 0x00;
 
-	memcpy(V + 33, private_key, 32);
+	memcpy(V + 33, private_key, 32); // private_key == x
 	memcpy(V + 65, h1, 32);
 
 	hmac_sha256(K, 32, V, 97, K);
