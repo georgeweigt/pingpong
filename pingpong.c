@@ -176,13 +176,6 @@ int rencode_string(uint8_t *buf, struct atom *p);
 void secrets(struct node *p, uint8_t *ack_public_key, uint8_t *ack_nonce);
 void send_auth(struct node *p);
 struct atom * auth_body(struct node *p);
-void send_enr_request(int fd, char *dst_ip, int dst_port, struct account *acct);
-uint8_t * enr_request_payload(int *plen, struct account *acct);
-struct atom * enr_request_data(void);
-void send_ping(int fd, char *src_ip, char *dst_ip, int src_port, int dst_port, struct account *acct);
-uint8_t * ping_payload(char *src_ip, char *dst_ip, int src_port, int dst_port, int *plen, struct account *acct);
-struct atom * ping_data(char *src_ip, char *dst_ip, int src_port, int dst_port);
-void test_ping(struct account *acct);
 void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
 void sha256(uint8_t *buf, int len, uint8_t *out);
 void sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out);
@@ -3622,11 +3615,11 @@ nib(void)
 	uint8_t *buf;
 	struct node N;
 
-	// init
+	memset(&N, 0, sizeof N);
 
 	hextobin(N.peer_public_key, 64, GETH_PUBLIC_KEY);
 
-	// create private key
+	// generate private key
 
 	ec_genkey(N.private_key, N.public_key);
 

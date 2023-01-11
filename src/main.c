@@ -19,11 +19,11 @@ nib(void)
 	uint8_t *buf;
 	struct node N;
 
-	// init
+	memset(&N, 0, sizeof N);
 
 	hextobin(N.peer_public_key, 64, GETH_PUBLIC_KEY);
 
-	// create private key
+	// generate private key
 
 	ec_genkey(N.private_key, N.public_key);
 
