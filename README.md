@@ -1,4 +1,4 @@
-`pingpong` communicates with a local `geth` instance over the loopback interface 127.0.0.1
+`pingpong` communicates with a local `geth` process over the loopback interface 127.0.0.1
 
 #
 
