@@ -4,6 +4,7 @@ main(int argc, char *argv[])
 	aes_init();
 	ec_init();
 	sim();
+//	nib();
 }
 
 void
@@ -41,6 +42,8 @@ nib(void)
 	wait_for_pollin(N.fd);
 
 	buf = receive(N.fd, &len);
+
+	free(buf);
 
 	close(initiator.fd);
 }

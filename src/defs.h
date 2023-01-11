@@ -53,13 +53,6 @@ struct node {
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
 	uint8_t nonce[32];
 	uint8_t peer_none[32];
-	uint8_t ephemeral_private_key[32];
-	uint8_t ephemeral_public_key[64];
-	uint8_t ephemeral_shared_secret[32];
-	uint8_t aes_key[16]; // k_E
-	uint8_t hmac_key[32]; // k_M
-	uint8_t aes_counter[16];
-	uint8_t expanded_key[544];
 };
 
 extern int tos;
