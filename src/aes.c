@@ -1,43 +1,25 @@
-// Expanded key layout:
-//			 _______
-// expanded_key		|	|
-//			|	|
-//			|	| 256 byte expanded encryption key
-//			|	|
-//			|_______|
-// expanded_key + 256	|_______| 16 byte encryption IV
-// expanded_key + 272	|	|
-//			|	|
-//			|	| 256 byte expanded decryption key
-//			|	|
-//			|_______|
-// expanded_key + 528	|_______| 16 byte decryption IV
-// expanded key + 544
+#define CTR ((uint8_t *) expanded_key + 240)
 
 void
-aes128ctr_keyinit(struct node *p, uint8_t *iv)
+aes128ctr_expandkey(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
 {
 	uint32_t w[44], v[44];
-
-	key_expansion(p->aes_key, w, v);
-
-	memcpy(p->expanded_key, w, 176); // see diagram above
-	memcpy(p->expanded_key + 272, v, 176);
-
-	memcpy(p->aes_counter, iv, 16);
+	key_expansion(key, w, v);
+	memcpy(expanded_key, w, 176); // see diagram above
+	memcpy(CTR, iv, 16);
 }
 
 // used for both encryption and decryption
 
 void
-aes128ctr_encrypt(struct node *p, uint8_t *buf, int len)
+aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
 {
 	int i;
 	uint8_t block[16];
 
 	while (len > 0) {
 
-		encrypt_nib((uint32_t *) p->expanded_key, p->aes_counter, block);
+		encrypt_nib(expanded_key, CTR, block);
 
 		for (i = 0; i < 16 && i < len; i++)
 			buf[i] ^= block[i];
@@ -45,13 +27,17 @@ aes128ctr_encrypt(struct node *p, uint8_t *buf, int len)
 		// increment counter
 
 		for (i = 15; i >= 0; i--)
-			if (++p->aes_counter[i] > 0)
+			if (++CTR[i] > 0)
 				break;
 
 		buf += 16;
 		len -= 16;
 	}
 }
+
+#undef CTR
+
+#if 0
 
 // cbc mode
 
@@ -103,6 +89,8 @@ aes128_decrypt(struct node *p, uint8_t *buf, int num_blocks)
 		buf += 16;
 	}
 }
+
+#endif
 
 uint32_t etab0[256]; // encryption tables
 uint32_t etab1[256];

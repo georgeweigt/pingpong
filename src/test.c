@@ -38,13 +38,14 @@ void
 test_aes(void)
 {
 	int err, i;
-	struct node N;
 	uint8_t cipher[32], plain[32], iv[16];
+	uint8_t aes_key[16];
+	uint32_t aes_expanded_key[64];
 
 	printf("Test aes ");
 
 	for (i = 0; i < 16; i++) {
-		N.aes_key[i] = random();
+		aes_key[i] = random();
 		iv[i] = random();
 	}
 
@@ -53,11 +54,11 @@ test_aes(void)
 
 	memcpy(cipher, plain, 32);
 
-	aes128ctr_keyinit(&N, iv);
-	aes128ctr_encrypt(&N, cipher, 32);
+	aes128ctr_expandkey(aes_expanded_key, aes_key, iv);
+	aes128ctr_encrypt(aes_expanded_key, cipher, 32);
 
-	aes128ctr_keyinit(&N, iv);
-	aes128ctr_encrypt(&N, cipher, 32);
+	aes128ctr_expandkey(aes_expanded_key, aes_key, iv);
+	aes128ctr_encrypt(aes_expanded_key, cipher, 32);
 
 	err = memcmp(cipher, plain, 32);
 
@@ -849,29 +850,32 @@ void
 test_decrypt(void)
 {
 	int err, len, msglen;
-	struct node N;
-	uint8_t buf[153], hmac[32];
+	uint8_t buf[153];
+	uint8_t private_key[32], shared_secret[32];
+	uint8_t hmac[32], hmac_key[32];
+	uint8_t aes_key[16];
+	uint32_t aes_expanded_key[64];
 
 	printf("Test decrypt ");
 
-	hextobin(N.private_key, 32, K);
+	hextobin(private_key, 32, K);
 	hextobin(buf, 153, C);
 
 	len = 153;
 
 	msglen = len - 65 - 16 - 32; // R, iv, hmac
 
-	// derive static_shared_secret from private_key and R
+	// derive shared_secret from private_key and R
 
-	ec_ecdh(N.static_shared_secret, N.private_key, buf + 1);
+	ec_ecdh(shared_secret, private_key, buf + 1);
 
-	// derive aes_key and hmac_key from static_shared_secret
+	// derive aes_key and hmac_key from shared_secret
 
-	kdf(N.aes_key, N.hmac_key, N.static_shared_secret);
+	kdf(aes_key, hmac_key, shared_secret);
 
 	// check hmac
 
-	hmac_sha256(N.hmac_key, 32, buf + 65, msglen + 16, hmac);
+	hmac_sha256(hmac_key, 32, buf + 65, msglen + 16, hmac);
 
 	err = memcmp(hmac, buf + len - 32, 32);
 
@@ -882,8 +886,8 @@ test_decrypt(void)
 
 	// decrypt
 
-	aes128ctr_keyinit(&N, buf + 65);
-	aes128ctr_encrypt(&N, buf + 65 + 16, msglen);
+	aes128ctr_expandkey(aes_expanded_key, aes_key, buf + 65);
+	aes128ctr_encrypt(aes_expanded_key, buf + 65 + 16, msglen);
 
 	err = memcmp(buf + 65 + 16, P, 40);
 

@@ -1,3 +1,5 @@
+#define GETH_PUBLIC_KEY "1ecbbdb04f54b68d99a9fb0d60786d29164ffe9776bad9118ec896f2764ec9f711ec2e6f8e0e21c1f0f9abe4515c45949e6bf776d84b54d08f7c32de60e8c480"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +20,7 @@
 #define SIGLEN 69
 #define R_INDEX (HASHLEN + 3)
 #define S_INDEX (HASHLEN + 36)
+#define ENCAP_OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
 
 #define len(p) (p)[-1]
 

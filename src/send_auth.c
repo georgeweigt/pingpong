@@ -1,40 +1,37 @@
+#define C (2 + 65 + 16) // prefix + R + iv
+#define OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
+
 void
 send_auth(struct node *p)
 {
 	int len, msglen, n;
-	uint8_t *buf, *msg;
+	uint8_t *buf;
 	struct atom *list;
+
+	list = auth_body(p);
+	msglen = enlength(list);
 
 	// pad with random amount of data, at least 100 bytes
 
 	n = 100 + random() % 100;
 
-	n = 150; // FIXME
+	len = msglen + n + OVERHEAD;
 
-	list = auth_body(p);
-	msglen = enlength(list);
+	buf = malloc(len);
 
-	msg = malloc(msglen + n);
-	if (msg == NULL)
+	if (buf == NULL)
 		exit(1);
 
-	rencode(msg, msglen, list);
+	rencode(buf + C, msglen, list);
+
 	free_list(list);
 
-	memset(msg + msglen, 0, n); // pad with n zeroes
-	msglen += n;
-
-	buf = ec_encrypt(p, msg, msglen, 2, &len); // header length = 2
-	free(msg);
-
-	// set length in big endian
-
-	buf[0] = (len - 2) >> 8;
-	buf[1] = len - 2;
+	encap(buf, len, p->peer_public_key);
 
 	// send
 
 	n = send(p->fd, buf, len, 0);
+
 	free(buf);
 
 	if (n < 0)
@@ -76,3 +73,6 @@ auth_body(struct node *p)
 
 	return pop();
 }
+
+#undef C
+#undef OVERHEAD

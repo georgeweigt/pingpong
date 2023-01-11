@@ -41,7 +41,9 @@ sim(void)
 	wait_for_pollin(recipient.fd);
 
 	buf = receive(recipient.fd, &len); // Bob receives from Alice
+
 	err = receive_auth(&recipient, buf, len);
+
 	free(buf);
 
 	if (err) {
