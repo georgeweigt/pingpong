@@ -1,6 +1,7 @@
 `pingpong` communicates with a local `geth` process over the loopback interface 127.0.0.1
 
-The code is under construction. Currently the `auth/ack` message exchange is working.
+This project is under construction.
+Currently the `auth/ack` message exchange is working.
 
 See the directory `src` for individual source files.
 `pingpong.c` is the cat of source files from `src`
