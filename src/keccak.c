@@ -323,6 +323,71 @@ test_keccak256(void)
 	printf("ok\n");
 }
 
+void
+keccak256_init(struct mac *p)
+{
+	memset(p->S, 0, 200);
+	p->index = 0;
+}
+
+void
+keccak256_update(struct mac *p, uint8_t *inbuf, int len)
+{
+	int i, j, n;
+
+	// finish pending block
+
+	if (p->index + len > RATE)
+		n = RATE - p->index;
+	else
+		n = len;
+
+	for (i = 0; i < n; i++)
+		p->S[p->index + i] ^= inbuf[i];
+
+	p->index += n;
+
+	if (p->index < RATE)
+		return;
+
+	Keccak(p->S);
+
+	// remaining blocks
+
+	inbuf += n;
+	len -= n;
+
+	n = len / RATE; // number of full blocks
+
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < RATE; j++)
+			p->S[j] ^= inbuf[RATE * i + j];
+		Keccak(p->S);
+	}
+
+	// remainder
+
+	p->index = len % RATE;
+
+	for (i = 0; i < p->index; i++)
+		p->S[i] ^= inbuf[RATE * n + i];
+}
+
+void
+keccak256_digest(struct mac *p, uint8_t *outbuf)
+{
+	uint8_t S[200];
+
+	memcpy(S, p->S, 200);
+
+	S[p->index] ^= 0x01;
+	S[RATE - 1] ^= 0x80;
+
+	Keccak(S);
+
+	memcpy(outbuf, S, 32);
+}
+
 #undef RATE
 #undef A
 #undef Aprime

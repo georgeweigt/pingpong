@@ -48,9 +48,8 @@ struct account {
 };
 
 struct mac {
-	int state;
-	uint8_t buf[64];
-	uint32_t hash[8];
+	uint8_t S[200]; // 1600 bits
+	int index;
 };
 
 struct node {
