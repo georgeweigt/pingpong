@@ -58,6 +58,7 @@ void init(void);
 void read_account(struct account *p, char *filename);
 char * read_file(char *filename);
 void print_account(struct account *p);
+void init_macs(struct node *p);
 void kdf(uint8_t *aes_key, uint8_t *hmac_key, uint8_t *shared_secret);
 uint8_t * theta(uint8_t *A);
 uint8_t * rho(uint8_t *A);

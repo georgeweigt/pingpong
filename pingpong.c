@@ -48,9 +48,8 @@ struct account {
 };
 
 struct mac {
-	int state;
-	uint8_t buf[64];
-	uint32_t hash[8];
+	uint8_t S[200]; // 1600 bits
+	int index;
 };
 
 struct node {
@@ -61,12 +60,17 @@ struct node {
 	uint8_t public_key[64];
 	uint8_t geth_public_key[64];
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
-	uint8_t auth_nonce[32];
 	uint8_t auth_private_key[32];
+	uint8_t auth_nonce[32];
+	uint8_t ack_nonce[32];
 	uint8_t aes_secret[32];
 	uint8_t mac_secret[32];
 	struct mac ingress_mac;
 	struct mac egress_mac;
+	uint8_t *auth_buf;
+	int auth_len;
+	uint8_t *ack_buf;
+	int ack_len;
 };
 
 extern int tos;
@@ -136,6 +140,7 @@ void init(void);
 void read_account(struct account *p, char *filename);
 char * read_file(char *filename);
 void print_account(struct account *p);
+void init_macs(struct node *p);
 void kdf(uint8_t *aes_key, uint8_t *hmac_key, uint8_t *shared_secret);
 uint8_t * theta(uint8_t *A);
 uint8_t * rho(uint8_t *A);
@@ -149,6 +154,9 @@ uint8_t * sponge(uint8_t *N, int len);
 void keccak256(uint8_t *outbuf, uint8_t *inbuf, int inbuflen);
 char * keccak256str(uint8_t *buf, int len);
 void test_keccak256(void);
+void keccak256_init(struct mac *p);
+void keccak256_update(struct mac *p, uint8_t *inbuf, int len);
+void keccak256_digest(struct mac *p, uint8_t *outbuf);
 void list(int n);
 void push(struct atom *p);
 struct atom * pop(void);
@@ -3037,6 +3045,30 @@ print_account(struct account *p)
 		printf("%02x", p->public_key[32 + i]);
 	printf("\n");
 }
+void
+init_macs(struct node *p)
+{
+	int i;
+	uint8_t buf[32];
+
+	// ingress-mac = keccak256.init((mac-secret ^ initiator-nonce) || ack)
+
+	for (i = 0; i < 32; i++)
+		buf[i] = p->mac_secret[i] ^ p->auth_nonce[i];
+
+	keccak256_init(&p->ingress_mac);
+	keccak256_update(&p->ingress_mac, buf, 32);
+	keccak256_update(&p->ingress_mac, p->ack_buf, p->ack_len);
+
+	// egress-mac = keccak256.init((mac-secret ^ recipient-nonce) || auth)
+
+	for (i = 0; i < 32; i++)
+		buf[i] = p->mac_secret[i] ^ p->ack_nonce[i];
+
+	keccak256_init(&p->egress_mac);
+	keccak256_update(&p->egress_mac, buf, 32);
+	keccak256_update(&p->egress_mac, p->auth_buf, p->auth_len);
+}
 // aes_key		16 bytes (result)
 // hmac_key		32 bytes (result)
 // shared_secret	32 bytes
@@ -3390,6 +3422,71 @@ test_keccak256(void)
 	}
 
 	printf("ok\n");
+}
+
+void
+keccak256_init(struct mac *p)
+{
+	memset(p->S, 0, 200);
+	p->index = 0;
+}
+
+void
+keccak256_update(struct mac *p, uint8_t *inbuf, int len)
+{
+	int i, j, n;
+
+	// finish pending block
+
+	if (p->index + len > RATE)
+		n = RATE - p->index;
+	else
+		n = len;
+
+	for (i = 0; i < n; i++)
+		p->S[p->index + i] ^= inbuf[i];
+
+	p->index += n;
+
+	if (p->index < RATE)
+		return;
+
+	Keccak(p->S);
+
+	// remaining blocks
+
+	inbuf += n;
+	len -= n;
+
+	n = len / RATE; // number of full blocks
+
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < RATE; j++)
+			p->S[j] ^= inbuf[RATE * i + j];
+		Keccak(p->S);
+	}
+
+	// remainder
+
+	p->index = len % RATE;
+
+	for (i = 0; i < p->index; i++)
+		p->S[i] ^= inbuf[RATE * n + i];
+}
+
+void
+keccak256_digest(struct mac *p, uint8_t *outbuf)
+{
+	uint8_t S[200];
+
+	memcpy(S, p->S, 200);
+
+	S[p->index] ^= 0x01;
+	S[RATE - 1] ^= 0x80;
+
+	Keccak(S);
+
+	memcpy(outbuf, S, 32);
 }
 
 #undef RATE
