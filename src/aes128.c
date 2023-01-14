@@ -8,7 +8,7 @@ void
 aes128ctr_expandkey(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
 {
 	uint32_t w[44], v[44];
-	key_expansion(key, w, v);
+	aes128_expansion(key, w, v);
 	memcpy(expanded_key, w, 176);
 	memcpy(CTR, iv, 16);
 }
@@ -23,7 +23,7 @@ aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
 
 	while (len > 0) {
 
-		encrypt_nib(expanded_key, CTR, block);
+		aes128_encrypt_block(expanded_key, CTR, block);
 
 		for (i = 0; i < 16 && i < len; i++)
 			buf[i] ^= block[i];
@@ -115,7 +115,7 @@ mul(int a, int b)
 // Initialize encryption and decryption tables
 
 void
-aes_init()
+aes128_init()
 {
 	int i, k;
 
@@ -136,7 +136,7 @@ aes_init()
 // Initialize w[44] and v[44] from encryption key
 
 void
-key_expansion(uint8_t *key, uint32_t *w, uint32_t *v)
+aes128_expansion(uint8_t *key, uint32_t *w, uint32_t *v)
 {
 	int i;
 	uint32_t *k, t;
@@ -214,7 +214,7 @@ key_expansion(uint8_t *key, uint32_t *w, uint32_t *v)
 // encrypt one block (16 bytes)
 
 void
-encrypt_nib(uint32_t *w, uint8_t *in, uint8_t *out)
+aes128_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 {
 	uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
 
@@ -302,7 +302,7 @@ encrypt_nib(uint32_t *w, uint8_t *in, uint8_t *out)
 // decrypt one block (16 bytes)
 
 void
-decrypt_nib(uint32_t *v, uint8_t *in, uint8_t *out)
+aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
 {
 	uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
 
@@ -386,3 +386,46 @@ decrypt_nib(uint32_t *v, uint8_t *in, uint8_t *out)
 	out[14] = s3 >> 16;
 	out[15] = s3 >> 24;
 }
+
+#undef CTR
+#undef MUL
+
+#undef s03
+#undef s02
+#undef s01
+#undef s00
+
+#undef s13
+#undef s12
+#undef s11
+#undef s10
+
+#undef s23
+#undef s22
+#undef s21
+#undef s20
+
+#undef s33
+#undef s32
+#undef s31
+#undef s30
+
+#undef t03
+#undef t02
+#undef t01
+#undef t00
+
+#undef t13
+#undef t12
+#undef t11
+#undef t10
+
+#undef t23
+#undef t22
+#undef t21
+#undef t20
+
+#undef t33
+#undef t32
+#undef t31
+#undef t30

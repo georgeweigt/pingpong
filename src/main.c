@@ -1,8 +1,9 @@
 int
 main(int argc, char *argv[])
 {
-	aes_init();
 	ec_init();
+	aes128_init();
+	aes256_init();
 
 	if (argc > 1 && strcmp(argv[1], "test") == 0) {
 		test();
@@ -67,9 +68,9 @@ nib(void)
 	uint8_t iv[16];
 	memset(iv, 0, 16);
 
-	aes128ctr_expandkey(N.expanded_key, N.aes_secret, iv);
+	aes256ctr_setup(N.expanded_key, N.aes_secret, iv);
 
-	aes128ctr_encrypt(N.expanded_key, buf, 16);
+	aes256ctr_encrypt(N.expanded_key, buf, 16);
 
 	printmem(buf, 16);
 }
