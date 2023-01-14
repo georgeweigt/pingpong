@@ -3745,6 +3745,14 @@ nib(void)
 
 	free(buf);
 
+	// wait for hello
+
+	wait_for_pollin(N.fd);
+
+	buf = receive(N.fd, &len);
+
+	free(buf);
+
 	close(N.fd);
 }
 // returns result on stack or -1 on error
@@ -3877,6 +3885,18 @@ recv_ack(struct node *p, uint8_t *buf, int len)
 	int err, msglen;
 	uint8_t *msg;
 	struct atom *q;
+
+	// save a copy of buf for later
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+	p->ack_buf = malloc(len);
+	if (p->ack_buf == NULL)
+		exit(1);
+	memcpy(p->ack_buf, buf, len);
+	p->ack_len = len;
+
+	// decrypt
 
 	err = decap(buf, len, p->private_key);
 
@@ -4141,11 +4161,17 @@ send_auth(struct node *p)
 
 	encap(buf, len, p);
 
-	// send
+	// save buf for later
+
+	if (p->auth_buf)
+		free(p->auth_buf);
+
+	p->auth_buf = buf;
+	p->auth_len = len;
+
+	// send buf
 
 	n = send(p->fd, buf, len, 0);
-
-	free(buf);
 
 	if (n < 0)
 		perror("send");

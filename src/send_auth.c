@@ -29,11 +29,17 @@ send_auth(struct node *p)
 
 	encap(buf, len, p);
 
-	// send
+	// save buf for later
+
+	if (p->auth_buf)
+		free(p->auth_buf);
+
+	p->auth_buf = buf;
+	p->auth_len = len;
+
+	// send buf
 
 	n = send(p->fd, buf, len, 0);
-
-	free(buf);
 
 	if (n < 0)
 		perror("send");

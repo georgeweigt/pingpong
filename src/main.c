@@ -49,5 +49,13 @@ nib(void)
 
 	free(buf);
 
+	// wait for hello
+
+	wait_for_pollin(N.fd);
+
+	buf = receive(N.fd, &len);
+
+	free(buf);
+
 	close(N.fd);
 }

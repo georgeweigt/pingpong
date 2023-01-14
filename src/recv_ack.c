@@ -5,6 +5,18 @@ recv_ack(struct node *p, uint8_t *buf, int len)
 	uint8_t *msg;
 	struct atom *q;
 
+	// save a copy of buf for later
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+	p->ack_buf = malloc(len);
+	if (p->ack_buf == NULL)
+		exit(1);
+	memcpy(p->ack_buf, buf, len);
+	p->ack_len = len;
+
+	// decrypt
+
 	err = decap(buf, len, p->private_key);
 
 	if (err)
