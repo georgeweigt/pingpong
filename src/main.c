@@ -15,7 +15,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int len;
+	int err, len;
 	uint8_t *buf;
 	struct node N;
 
@@ -39,15 +39,20 @@ nib(void)
 
 	send_auth(&N);
 
-	// get reply
+	// get ack
 
 	wait_for_pollin(N.fd);
 
 	buf = receive(N.fd, &len);
 
-	recv_ack(&N, buf, len);
+	err = recv_ack(&N, buf, len);
 
 	free(buf);
+
+	if (err)
+		exit(1);
+
+	secrets(&N);
 
 	// wait for hello
 
@@ -55,7 +60,16 @@ nib(void)
 
 	buf = receive(N.fd, &len);
 
-	free(buf);
-
 	close(N.fd);
+
+	printmem(buf, 16);
+
+	uint8_t iv[16];
+	memset(iv, 0, 16);
+
+	aes128ctr_expandkey(N.expanded_key, N.aes_secret, iv);
+
+	aes128ctr_encrypt(N.expanded_key, buf, 16);
+
+	printmem(buf, 16);
 }

@@ -45,8 +45,6 @@ int
 recv_ack_data(struct node *p, struct atom *q)
 {
 	struct atom *q1, *q2;
-	uint8_t *ack_public_key;
-	uint8_t *ack_nonce;
 
 	// length == -1 indicates a list item
 
@@ -62,10 +60,8 @@ recv_ack_data(struct node *p, struct atom *q)
 	if (q1->length != 64 || q2->length != 32)
 		return -1;
 
-	ack_public_key = q1->string;
-	ack_nonce = q2->string;
-
-	secrets(p, ack_public_key, ack_nonce);
+	memcpy(p->ack_public_key, q1, 64);
+	memcpy(p->ack_nonce, q2, 32);
 
 	return 0;
 }

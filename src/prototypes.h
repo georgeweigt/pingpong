@@ -99,7 +99,7 @@ int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
 int rencode_string(uint8_t *buf, struct atom *p);
-void secrets(struct node *p, uint8_t *ack_public_key, uint8_t *ack_nonce);
+void secrets(struct node *p);
 void send_auth(struct node *p);
 struct atom * auth_body(struct node *p);
 void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
