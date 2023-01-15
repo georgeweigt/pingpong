@@ -30,7 +30,7 @@ ec_ecdh(uint8_t *shared_secret, uint8_t *private_key, uint8_t *public_key)
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err, result greater than 32 bytes
+			break; // err, result greater than 32 bytes, truncate
 		// bignums are LE, this converts to BE
 		shared_secret[32 - 4 * i - 4] = S.x[i] >> 24;
 		shared_secret[32 - 4 * i - 3] = S.x[i] >> 16;

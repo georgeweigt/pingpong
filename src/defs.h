@@ -64,7 +64,8 @@ struct node {
 	uint8_t ack_nonce[32];
 	uint8_t aes_secret[32];
 	uint8_t mac_secret[32];
-	uint32_t expanded_key[64];
+	uint32_t encrypt_state[64];
+	uint32_t decrypt_state[64];
 	struct mac ingress_mac;
 	struct mac egress_mac;
 	uint8_t *auth_buf;

@@ -50,8 +50,10 @@ nib(void)
 
 	free(buf);
 
-	if (err)
+	if (err) {
+		printf("recv ack err\n");
 		exit(1);
+	}
 
 	secrets(&N);
 
@@ -70,9 +72,10 @@ nib(void)
 	uint8_t iv[16];
 	memset(iv, 0, 16);
 
-	aes256ctr_setup(N.expanded_key, N.aes_secret, iv);
+	aes256ctr_setup(N.encrypt_state, N.aes_secret, iv);
+	aes256ctr_setup(N.decrypt_state, N.aes_secret, iv);
 
-	aes256ctr_encrypt(N.expanded_key, buf, 16); // encrypt does decrypt in ctr mode
+	aes256ctr_encrypt(N.decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
 
 	printmem(buf, 16);
 }

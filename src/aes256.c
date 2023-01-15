@@ -1,27 +1,27 @@
-#define CTR ((uint8_t *) expanded_key + 240)
+#define CTR ((uint8_t *) state + 240)
 
-// expanded_key		256 bytes (64 uint32_t)
-// key			32 bytes
-// iv			16 bytes
+// state	256 bytes (64 uint32_t)
+// key		32 bytes
+// iv		16 bytes
 
 void
-aes256ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
+aes256ctr_setup(uint32_t *state, uint8_t *key, uint8_t *iv)
 {
-	aes256_expand_key(expanded_key, key);
+	aes256_expand_key(state, key);
 	memcpy(CTR, iv, 16);
 }
 
 // used for both encryption and decryption
 
 void
-aes256ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
+aes256ctr_encrypt(uint32_t *state, uint8_t *buf, int len)
 {
 	int i;
 	uint8_t block[16];
 
 	while (len > 0) {
 
-		aes256_encrypt_block(expanded_key, CTR, block);
+		aes256_encrypt_block(state, CTR, block);
 
 		for (i = 0; i < 16 && i < len; i++)
 			buf[i] ^= block[i];

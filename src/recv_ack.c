@@ -51,8 +51,8 @@ recv_ack_data(struct node *p, struct atom *q)
 	if (q == NULL || q->length != -1 || q->cdr == NULL)
 		return -1;
 
-	q1 = q->car;		// 1st item: recipient ephemeral public key
-	q2 = q->cdr->car;	// 2nd item: recipient nonce
+	q1 = q->car;		// 1st item: ephemeral public key
+	q2 = q->cdr->car;	// 2nd item: nonce
 
 	if (q1 == NULL || q2 == NULL)
 		return -1;
@@ -60,8 +60,8 @@ recv_ack_data(struct node *p, struct atom *q)
 	if (q1->length != 64 || q2->length != 32)
 		return -1;
 
-	memcpy(p->ack_public_key, q1, 64);
-	memcpy(p->ack_nonce, q2, 32);
+	memcpy(p->ack_public_key, q1->string, 64);
+	memcpy(p->ack_nonce, q2->string, 32);
 
 	return 0;
 }
