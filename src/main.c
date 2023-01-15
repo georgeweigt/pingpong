@@ -55,6 +55,8 @@ nib(void)
 
 	secrets(&N);
 
+	macs(&N);
+
 	// wait for hello
 
 	wait_for_pollin(N.fd);

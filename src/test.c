@@ -75,31 +75,11 @@ test_aes128(void)
 void
 test_aes256(void)
 {
-	int err, i;
-	uint8_t cipher[32], plain[32], iv[16];
-	uint8_t aes_key[32];
-	uint32_t aes_expanded_key[64];
+	int err;
 
 	printf("Test aes256 ");
 
-	for (i = 0; i < 32; i++)
-		aes_key[i] = random();
-
-	for (i = 0; i < 16; i++)
-		iv[i] = random();
-
-	for (i = 0; i < 32; i++)
-		plain[i] = random();
-
-	memcpy(cipher, plain, 32);
-
-	aes256ctr_setup(aes_expanded_key, aes_key, iv);
-	aes256ctr_encrypt(aes_expanded_key, cipher, 32);
-
-	aes256ctr_setup(aes_expanded_key, aes_key, iv);
-	aes256ctr_encrypt(aes_expanded_key, cipher, 32);
-
-	err = memcmp(cipher, plain, 32);
+	err = aes256_test_encrypt();
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);

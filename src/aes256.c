@@ -193,6 +193,7 @@ aes256_expand_key(uint32_t *w, uint8_t *key)
 void
 aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 {
+	int i;
 	uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
 
 	s0 = in[3] << 24 | in[2] << 16 | in[1] << 8 | in[0];
@@ -205,91 +206,18 @@ aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 	s2 ^= w[2];
 	s3 ^= w[3];
 
-	// 1
+	for (i = 4; i < 52; i += 8) {
 
-	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[4];
-	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[5];
-	t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[6];
-	t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[7];
+		t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[i + 0];
+		t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[i + 1];
+		t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[i + 2];
+		t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[i + 3];
 
-	// 2
-
-	s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[8];
-	s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[9];
-	s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[10];
-	s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[11];
-
-	// 3
-
-	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[12];
-	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[13];
-	t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[14];
-	t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[15];
-
-	// 4
-
-	s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[16];
-	s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[17];
-	s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[18];
-	s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[19];
-
-	// 5
-
-	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[20];
-	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[21];
-	t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[22];
-	t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[23];
-
-	// 6
-
-	s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[24];
-	s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[25];
-	s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[26];
-	s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[27];
-
-	// 7
-
-	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[28];
-	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[29];
-	t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[30];
-	t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[31];
-
-	// 8
-
-	s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[32];
-	s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[33];
-	s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[34];
-	s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[35];
-
-	// 9
-
-	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[36];
-	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[37];
-	t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[38];
-	t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[39];
-
-	// 10
-
-	s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[40];
-	s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[41];
-	s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[42];
-	s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[43];
-
-	// 11
-
-	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[44];
-	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[45];
-	t2 = aes256_etab0[s20] ^ aes256_etab1[s31] ^ aes256_etab2[s02] ^ aes256_etab3[s13] ^ w[46];
-	t3 = aes256_etab0[s30] ^ aes256_etab1[s01] ^ aes256_etab2[s12] ^ aes256_etab3[s23] ^ w[47];
-
-	// 12
-
-	s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[48];
-	s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[49];
-	s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[50];
-	s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[51];
-
-	// 13
+		s0 = aes256_etab0[t00] ^ aes256_etab1[t11] ^ aes256_etab2[t22] ^ aes256_etab3[t33] ^ w[i + 4];
+		s1 = aes256_etab0[t10] ^ aes256_etab1[t21] ^ aes256_etab2[t32] ^ aes256_etab3[t03] ^ w[i + 5];
+		s2 = aes256_etab0[t20] ^ aes256_etab1[t31] ^ aes256_etab2[t02] ^ aes256_etab3[t13] ^ w[i + 6];
+		s3 = aes256_etab0[t30] ^ aes256_etab1[t01] ^ aes256_etab2[t12] ^ aes256_etab3[t23] ^ w[i + 7];
+	}
 
 	t0 = aes256_etab0[s00] ^ aes256_etab1[s11] ^ aes256_etab2[s22] ^ aes256_etab3[s33] ^ w[52];
 	t1 = aes256_etab0[s10] ^ aes256_etab1[s21] ^ aes256_etab2[s32] ^ aes256_etab3[s03] ^ w[53];
@@ -320,20 +248,6 @@ aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 	out[13] = s3 >> 8;
 	out[14] = s3 >> 16;
 	out[15] = s3 >> 24;
-}
-
-int
-aes256_test_expand_key(void)
-{
-	uint8_t key[32] = {0x60,0x3d,0xeb,0x10,0x15,0xca,0x71,0xbe,0x2b,0x73,0xae,0xf0,0x85,0x7d,0x77,0x81,0x1f,0x35,0x2c,0x07,0x3b,0x61,0x08,0xd7,0x2d,0x98,0x10,0xa3,0x09,0x14,0xdf,0xf4};
-	uint32_t w[60];
-
-	aes256_expand_key(w, key);
-
-	if (w[0] == 0x10eb3d60 && w[1] == 0xbe71ca15 && w[2] == 0xf0ae732b && w[3] == 0x81777d85 && w[4] == 0x072c351f && w[5] == 0xd708613b && w[6] == 0xa310982d && w[7] == 0xf4df1409)
-		return 0;
-	else
-		return -1;
 }
 
 int

@@ -1,5 +1,5 @@
 void
-init_macs(struct node *p)
+macs(struct node *p)
 {
 	int i;
 	uint8_t buf[32];
