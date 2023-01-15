@@ -73,7 +73,7 @@ prefix || R || iv || msg || hmac
 ```
 
 The ciphertext of `iv || msg` is not padded to form a multiple of 16 byte blocks as is done in TLS and VPN.
-Hence the length of ciphertext is exactly the same as the length of `iv || msg`.
+Hence the length of `ciphertext` is exactly the same as the length of `iv || msg`.
 
 4. From RLPx documentation
 
