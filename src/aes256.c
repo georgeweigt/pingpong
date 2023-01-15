@@ -1,7 +1,7 @@
 #define CTR ((uint8_t *) expanded_key + 240)
 
-// expanded_key		192 bytes (48 uint32_t)
-// key			16 bytes
+// expanded_key		256 bytes (64 uint32_t)
+// key			32 bytes
 // iv			16 bytes
 
 void
@@ -37,15 +37,12 @@ aes256ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
 	}
 }
 
-uint32_t aes256_etab0[256]; // encryption tables
+// encryption tables
+
+uint32_t aes256_etab0[256];
 uint32_t aes256_etab1[256];
 uint32_t aes256_etab2[256];
 uint32_t aes256_etab3[256];
-
-uint32_t aes256_dtab0[256]; // decryption tables
-uint32_t aes256_dtab1[256];
-uint32_t aes256_dtab2[256];
-uint32_t aes256_dtab3[256];
 
 uint32_t aes256_rcon[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
 
@@ -108,9 +105,7 @@ aes256_mul(int a, int b)
 
 // multiply a times column b
 
-#define MUL(a, b0, b1, b2, b3) mul(a, b0) | mul(a, b1) << 8 | mul(a, b2) << 16 | mul(a, b3) << 24
-
-// Initialize encryption and decryption tables
+#define MUL(a, b0, b1, b2, b3) (aes256_mul(a, b0) | aes256_mul(a, b1) << 8 | aes256_mul(a, b2) << 16 | aes256_mul(a, b3) << 24)
 
 void
 aes256_init()
@@ -123,11 +118,6 @@ aes256_init()
 		aes256_etab1[i] = MUL(k, 3, 2, 1, 1);
 		aes256_etab2[i] = MUL(k, 1, 3, 2, 1);
 		aes256_etab3[i] = MUL(k, 1, 1, 3, 2);
-		k = aes256_inv_sbox[i];
-		aes256_dtab0[i] = MUL(k, 14, 9, 13, 11);
-		aes256_dtab1[i] = MUL(k, 11, 14, 9, 13);
-		aes256_dtab2[i] = MUL(k, 13, 11, 14, 9);
-		aes256_dtab3[i] = MUL(k, 9, 13, 11, 14);
 	}
 }
 
@@ -152,9 +142,9 @@ aes256_expand_key(uint32_t *w, uint8_t *key)
 		temp = w[i - 1];
 
 		if (i % 8 == 0)
-			temp = ((aes256_etab2[temp >> 8 & 0xff] & 0xff) | (aes256_etab3[temp >> 16 & 0xff] & 0xff00) | (aes256_etab0[temp >> 24] & 0xff0000) | (aes256_etab1[temp & 0xff] & 0xff000000)) ^ aes256_rcon[i / 8];
+			temp = ((aes256_etab2[temp >> 8 & 0xff] & 0xff) | (aes256_etab3[temp >> 16 & 0xff] & 0xff00) | (aes256_etab0[temp >> 24] & 0xff0000) | (aes256_etab1[temp & 0xff] & 0xff000000)) ^ aes256_rcon[i / 8 - 1];
 		else if (i % 8 == 4)
-			temp = (aes256_sbox[temp >> 24] << 24) | (aes256_sbox[temp >> 16 & 0xff] << 16) | (aes256_sbox[temp >> 8 & 0xff] << 8) | aes256_sbox[temp & 0xff];
+			temp = ((uint32_t) aes256_sbox[temp >> 24] << 24) | ((uint32_t) aes256_sbox[temp >> 16 & 0xff] << 16) | ((uint32_t) aes256_sbox[temp >> 8 & 0xff] << 8) | (uint32_t) aes256_sbox[temp & 0xff];
 
 		w[i] = w[i - 8] ^ temp;
 	}
@@ -340,7 +330,28 @@ aes256_test_expand_key(void)
 
 	aes256_expand_key(w, key);
 
-	return w[0] == 0x10eb3d60 && w[1] == 0xbe71ca15 && w[2] == 0xf0ae732b && w[3] == 0x81777d85;
+	if (w[0] == 0x10eb3d60 && w[1] == 0xbe71ca15 && w[2] == 0xf0ae732b && w[3] == 0x81777d85 && w[4] == 0x072c351f && w[5] == 0xd708613b && w[6] == 0xa310982d && w[7] == 0xf4df1409)
+		return 0;
+	else
+		return -1;
+}
+
+int
+aes256_test_encrypt(void)
+{
+	uint8_t key[32] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f};
+	uint8_t plaintext[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+	uint8_t ciphertext[16] = {0x8e,0xa2,0xb7,0xca,0x51,0x67,0x45,0xbf,0xea,0xfc,0x49,0x90,0x4b,0x49,0x60,0x89};
+	uint32_t w[60];
+
+	aes256_expand_key(w, key);
+
+	aes256_encrypt_block(w, plaintext, plaintext);
+
+	if (memcmp(plaintext, ciphertext, 16) == 0)
+		return 0;
+	else
+		return -1;
 }
 
 #undef CTR

@@ -12,6 +12,7 @@ void aes256_init();
 void aes256_expand_key(uint32_t *w, uint8_t *key);
 void aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out);
 int aes256_test_expand_key(void);
+int aes256_test_encrypt(void);
 int decap(uint8_t *buf, int len, uint8_t *private_key);
 uint32_t * ec_modinv(uint32_t *a, uint32_t *p);
 uint32_t * ec_modinv_v1(uint32_t *a, uint32_t *p);
