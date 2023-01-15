@@ -65,11 +65,23 @@ After decryption, `R` is thrown away and is not used for anything else.
 prefix || R || iv || msg || hmac
 ```
 
-The `hmac` is computed over `iv`, `msg`, and `prefix` as follows.
+`hmac` is computed as follows.
 
 ```
 hmac = hmac256(iv || msg || prefix)
 ```
+
+3. From RLPx documentation
+
+```
+auth-body = [sig, initiator-pubk, initiator-nonce, auth-vsn, ...]
+
+ack-body = [recipient-ephemeral-pubk, recipient-nonce, ack-vsn, ...]
+```
+
+Note that there is no `initiator-ephemeral-pubk`.
+However, in order to establish a shared secret there has be an `initiator-ephemeral-pubk`.
+It turns out that `recipient` recovers `initiator-ephemeral-pubk` from `sig`.
 
 #
 
