@@ -27,7 +27,7 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	ec_genkey(ephemeral_private_key, ephemeral_public_key);
 
-	ec_ecdh(shared_secret, ephemeral_private_key, p->geth_public_key);
+	ec_ecdh(shared_secret, ephemeral_private_key, p->far_public_key);
 
 	// derive AES and HMAC keys
 

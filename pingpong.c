@@ -56,7 +56,7 @@ struct node {
 	int fd;
 	uint8_t private_key[32];
 	uint8_t public_key[64];
-	uint8_t geth_public_key[64];
+	uint8_t far_public_key[64];
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
 	uint8_t auth_private_key[32];
 	uint8_t auth_public_key[64];
@@ -3226,7 +3226,7 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	ec_genkey(ephemeral_private_key, ephemeral_public_key);
 
-	ec_ecdh(shared_secret, ephemeral_private_key, p->geth_public_key);
+	ec_ecdh(shared_secret, ephemeral_private_key, p->far_public_key);
 
 	// derive AES and HMAC keys
 
@@ -4090,15 +4090,15 @@ nib(void)
 
 	memset(&N, 0, sizeof N);
 
-	hextobin(N.geth_public_key, 64, GETH_PUBLIC_KEY);
+	hextobin(N.far_public_key, 64, GETH_PUBLIC_KEY);
 
 	// generate keyset
 
 	ec_genkey(N.private_key, N.public_key);
 
-	// static_shared_secret = private_key * geth_public_key
+	// static_shared_secret = private_key * far_public_key
 
-	ec_ecdh(N.static_shared_secret, N.private_key, N.geth_public_key);
+	ec_ecdh(N.static_shared_secret, N.private_key, N.far_public_key);
 
 	// ephemeral key, nonce
 
@@ -5030,11 +5030,11 @@ sim(void)
 	ec_genkey(A.private_key, A.public_key);
 	ec_genkey(B.private_key, B.public_key);
 
-	memcpy(A.geth_public_key, B.public_key, 64); // Alice knows Bob's public key
-	memcpy(B.geth_public_key, A.public_key, 64); // Bob knows Alice's public key
+	memcpy(A.far_public_key, B.public_key, 64); // Alice knows Bob's public key
+	memcpy(B.far_public_key, A.public_key, 64); // Bob knows Alice's public key
 
-	ec_ecdh(A.static_shared_secret, A.private_key, A.geth_public_key);
-	ec_ecdh(B.static_shared_secret, B.private_key, B.geth_public_key);
+	ec_ecdh(A.static_shared_secret, A.private_key, A.far_public_key);
+	ec_ecdh(B.static_shared_secret, B.private_key, B.far_public_key);
 
 	// ephemeral keys, nonces
 

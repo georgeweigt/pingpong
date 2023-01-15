@@ -27,15 +27,15 @@ nib(void)
 
 	memset(&N, 0, sizeof N);
 
-	hextobin(N.geth_public_key, 64, GETH_PUBLIC_KEY);
+	hextobin(N.far_public_key, 64, GETH_PUBLIC_KEY);
 
 	// generate keyset
 
 	ec_genkey(N.private_key, N.public_key);
 
-	// static_shared_secret = private_key * geth_public_key
+	// static_shared_secret = private_key * far_public_key
 
-	ec_ecdh(N.static_shared_secret, N.private_key, N.geth_public_key);
+	ec_ecdh(N.static_shared_secret, N.private_key, N.far_public_key);
 
 	// ephemeral key, nonce
 

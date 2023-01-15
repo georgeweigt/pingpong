@@ -56,7 +56,7 @@ struct node {
 	int fd;
 	uint8_t private_key[32];
 	uint8_t public_key[64];
-	uint8_t geth_public_key[64];
+	uint8_t far_public_key[64];
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
 	uint8_t auth_private_key[32];
 	uint8_t auth_public_key[64];

@@ -17,11 +17,11 @@ sim(void)
 	ec_genkey(A.private_key, A.public_key);
 	ec_genkey(B.private_key, B.public_key);
 
-	memcpy(A.geth_public_key, B.public_key, 64); // Alice knows Bob's public key
-	memcpy(B.geth_public_key, A.public_key, 64); // Bob knows Alice's public key
+	memcpy(A.far_public_key, B.public_key, 64); // Alice knows Bob's public key
+	memcpy(B.far_public_key, A.public_key, 64); // Bob knows Alice's public key
 
-	ec_ecdh(A.static_shared_secret, A.private_key, A.geth_public_key);
-	ec_ecdh(B.static_shared_secret, B.private_key, B.geth_public_key);
+	ec_ecdh(A.static_shared_secret, A.private_key, A.far_public_key);
+	ec_ecdh(B.static_shared_secret, B.private_key, B.far_public_key);
 
 	// ephemeral keys, nonces
 
