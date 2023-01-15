@@ -5,10 +5,10 @@
 // iv			16 bytes
 
 void
-aes128ctr_expandkey(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
+aes128ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
 {
 	uint32_t w[44], v[44];
-	aes128_expansion(key, w, v);
+	aes128_expand_key(key, w, v);
 	memcpy(expanded_key, w, 176);
 	memcpy(CTR, iv, 16);
 }
@@ -136,7 +136,7 @@ aes128_init()
 // Initialize w[44] and v[44] from encryption key
 
 void
-aes128_expansion(uint8_t *key, uint32_t *w, uint32_t *v)
+aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
 {
 	int i;
 	uint32_t *k, t;

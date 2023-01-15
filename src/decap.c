@@ -52,7 +52,7 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 
 	// decrypt
 
-	aes128ctr_expandkey(aes_expanded_key, aes_key, buf + ENCAP_IV);
+	aes128ctr_setup(aes_expanded_key, aes_key, buf + ENCAP_IV);
 	aes128ctr_encrypt(aes_expanded_key, msg, msglen); // encrypt does decrypt in CTR mode
 
 	return 0;

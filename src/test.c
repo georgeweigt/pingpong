@@ -56,10 +56,10 @@ test_aes128(void)
 
 	memcpy(cipher, plain, 32);
 
-	aes128ctr_expandkey(aes_expanded_key, aes_key, iv);
+	aes128ctr_setup(aes_expanded_key, aes_key, iv);
 	aes128ctr_encrypt(aes_expanded_key, cipher, 32);
 
-	aes128ctr_expandkey(aes_expanded_key, aes_key, iv);
+	aes128ctr_setup(aes_expanded_key, aes_key, iv);
 	aes128ctr_encrypt(aes_expanded_key, cipher, 32);
 
 	err = memcmp(cipher, plain, 32);
@@ -925,7 +925,7 @@ test_decrypt(void)
 
 	// decrypt
 
-	aes128ctr_expandkey(aes_expanded_key, aes_key, buf + 65);
+	aes128ctr_setup(aes_expanded_key, aes_key, buf + 65);
 	aes128ctr_encrypt(aes_expanded_key, buf + 65 + 16, msglen);
 
 	err = memcmp(buf + 65 + 16, P, 40);

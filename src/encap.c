@@ -51,7 +51,7 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	// encrypt the message
 
-	aes128ctr_expandkey(aes_expanded_key, aes_key, buf + ENCAP_IV);
+	aes128ctr_setup(aes_expanded_key, aes_key, buf + ENCAP_IV);
 	aes128ctr_encrypt(aes_expanded_key, msg, msglen);
 
 	// compute hmac over IV || C || prefix
