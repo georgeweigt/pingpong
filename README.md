@@ -48,6 +48,29 @@ In `pingpong.c`, set `GETH_PUBLIC_KEY` accordingly and run `make`
 #define GETH_PUBLIC_KEY "1ecbbdb04f54b68d99a9fb0d60786d29164ffe9776bad9118ec896f2764ec9f711ec2e6f8e0e21c1f0f9abe4515c45949e6bf776d84b54d08f7c32de60e8c480"
 ```
 
+# Lessons learned
+
+1. AUTH and ACK messages have the following format.
+
+```
+prefix || R || ciphertext || hmac
+```
+
+`R` is an ephemeral public key that the receiver uses to decrypt the ciphertext.
+After decryption, `R` is thrown away and is not used for anything else.
+
+2. After decryption we have
+
+```
+prefix || R || iv || msg || hmac
+```
+
+The `hmac` is computed over `iv`, `msg`, and `prefix` as follows.
+
+```
+hmac = hmac256(iv || msg || prefix)
+```
+
 #
 
 [Documentation](https://georgeweigt.github.io/pingpong.pdf)

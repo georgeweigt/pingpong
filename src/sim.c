@@ -84,9 +84,9 @@ sim(void)
 		exit(1);
 	}
 
-	// geth recovers auth_public_key from sig in auth msg
+	// geth recovers public key from sig in auth msg
 
-	// don't have recover function so do this
+	// don't have recovery function so do this
 
 	memcpy(B.auth_public_key, A.auth_public_key, 64);
 
