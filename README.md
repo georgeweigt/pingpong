@@ -53,7 +53,7 @@ In `pingpong.c`, set `GETH_PUBLIC_KEY` accordingly and run `make`
 1. AUTH and ACK messages have the following format.
 
 ```
-prefix || R || ciphertext || hmac
+prefix || 0x04 || R || ciphertext || hmac
 ```
 
 Note that `R` is an ephemeral public key that the receiver uses to verify `hmac` and decrypt the ciphertext.
@@ -69,7 +69,7 @@ hmac = hmac256(ciphertext || prefix)
 3. After decryption we have
 
 ```
-prefix || R || iv || msg || hmac
+prefix || 0x04 || R || iv || msg || hmac
 ```
 
 The ciphertext of `iv || msg` is not padded to form a multiple of 16 byte blocks as is done in TLS and VPN.
