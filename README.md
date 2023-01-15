@@ -56,23 +56,24 @@ In `pingpong.c`, set `GETH_PUBLIC_KEY` accordingly and run `make`
 prefix || R || ciphertext || hmac
 ```
 
-Note that `R` is an ephemeral public key that the receiver uses to decrypt the ciphertext.
+Note that `R` is an ephemeral public key that the receiver uses to verify `hmac` and decrypt the ciphertext.
 After decryption, `R` is thrown away and is not used for anything else.
 In particular, `R` is not used to compute any session secrets.
 
-2. After decryption we have
+2. `hmac` computation includes the prefix as follows.
+
+```
+hmac = hmac256(ciphertext || prefix)
+```
+
+3. After decryption we have
 
 ```
 prefix || R || iv || msg || hmac
 ```
 
-`hmac` is computed as follows.
-
-```
-hmac = hmac256(iv || msg || prefix)
-```
-
-3. The ciphertext of `iv || msg` is not padded to be multiple of 16 bytes as is done in TLS and VPN.
+The ciphertext of `iv || msg` is not padded to form a multiple of 16 byte blocks as is done in TLS and VPN.
+Hence the length of ciphertext is exactly the same as the length of `iv || msg`.
 
 4. From RLPx documentation
 
@@ -84,7 +85,7 @@ ack-body = [recipient-ephemeral-pubk, recipient-nonce, ack-vsn, ...]
 
 Note that there is no `initiator-ephemeral-pubk`.
 However, in order to establish a shared secret there has be an `initiator-ephemeral-pubk`.
-It turns out that `recipient` recovers `initiator-ephemeral-pubk` from `sig`.
+It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
 #
 
