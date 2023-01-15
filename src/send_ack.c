@@ -79,6 +79,8 @@ ack_encap(uint8_t *buf, int len, struct node *p)
 {
 	int i, msglen;
 	uint8_t *msg;
+	uint8_t ephemeral_private_key[32];
+	uint8_t ephemeral_public_key[64];
 	uint8_t shared_secret[32];
 	uint8_t hmac_key[32];
 	uint8_t aes_key[16];
@@ -89,7 +91,9 @@ ack_encap(uint8_t *buf, int len, struct node *p)
 
 	// derive shared secret
 
-	ec_ecdh(shared_secret, p->ack_private_key, p->geth_public_key); // read 'geth' as 'peer'
+	ec_genkey(ephemeral_private_key, ephemeral_public_key);
+
+	ec_ecdh(shared_secret, ephemeral_private_key, p->geth_public_key);
 
 	// derive AES and HMAC keys
 
@@ -103,7 +107,7 @@ ack_encap(uint8_t *buf, int len, struct node *p)
 	// ephemeral key R
 
 	buf[ENCAP_R] = 0x04; // uncompressed format
-	memcpy(buf + ENCAP_R + 1, p->ack_public_key, 64);
+	memcpy(buf + ENCAP_R + 1, ephemeral_public_key, 64);
 
 	// iv
 

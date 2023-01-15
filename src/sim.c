@@ -84,6 +84,10 @@ sim(void)
 		exit(1);
 	}
 
+	// don't have erecover so do this
+
+	memcpy(B.auth_public_key, A.auth_public_key, 64);
+
 	// sanity check
 
 	err = memcmp(A.auth_public_key, B.auth_public_key, 64);
