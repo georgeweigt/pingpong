@@ -57,7 +57,6 @@ void ec_genkey(uint8_t *private_key, uint8_t *public_key);
 void ec_pubkey(uint8_t *public_key, uint8_t *private_key);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
-void encap(uint8_t *buf, int len, struct node *p);
 int enlength(struct atom *p);
 int sublength(struct atom *p);
 int padlength(struct atom *p, int sublen);

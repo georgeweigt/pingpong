@@ -84,6 +84,36 @@ sim(void)
 		exit(1);
 	}
 
+	// sanity check
+
+	err = memcmp(A.auth_public_key, B.auth_public_key, 64);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	err = memcmp(A.ack_public_key, B.ack_public_key, 64);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	err = memcmp(A.auth_nonce, B.auth_nonce, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	err = memcmp(A.ack_nonce, B.ack_nonce, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
 	// secrets
 
 	secrets(&A, 1);

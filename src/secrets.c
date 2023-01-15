@@ -5,7 +5,7 @@ secrets(struct node *p, int initiator)
 	uint8_t shared_secret[32];
 	uint8_t buf[64];
 
-	// ephemeral_secret = auth_private_key * ack_public_key
+	// ephemeral_secret = ephemeral private_key * ephemeral public_key
 
 	if (initiator)
 		ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
