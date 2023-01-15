@@ -82,7 +82,7 @@ auth-body = [sig, initiator-pubk, initiator-nonce, auth-vsn, ...]
 ack-body = [recipient-ephemeral-pubk, recipient-nonce, ack-vsn, ...]
 ```
 
-Note that we have `recipient-ephemeral-pubk` but there is no `initiator-ephemeral-pubk`.
+Note that `recipient-ephemeral-pubk` is shown but there is no `initiator-ephemeral-pubk`.
 Of course, both are required to establish a shared secret.
 It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
