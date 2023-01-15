@@ -1,7 +1,8 @@
 void
 test(void)
 {
-	test_aes();
+	test_aes128();
+	test_aes256();
 	test_sha256();
 	test_keccak256();
 	test_rencode();
@@ -35,19 +36,20 @@ test_public_key(char *public_key_x, char *public_key_y)
 }
 
 void
-test_aes(void)
+test_aes128(void)
 {
 	int err, i;
 	uint8_t cipher[32], plain[32], iv[16];
 	uint8_t aes_key[16];
-	uint32_t aes_expanded_key[64];
+	uint32_t aes_expanded_key[48];
 
-	printf("Test aes ");
+	printf("Test aes128 ");
 
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 16; i++)
 		aes_key[i] = random();
+
+	for (i = 0; i < 16; i++)
 		iv[i] = random();
-	}
 
 	for (i = 0; i < 32; i++)
 		plain[i] = random();
@@ -59,6 +61,43 @@ test_aes(void)
 
 	aes128ctr_expandkey(aes_expanded_key, aes_key, iv);
 	aes128ctr_encrypt(aes_expanded_key, cipher, 32);
+
+	err = memcmp(cipher, plain, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		return;
+	}
+
+	printf("ok\n");
+}
+
+void
+test_aes256(void)
+{
+	int err, i;
+	uint8_t cipher[32], plain[32], iv[16];
+	uint8_t aes_key[32];
+	uint32_t aes_expanded_key[64];
+
+	printf("Test aes256 ");
+
+	for (i = 0; i < 32; i++)
+		aes_key[i] = random();
+
+	for (i = 0; i < 16; i++)
+		iv[i] = random();
+
+	for (i = 0; i < 32; i++)
+		plain[i] = random();
+
+	memcpy(cipher, plain, 32);
+
+	aes256ctr_setup(aes_expanded_key, aes_key, iv);
+	aes256ctr_encrypt(aes_expanded_key, cipher, 32);
+
+	aes256ctr_setup(aes_expanded_key, aes_key, iv);
+	aes256ctr_encrypt(aes_expanded_key, cipher, 32);
 
 	err = memcmp(cipher, plain, 32);
 
