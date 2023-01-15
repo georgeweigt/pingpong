@@ -70,7 +70,7 @@ nib(void)
 
 	aes256ctr_setup(N.expanded_key, N.aes_secret, iv);
 
-	aes256ctr_encrypt(N.expanded_key, buf, 16);
+	aes256ctr_encrypt(N.expanded_key, buf, 16); // encrypt does decrypt in ctr mode
 
 	printmem(buf, 16);
 }

@@ -53,16 +53,14 @@ struct mac {
 };
 
 struct node {
-
 	int fd;
-
 	uint8_t private_key[32];
 	uint8_t public_key[64];
 	uint8_t geth_public_key[64];
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
 	uint8_t auth_private_key[32];
 	uint8_t auth_nonce[32];
-	uint8_t ack_public_key[32];
+	uint8_t ack_public_key[64];
 	uint8_t ack_nonce[32];
 	uint8_t aes_secret[32];
 	uint8_t mac_secret[32];
@@ -79,6 +77,5 @@ extern int tos;
 extern int atom_count;
 extern int ec_malloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
-extern uint8_t private_key[32], public_key_x[32], public_key_y[32];
 extern struct account account_table[];
 extern struct node initiator, recipient;
