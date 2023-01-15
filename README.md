@@ -3,8 +3,8 @@
 This project is under construction.
 Currently the `auth/ack` message exchange is working.
 
-See the directory `src` for individual source files.
-`pingpong.c` is the cat of source files from `src`
+All of the crypto code is here, see the directory `src` for individual source files.
+`pingpong.c` is the cat of source files.
 
 #
 
@@ -83,7 +83,7 @@ ack-body = [recipient-ephemeral-pubk, recipient-nonce, ack-vsn, ...]
 ```
 
 Note that `recipient-ephemeral-pubk` is shown but there is no `initiator-ephemeral-pubk`.
-Of course, both are required to establish a shared secret.
+Of course, both are required to establish a shared secret from which session keys are derived.
 It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
 #
