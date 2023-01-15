@@ -3,41 +3,60 @@
 void
 sim(void)
 {
-	int err, len, listen_fd;
+	int err, i, len, listen_fd;
 	uint8_t *buf;
 
-	struct node initiator; // Alice
-	struct node recipient; // Bob
+	struct node A; // Alice
+	struct node B; // Bob
 
-	memset(&initiator, 0, sizeof initiator);
-	memset(&recipient, 0, sizeof recipient);
+	memset(&A, 0, sizeof A);
+	memset(&B, 0, sizeof B);
 
 	// generate keys
 
-	ec_genkey(initiator.private_key, initiator.public_key);
-	ec_genkey(recipient.private_key, recipient.public_key);
+	ec_genkey(A.private_key, A.public_key);
+	ec_genkey(B.private_key, B.public_key);
 
-	memcpy(initiator.geth_public_key, recipient.public_key, 64); // Alice knows Bob's public key
-	memcpy(recipient.geth_public_key, initiator.public_key, 64); // Bob knows Alice's public key
+	memcpy(A.geth_public_key, B.public_key, 64); // Alice knows Bob's public key
+	memcpy(B.geth_public_key, A.public_key, 64); // Bob knows Alice's public key
 
-	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.geth_public_key);
-	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.geth_public_key);
+	ec_ecdh(A.static_shared_secret, A.private_key, A.geth_public_key);
+	ec_ecdh(B.static_shared_secret, B.private_key, B.geth_public_key);
+
+	// ephemeral keys, nonces
+
+	ec_genkey(A.auth_private_key, A.auth_public_key);
+	ec_genkey(B.auth_private_key, B.auth_public_key);
+
+	ec_genkey(A.ack_private_key, A.ack_public_key);
+	ec_genkey(B.ack_private_key, B.ack_public_key);
+
+	for (i = 0; i < 32; i++) {
+		A.auth_nonce[i] = random();
+		A.ack_nonce[i] = random();
+		B.auth_nonce[i] = random();
+		B.ack_nonce[i] = random();
+	}
 
 	// establish connection
 
 	listen_fd = start_listening(30303);
-	initiator.fd = client_connect("127.0.0.1", 30303);
+	A.fd = client_connect("127.0.0.1", 30303);
 	wait_for_pollin(listen_fd);
-	recipient.fd = server_connect(listen_fd);
+	B.fd = server_connect(listen_fd);
 	close(listen_fd);
 
-	send_auth(&initiator); // Alice sends to Bob
+	// send auth
 
-	wait_for_pollin(recipient.fd);
+	send_auth(&A);
 
-	buf = receive(recipient.fd, &len); // Bob receives from Alice
+	// recv auth
 
-	err = receive_auth(&recipient, buf, len);
+	wait_for_pollin(B.fd);
+
+	buf = receive(B.fd, &len);
+
+	err = recv_auth(&B, buf, len);
 
 	free(buf);
 
@@ -46,9 +65,33 @@ sim(void)
 		exit(1);
 	}
 
-	// compare keys
+	// send ack
 
-	err = memcmp(initiator.public_key, recipient.geth_public_key, 64);
+	send_ack(&B);
+
+	// recv ack
+
+	wait_for_pollin(A.fd);
+
+	buf = receive(A.fd, &len);
+
+	err = recv_ack(&A, buf, len);
+
+	free(buf);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	// secrets
+
+	secrets(&A, 1);
+	secrets(&B, 0);
+
+	// compare aes secrets
+
+	err = memcmp(A.aes_secret, B.aes_secret, 32);
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
@@ -57,8 +100,8 @@ sim(void)
 
 	printf("ok\n");
 
-	close(initiator.fd);
-	close(recipient.fd);
+	close(A.fd);
+	close(B.fd);
 }
 
 uint8_t *

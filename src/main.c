@@ -5,8 +5,13 @@ main(int argc, char *argv[])
 	aes128_init();
 	aes256_init();
 
-	if (argc > 1 && strcmp(argv[1], "test") == 0) {
-		test();
+	if (argc > 1) {
+		if (strcmp(argv[1], "test") == 0)
+			test();
+		else if (strcmp(argv[1], "sim") == 0)
+			sim();
+		else
+			printf("usage: pingpong | pinpong test | pingpong sim\n");
 		exit(1);
 	}
 
@@ -16,7 +21,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int err, len;
+	int err, i, len;
 	uint8_t *buf;
 	struct node N;
 
@@ -31,6 +36,13 @@ nib(void)
 	// static_shared_secret = private_key * geth_public_key
 
 	ec_ecdh(N.static_shared_secret, N.private_key, N.geth_public_key);
+
+	// ephemeral key, nonce
+
+	ec_genkey(N.auth_private_key, N.auth_public_key);
+
+	for (i = 0; i < 32; i++)
+		N.auth_nonce[i] = random();
 
 	// establish connection
 
@@ -55,7 +67,7 @@ nib(void)
 		exit(1);
 	}
 
-	secrets(&N);
+	secrets(&N, 1);
 
 	macs(&N);
 

@@ -1,5 +1,5 @@
 void
-secrets(struct node *p)
+secrets(struct node *p, int initiator)
 {
 	uint8_t ephemeral_secret[32];
 	uint8_t shared_secret[32];
@@ -7,7 +7,10 @@ secrets(struct node *p)
 
 	// ephemeral_secret = auth_private_key * ack_public_key
 
-	ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
+	if (initiator)
+		ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
+	else
+		ec_ecdh(ephemeral_secret, p->ack_private_key, p->auth_public_key);
 
 	// shared_secret = keccak256(ephemeral_secret || keccak256(ack_nonce || auth_nonce))
 
