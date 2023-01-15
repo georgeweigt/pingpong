@@ -1,3 +1,5 @@
+// returns the number of bytes needed to encode p
+
 int
 enlength(struct atom *p)
 {
