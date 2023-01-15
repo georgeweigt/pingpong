@@ -79,11 +79,10 @@ Hence the length of ciphertext is exactly the same as the length of `iv || msg`.
 
 ```
 auth-body = [sig, initiator-pubk, initiator-nonce, auth-vsn, ...]
-
 ack-body = [recipient-ephemeral-pubk, recipient-nonce, ack-vsn, ...]
 ```
 
-Note that no `initiator-ephemeral-pubk` is shown.
+Note that we have a `recipient-ephemeral-pubk` but no `initiator-ephemeral-pubk` is shown.
 It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
 #
