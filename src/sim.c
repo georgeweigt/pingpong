@@ -120,10 +120,10 @@ sim(void)
 		exit(1);
 	}
 
-	// secrets
+	// session setup
 
-	secrets(&A, 1);
-	secrets(&B, 0);
+	session(&A, 1);
+	session(&B, 0);
 
 	// compare aes secrets
 

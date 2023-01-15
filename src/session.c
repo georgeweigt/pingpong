@@ -1,9 +1,9 @@
 void
-secrets(struct node *p, int initiator)
+session(struct node *p, int initiator)
 {
 	uint8_t ephemeral_secret[32];
 	uint8_t shared_secret[32];
-	uint8_t buf[64];
+	uint8_t buf[64], iv[16];
 
 	// ephemeral_secret = ephemeral private_key * ephemeral public_key
 
@@ -36,4 +36,11 @@ secrets(struct node *p, int initiator)
 	memcpy(buf + 32, p->aes_secret, 32);
 
 	keccak256(p->mac_secret, buf, 64);
+
+	// setup enc/dec streams
+
+	memset(iv, 0, 16);
+
+	aes256ctr_setup(p->encrypt_state, p->aes_secret, iv);
+	aes256ctr_setup(p->decrypt_state, p->aes_secret, iv);
 }

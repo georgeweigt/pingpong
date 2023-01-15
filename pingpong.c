@@ -191,11 +191,11 @@ int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
 int rencode_string(uint8_t *buf, struct atom *p);
-void secrets(struct node *p, int initiator);
 void send_ack(struct node *p);
 struct atom * ack_body(struct node *p);
 void send_auth(struct node *p);
 struct atom * auth_body(struct node *p);
+void session(struct node *p, int initiator);
 void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
 void sha256(uint8_t *buf, int len, uint8_t *out);
 void sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out);
@@ -4130,9 +4130,9 @@ nib(void)
 		exit(1);
 	}
 
-	secrets(&N, 1);
+	// session setup
 
-	macs(&N);
+	session(&N, 1);
 
 	// wait for hello
 
@@ -4140,19 +4140,15 @@ nib(void)
 
 	buf = receive(N.fd, &len);
 
-	close(N.fd);
+	// the rest is under construction
 
-	printmem(buf, 16);
-
-	uint8_t iv[16];
-	memset(iv, 0, 16);
-
-	aes256ctr_setup(N.encrypt_state, N.aes_secret, iv);
-	aes256ctr_setup(N.decrypt_state, N.aes_secret, iv);
+	printmem(buf, 16); // before decryption
 
 	aes256ctr_encrypt(N.decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
 
-	printmem(buf, 16);
+	printmem(buf, 16); // after decryption
+
+	close(N.fd);
 }
 // returns result on stack or -1 on error
 
@@ -4503,45 +4499,6 @@ rencode_string(uint8_t *buf, struct atom *p)
 	return padlen + sublen;
 }
 void
-secrets(struct node *p, int initiator)
-{
-	uint8_t ephemeral_secret[32];
-	uint8_t shared_secret[32];
-	uint8_t buf[64];
-
-	// ephemeral_secret = ephemeral private_key * ephemeral public_key
-
-	if (initiator)
-		ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
-	else
-		ec_ecdh(ephemeral_secret, p->ack_private_key, p->auth_public_key);
-
-	// shared_secret = keccak256(ephemeral_secret || keccak256(ack_nonce || auth_nonce))
-
-	memcpy(buf, p->ack_nonce, 32);
-	memcpy(buf + 32, p->auth_nonce, 32);
-
-	keccak256(buf + 32, buf, 64);
-
-	memcpy(buf, ephemeral_secret, 32);
-
-	keccak256(shared_secret, buf, 64);
-
-	// aes_secret = keccak256(ephemeral_secret || shared_secret)
-
-	memcpy(buf, ephemeral_secret, 32);
-	memcpy(buf + 32, shared_secret, 32);
-
-	keccak256(p->aes_secret, buf, 64);
-
-	// mac_secret = keccak256(ephemeral_secret || aes_secret)
-
-	memcpy(buf, ephemeral_secret, 32);
-	memcpy(buf + 32, p->aes_secret, 32);
-
-	keccak256(p->mac_secret, buf, 64);
-}
-void
 send_ack(struct node *p)
 {
 	int len, msglen, n;
@@ -4684,6 +4641,52 @@ auth_body(struct node *p)
 	list(4);
 
 	return pop();
+}
+void
+session(struct node *p, int initiator)
+{
+	uint8_t ephemeral_secret[32];
+	uint8_t shared_secret[32];
+	uint8_t buf[64], iv[16];
+
+	// ephemeral_secret = ephemeral private_key * ephemeral public_key
+
+	if (initiator)
+		ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
+	else
+		ec_ecdh(ephemeral_secret, p->ack_private_key, p->auth_public_key);
+
+	// shared_secret = keccak256(ephemeral_secret || keccak256(ack_nonce || auth_nonce))
+
+	memcpy(buf, p->ack_nonce, 32);
+	memcpy(buf + 32, p->auth_nonce, 32);
+
+	keccak256(buf + 32, buf, 64);
+
+	memcpy(buf, ephemeral_secret, 32);
+
+	keccak256(shared_secret, buf, 64);
+
+	// aes_secret = keccak256(ephemeral_secret || shared_secret)
+
+	memcpy(buf, ephemeral_secret, 32);
+	memcpy(buf + 32, shared_secret, 32);
+
+	keccak256(p->aes_secret, buf, 64);
+
+	// mac_secret = keccak256(ephemeral_secret || aes_secret)
+
+	memcpy(buf, ephemeral_secret, 32);
+	memcpy(buf + 32, p->aes_secret, 32);
+
+	keccak256(p->mac_secret, buf, 64);
+
+	// setup enc/dec streams
+
+	memset(iv, 0, 16);
+
+	aes256ctr_setup(p->encrypt_state, p->aes_secret, iv);
+	aes256ctr_setup(p->decrypt_state, p->aes_secret, iv);
 }
 void
 hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out)
@@ -5133,10 +5136,10 @@ sim(void)
 		exit(1);
 	}
 
-	// secrets
+	// session setup
 
-	secrets(&A, 1);
-	secrets(&B, 0);
+	session(&A, 1);
+	session(&B, 0);
 
 	// compare aes secrets
 

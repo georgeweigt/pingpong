@@ -67,9 +67,9 @@ nib(void)
 		exit(1);
 	}
 
-	secrets(&N, 1);
+	// session setup
 
-	macs(&N);
+	session(&N, 1);
 
 	// wait for hello
 
@@ -77,17 +77,13 @@ nib(void)
 
 	buf = receive(N.fd, &len);
 
-	close(N.fd);
+	// the rest is under construction
 
-	printmem(buf, 16);
-
-	uint8_t iv[16];
-	memset(iv, 0, 16);
-
-	aes256ctr_setup(N.encrypt_state, N.aes_secret, iv);
-	aes256ctr_setup(N.decrypt_state, N.aes_secret, iv);
+	printmem(buf, 16); // before decryption
 
 	aes256ctr_encrypt(N.decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
 
-	printmem(buf, 16);
+	printmem(buf, 16); // after decryption
+
+	close(N.fd);
 }
