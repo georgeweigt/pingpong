@@ -4037,30 +4037,6 @@ print_list_nib(struct atom *p, int level)
 	for (i = 0; i < p->length; i++)
 		printf("%02x", p->string[i]);
 }
-void
-macs(struct node *p)
-{
-	int i;
-	uint8_t buf[32];
-
-	// ingress-mac = keccak256.init((mac-secret ^ initiator-nonce) || ack)
-
-	for (i = 0; i < 32; i++)
-		buf[i] = p->mac_secret[i] ^ p->auth_nonce[i];
-
-	keccak256_init(&p->ingress_mac);
-	keccak256_update(&p->ingress_mac, buf, 32);
-	keccak256_update(&p->ingress_mac, p->ack_buf, p->ack_len);
-
-	// egress-mac = keccak256.init((mac-secret ^ recipient-nonce) || auth)
-
-	for (i = 0; i < 32; i++)
-		buf[i] = p->mac_secret[i] ^ p->ack_nonce[i];
-
-	keccak256_init(&p->egress_mac);
-	keccak256_update(&p->egress_mac, buf, 32);
-	keccak256_update(&p->egress_mac, p->auth_buf, p->auth_len);
-}
 int
 main(int argc, char *argv[])
 {
@@ -4645,9 +4621,11 @@ auth_body(struct node *p)
 void
 session(struct node *p, int initiator)
 {
+	int i;
 	uint8_t ephemeral_secret[32];
 	uint8_t shared_secret[32];
 	uint8_t buf[64], iv[16];
+	struct mac *a, *b;
 
 	// ephemeral_secret = ephemeral private_key * ephemeral public_key
 
@@ -4687,6 +4665,32 @@ session(struct node *p, int initiator)
 
 	aes256ctr_setup(p->encrypt_state, p->aes_secret, iv);
 	aes256ctr_setup(p->decrypt_state, p->aes_secret, iv);
+
+	if (initiator) {
+		a = &p->ingress_mac;
+		b = &p->egress_mac;
+	} else {
+		a = &p->egress_mac; // interchange for recipient
+		b = &p->ingress_mac;
+	}
+
+	// initiator ingress-mac = keccak256.init((mac-secret ^ initiator-nonce) || ack)
+
+	for (i = 0; i < 32; i++)
+		buf[i] = p->mac_secret[i] ^ p->auth_nonce[i];
+
+	keccak256_init(a);
+	keccak256_update(a, buf, 32);
+	keccak256_update(a, p->ack_buf, p->ack_len);
+
+	// initiator egress-mac = keccak256.init((mac-secret ^ recipient-nonce) || auth)
+
+	for (i = 0; i < 32; i++)
+		buf[i] = p->mac_secret[i] ^ p->ack_nonce[i];
+
+	keccak256_init(b);
+	keccak256_update(b, buf, 32);
+	keccak256_update(b, p->auth_buf, p->auth_len);
 }
 void
 hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out)
