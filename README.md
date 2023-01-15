@@ -84,7 +84,7 @@ ack-body = [recipient-ephemeral-pubk, recipient-nonce, ack-vsn, ...]
 ```
 
 Note that there is no `initiator-ephemeral-pubk` shown.
-However, in order to establish a shared secret there has be one.
+However, in order to establish a shared secret there has be one to pair with `recipient-ephemeral-pubk`.
 It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
 #
