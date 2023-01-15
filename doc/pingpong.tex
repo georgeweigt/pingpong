@@ -63,4 +63,37 @@ kdf(aes_key, hmac_key, shared_secret);
 \end{verbatim}
 }
 
+\section*{Review of shared secrets}
+
+Let $k_a$ and $k_b$ be private keys and let $K_a$ and $K_b$ be public keys such that
+\begin{equation*}
+K_a=k_a\,G,\quad K_b=k_b\,G
+\end{equation*}
+where $G$ is the generating curve.
+
+\bigskip
+It follows that
+\begin{equation*}
+\frac{K_a}{k_a}=G,\quad \frac{K_b}{k_b}=G
+\end{equation*}
+
+Hence
+\begin{equation*}
+\frac{K_a}{k_a}=\frac{K_b}{k_b}
+\end{equation*}
+and
+\begin{equation*}
+k_b\,K_a=k_a\,K_b
+\end{equation*}
+
+If $A$ and $B$ exchange public keys then both can compute shared secret $S$.
+\begin{equation*}
+k_a\,K_b=S,\quad k_b\,K_a=S
+\end{equation*}
+
+Normally we don't care what $S$ is but mathematically we have
+\begin{equation*}
+S=k_ak_b\,G
+\end{equation*}
+
 \end{document}
