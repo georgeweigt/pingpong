@@ -84,7 +84,9 @@ sim(void)
 		exit(1);
 	}
 
-	// don't have erecover so do this
+	// geth recovers auth_public_key from sig in auth msg
+
+	// don't have recover function so do this
 
 	memcpy(B.auth_public_key, A.auth_public_key, 64);
 

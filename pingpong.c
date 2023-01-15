@@ -59,12 +59,15 @@ struct node {
 	uint8_t geth_public_key[64];
 	uint8_t static_shared_secret[32]; // == k_A * K_B == k_B * K_A
 	uint8_t auth_private_key[32];
+	uint8_t auth_public_key[64];
 	uint8_t auth_nonce[32];
+	uint8_t ack_private_key[32];
 	uint8_t ack_public_key[64];
 	uint8_t ack_nonce[32];
 	uint8_t aes_secret[32];
 	uint8_t mac_secret[32];
-	uint32_t expanded_key[64];
+	uint32_t encrypt_state[64];
+	uint32_t decrypt_state[64];
 	struct mac ingress_mac;
 	struct mac egress_mac;
 	uint8_t *auth_buf;
@@ -86,8 +89,8 @@ void aes128_init();
 void aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v);
 void aes128_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out);
 void aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out);
-void aes256ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
-void aes256ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
+void aes256ctr_setup(uint32_t *state, uint8_t *key, uint8_t *iv);
+void aes256ctr_encrypt(uint32_t *state, uint8_t *buf, int len);
 int aes256_mul(int a, int b);
 void aes256_init();
 void aes256_expand_key(uint32_t *w, uint8_t *key);
@@ -182,12 +185,15 @@ int rdecode_nib(uint8_t *buf, int length);
 int rdecode_list(uint8_t *buf, int length);
 int recv_ack(struct node *p, uint8_t *buf, int len);
 int recv_ack_data(struct node *p, struct atom *q);
-int receive_auth(struct node *p, uint8_t *buf, int len);
+int recv_auth(struct node *p, uint8_t *buf, int len);
+int recv_auth_data(struct node *p, struct atom *q);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
 int rencode_string(uint8_t *buf, struct atom *p);
-void secrets(struct node *p);
+void secrets(struct node *p, int initiator);
+void send_ack(struct node *p);
+struct atom * ack_body(struct node *p);
 void send_auth(struct node *p);
 struct atom * auth_body(struct node *p);
 void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
@@ -650,30 +656,30 @@ aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
 #undef t32
 #undef t31
 #undef t30
-#define CTR ((uint8_t *) expanded_key + 240)
+#define CTR ((uint8_t *) state + 240)
 
-// expanded_key		256 bytes (64 uint32_t)
-// key			32 bytes
-// iv			16 bytes
+// state	256 bytes (64 uint32_t)
+// key		32 bytes
+// iv		16 bytes
 
 void
-aes256ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
+aes256ctr_setup(uint32_t *state, uint8_t *key, uint8_t *iv)
 {
-	aes256_expand_key(expanded_key, key);
+	aes256_expand_key(state, key);
 	memcpy(CTR, iv, 16);
 }
 
 // used for both encryption and decryption
 
 void
-aes256ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
+aes256ctr_encrypt(uint32_t *state, uint8_t *buf, int len)
 {
 	int i;
 	uint8_t block[16];
 
 	while (len > 0) {
 
-		aes256_encrypt_block(expanded_key, CTR, block);
+		aes256_encrypt_block(state, CTR, block);
 
 		for (i = 0; i < 16 && i < len; i++)
 			buf[i] ^= block[i];
@@ -2810,7 +2816,7 @@ ec_ecdh(uint8_t *shared_secret, uint8_t *private_key, uint8_t *public_key)
 
 	for (i = 0; i < len(S.x); i++) {
 		if (32 - 4 * i - 4 < 0)
-			break; // err, result greater than 32 bytes
+			break; // err, result greater than 32 bytes, truncate
 		// bignums are LE, this converts to BE
 		shared_secret[32 - 4 * i - 4] = S.x[i] >> 24;
 		shared_secret[32 - 4 * i - 3] = S.x[i] >> 16;
@@ -3206,7 +3212,8 @@ encap(uint8_t *buf, int len, struct node *p)
 {
 	int i, msglen;
 	uint8_t *msg;
-	uint8_t auth_public_key[64];
+	uint8_t ephemeral_private_key[32];
+	uint8_t ephemeral_public_key[64];
 	uint8_t shared_secret[32];
 	uint8_t hmac_key[32];
 	uint8_t aes_key[16];
@@ -3215,13 +3222,11 @@ encap(uint8_t *buf, int len, struct node *p)
 	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
 	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	// generate ephemeral keys
-
-	ec_genkey(p->auth_private_key, auth_public_key);
-
 	// derive shared secret
 
-	ec_ecdh(shared_secret, p->auth_private_key, p->geth_public_key);
+	ec_genkey(ephemeral_private_key, ephemeral_public_key);
+
+	ec_ecdh(shared_secret, ephemeral_private_key, p->geth_public_key);
 
 	// derive AES and HMAC keys
 
@@ -3235,7 +3240,7 @@ encap(uint8_t *buf, int len, struct node *p)
 	// ephemeral key R
 
 	buf[ENCAP_R] = 0x04; // uncompressed format
-	memcpy(buf + ENCAP_R + 1, auth_public_key, 64);
+	memcpy(buf + ENCAP_R + 1, ephemeral_public_key, 64);
 
 	// iv
 
@@ -4063,8 +4068,13 @@ main(int argc, char *argv[])
 	aes128_init();
 	aes256_init();
 
-	if (argc > 1 && strcmp(argv[1], "test") == 0) {
-		test();
+	if (argc > 1) {
+		if (strcmp(argv[1], "test") == 0)
+			test();
+		else if (strcmp(argv[1], "sim") == 0)
+			sim();
+		else
+			printf("usage: pingpong | pinpong test | pingpong sim\n");
 		exit(1);
 	}
 
@@ -4074,7 +4084,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int err, len;
+	int err, i, len;
 	uint8_t *buf;
 	struct node N;
 
@@ -4089,6 +4099,13 @@ nib(void)
 	// static_shared_secret = private_key * geth_public_key
 
 	ec_ecdh(N.static_shared_secret, N.private_key, N.geth_public_key);
+
+	// ephemeral key, nonce
+
+	ec_genkey(N.auth_private_key, N.auth_public_key);
+
+	for (i = 0; i < 32; i++)
+		N.auth_nonce[i] = random();
 
 	// establish connection
 
@@ -4108,10 +4125,12 @@ nib(void)
 
 	free(buf);
 
-	if (err)
+	if (err) {
+		printf("recv ack err\n");
 		exit(1);
+	}
 
-	secrets(&N);
+	secrets(&N, 1);
 
 	macs(&N);
 
@@ -4128,9 +4147,10 @@ nib(void)
 	uint8_t iv[16];
 	memset(iv, 0, 16);
 
-	aes256ctr_setup(N.expanded_key, N.aes_secret, iv);
+	aes256ctr_setup(N.encrypt_state, N.aes_secret, iv);
+	aes256ctr_setup(N.decrypt_state, N.aes_secret, iv);
 
-	aes256ctr_encrypt(N.expanded_key, buf, 16); // encrypt does decrypt in ctr mode
+	aes256ctr_encrypt(N.decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
 
 	printmem(buf, 16);
 }
@@ -4311,8 +4331,8 @@ recv_ack_data(struct node *p, struct atom *q)
 	if (q == NULL || q->length != -1 || q->cdr == NULL)
 		return -1;
 
-	q1 = q->car;		// 1st item: recipient ephemeral public key
-	q2 = q->cdr->car;	// 2nd item: recipient nonce
+	q1 = q->car;		// 1st item: ephemeral public key
+	q2 = q->cdr->car;	// 2nd item: nonce
 
 	if (q1 == NULL || q2 == NULL)
 		return -1;
@@ -4320,8 +4340,8 @@ recv_ack_data(struct node *p, struct atom *q)
 	if (q1->length != 64 || q2->length != 32)
 		return -1;
 
-	memcpy(p->ack_public_key, q1, 64);
-	memcpy(p->ack_nonce, q2, 32);
+	memcpy(p->ack_public_key, q1->string, 64);
+	memcpy(p->ack_nonce, q2->string, 32);
 
 	return 0;
 }
@@ -4331,46 +4351,59 @@ recv_ack_data(struct node *p, struct atom *q)
 // ciphertext	msglen bytes
 // hmac		32 bytes
 
-#define R 2
-#define IV (2 + 65)
-#define C (2 + 65 + 16)
-#define OVERHEAD (2 + 65 + 16 + 32)
-
 int
-receive_auth(struct node *p, uint8_t *buf, int len)
+recv_auth(struct node *p, uint8_t *buf, int len)
 {
 	int err, msglen;
-	struct atom *list;
+	struct atom *q;
 
 	err = decap(buf, len, p->private_key);
 
 	if (err)
 		return -1;
 
-	msglen = len - OVERHEAD;
+	memcpy(p->auth_public_key, buf + 3, 64);
 
-	err = rdecode_relax(buf + C, msglen);
+	msglen = len - ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
+
+	err = rdecode_relax(buf + ENCAP_C, msglen);
 
 	if (err)
 		return -1;
 
-	list = pop();
+	q = pop();
 
-	// FIXME validate list
+	err = recv_auth_data(p, q);
 
-	// save peer public key
+	free_list(q);
 
-	memcpy(p->geth_public_key, list->cdr->car->string, 64);
+	return err;
+}
 
-	free_list(list);
+int
+recv_auth_data(struct node *p, struct atom *q)
+{
+	struct atom *q1, *q2, *q3;
+
+	// length == -1 indicates a list item
+
+	if (q == NULL || q->length != -1 || q->cdr == NULL || q->cdr->cdr == NULL)
+		return -1;
+
+	q1 = q->car;		// 1st item: sig
+	q2 = q->cdr->car;	// 2nd item: public key
+	q3 = q->cdr->cdr->car;	// 3rd item: nonce
+
+	if (q1 == NULL || q2 == NULL || q3 == NULL)
+		return -1;
+
+	if (q2->length != 64 || q3->length != 32)
+		return -1;
+
+	memcpy(p->auth_nonce, q3->string, 32);
 
 	return 0;
 }
-
-#undef R
-#undef IV
-#undef C
-#undef OVERHEAD
 int
 rencode(uint8_t *buf, int len, struct atom *p)
 {
@@ -4470,17 +4503,20 @@ rencode_string(uint8_t *buf, struct atom *p)
 	return padlen + sublen;
 }
 void
-secrets(struct node *p)
+secrets(struct node *p, int initiator)
 {
 	uint8_t ephemeral_secret[32];
 	uint8_t shared_secret[32];
 	uint8_t buf[64];
 
-	// ephemeral_secret = auth_private_key * ack_public_key
+	// ephemeral_secret = ephemeral private_key * ephemeral public_key
 
-	ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
+	if (initiator)
+		ec_ecdh(ephemeral_secret, p->auth_private_key, p->ack_public_key);
+	else
+		ec_ecdh(ephemeral_secret, p->ack_private_key, p->auth_public_key);
 
-	// shared_secret = keccak256(ephemeral_key || keccak256(ack_nonce || auth_nonce))
+	// shared_secret = keccak256(ephemeral_secret || keccak256(ack_nonce || auth_nonce))
 
 	memcpy(buf, p->ack_nonce, 32);
 	memcpy(buf + 32, p->auth_nonce, 32);
@@ -4506,14 +4542,76 @@ secrets(struct node *p)
 	keccak256(p->mac_secret, buf, 64);
 }
 void
-send_auth(struct node *p)
+send_ack(struct node *p)
 {
-	int i, len, msglen, n;
+	int len, msglen, n;
 	uint8_t *buf;
 	struct atom *q;
 
-	for (i = 0; i < 32; i++)
-		p->auth_nonce[i] = random();
+	q = ack_body(p);
+
+	msglen = enlength(q);
+
+	// pad with random amount of data, at least 100 bytes
+
+	n = 100 + random() % 100;
+
+	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
+
+	buf = malloc(len);
+
+	if (buf == NULL)
+		exit(1);
+
+	rencode(buf + ENCAP_C, msglen, q); // ENCAP_C == 2 + 65 + 16
+
+	free_list(q);
+
+	encap(buf, len, p);
+
+	// save buf for later
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+
+	p->ack_buf = buf;
+	p->ack_len = len;
+
+	// send buf
+
+	n = send(p->fd, buf, len, 0);
+
+	if (n < 0)
+		perror("send");
+
+	printf("%d bytes sent\n", n);
+}
+
+struct atom *
+ack_body(struct node *p)
+{
+	// public key
+
+	push_string(p->ack_public_key, 64);
+
+	// nonce
+
+	push_string(p->ack_nonce, 32);
+
+	// version
+
+	push_number(4);
+
+	list(3);
+
+	return pop();
+}
+void
+send_auth(struct node *p)
+{
+	int len, msglen, n;
+	uint8_t *buf;
+	struct atom *q;
 
 	q = auth_body(p);
 
@@ -4565,7 +4663,7 @@ auth_body(struct node *p)
 	for (i = 0; i < 32; i++)
 		hash[i] = p->static_shared_secret[i] ^ p->auth_nonce[i];
 
-	ec_sign(sig, sig + 32, hash, p->private_key);
+	ec_sign(sig, sig + 32, hash, p->auth_private_key);
 
 	sig[64] = p->public_key[63] & 1;
 
@@ -4918,41 +5016,60 @@ test_sign(void)
 void
 sim(void)
 {
-	int err, len, listen_fd;
+	int err, i, len, listen_fd;
 	uint8_t *buf;
 
-	struct node initiator; // Alice
-	struct node recipient; // Bob
+	struct node A; // Alice
+	struct node B; // Bob
 
-	memset(&initiator, 0, sizeof initiator);
-	memset(&recipient, 0, sizeof recipient);
+	memset(&A, 0, sizeof A);
+	memset(&B, 0, sizeof B);
 
 	// generate keys
 
-	ec_genkey(initiator.private_key, initiator.public_key);
-	ec_genkey(recipient.private_key, recipient.public_key);
+	ec_genkey(A.private_key, A.public_key);
+	ec_genkey(B.private_key, B.public_key);
 
-	memcpy(initiator.geth_public_key, recipient.public_key, 64); // Alice knows Bob's public key
-	memcpy(recipient.geth_public_key, initiator.public_key, 64); // Bob knows Alice's public key
+	memcpy(A.geth_public_key, B.public_key, 64); // Alice knows Bob's public key
+	memcpy(B.geth_public_key, A.public_key, 64); // Bob knows Alice's public key
 
-	ec_ecdh(initiator.static_shared_secret, initiator.private_key, initiator.geth_public_key);
-	ec_ecdh(recipient.static_shared_secret, recipient.private_key, recipient.geth_public_key);
+	ec_ecdh(A.static_shared_secret, A.private_key, A.geth_public_key);
+	ec_ecdh(B.static_shared_secret, B.private_key, B.geth_public_key);
+
+	// ephemeral keys, nonces
+
+	ec_genkey(A.auth_private_key, A.auth_public_key);
+	ec_genkey(B.auth_private_key, B.auth_public_key);
+
+	ec_genkey(A.ack_private_key, A.ack_public_key);
+	ec_genkey(B.ack_private_key, B.ack_public_key);
+
+	for (i = 0; i < 32; i++) {
+		A.auth_nonce[i] = random();
+		A.ack_nonce[i] = random();
+		B.auth_nonce[i] = random();
+		B.ack_nonce[i] = random();
+	}
 
 	// establish connection
 
 	listen_fd = start_listening(30303);
-	initiator.fd = client_connect("127.0.0.1", 30303);
+	A.fd = client_connect("127.0.0.1", 30303);
 	wait_for_pollin(listen_fd);
-	recipient.fd = server_connect(listen_fd);
+	B.fd = server_connect(listen_fd);
 	close(listen_fd);
 
-	send_auth(&initiator); // Alice sends to Bob
+	// send auth
 
-	wait_for_pollin(recipient.fd);
+	send_auth(&A);
 
-	buf = receive(recipient.fd, &len); // Bob receives from Alice
+	// recv auth
 
-	err = receive_auth(&recipient, buf, len);
+	wait_for_pollin(B.fd);
+
+	buf = receive(B.fd, &len);
+
+	err = recv_auth(&B, buf, len);
 
 	free(buf);
 
@@ -4961,9 +5078,69 @@ sim(void)
 		exit(1);
 	}
 
-	// compare keys
+	// send ack
 
-	err = memcmp(initiator.public_key, recipient.geth_public_key, 64);
+	send_ack(&B);
+
+	// recv ack
+
+	wait_for_pollin(A.fd);
+
+	buf = receive(A.fd, &len);
+
+	err = recv_ack(&A, buf, len);
+
+	free(buf);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	// geth recovers auth_public_key from sig in auth msg
+
+	// don't have recover function so do this
+
+	memcpy(B.auth_public_key, A.auth_public_key, 64);
+
+	// sanity check
+
+	err = memcmp(A.auth_public_key, B.auth_public_key, 64);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	err = memcmp(A.ack_public_key, B.ack_public_key, 64);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	err = memcmp(A.auth_nonce, B.auth_nonce, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	err = memcmp(A.ack_nonce, B.ack_nonce, 32);
+
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	// secrets
+
+	secrets(&A, 1);
+	secrets(&B, 0);
+
+	// compare aes secrets
+
+	err = memcmp(A.aes_secret, B.aes_secret, 32);
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
@@ -4972,8 +5149,8 @@ sim(void)
 
 	printf("ok\n");
 
-	close(initiator.fd);
-	close(recipient.fd);
+	close(A.fd);
+	close(B.fd);
 }
 
 uint8_t *
