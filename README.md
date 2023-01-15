@@ -56,8 +56,9 @@ In `pingpong.c`, set `GETH_PUBLIC_KEY` accordingly and run `make`
 prefix || R || ciphertext || hmac
 ```
 
-`R` is an ephemeral public key that the receiver uses to decrypt the ciphertext.
+Note that `R` is an ephemeral public key that the receiver uses to decrypt the ciphertext.
 After decryption, `R` is thrown away and is not used for anything else.
+In particular, `R` is not used to compute any session secrets.
 
 2. After decryption we have
 
@@ -71,7 +72,7 @@ prefix || R || iv || msg || hmac
 hmac = hmac256(iv || msg || prefix)
 ```
 
-3. The ciphertext of `msg` is not padded to be multiple of 16 bytes as is done in TLS and VPN.
+3. The ciphertext of `iv || msg` is not padded to be multiple of 16 bytes as is done in TLS and VPN.
 
 4. From RLPx documentation
 
