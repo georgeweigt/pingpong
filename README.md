@@ -50,8 +50,7 @@ In `pingpong.c`, set `GETH_PUBLIC_KEY` accordingly and run `make`
 
 # Lessons learned
 
-1.
-AUTH and ACK messages have the following format.
+1. AUTH and ACK messages have the following format.
 
 ```
 prefix || R || ciphertext || hmac
@@ -60,8 +59,7 @@ prefix || R || ciphertext || hmac
 `R` is an ephemeral public key that the receiver uses to decrypt the ciphertext.
 After decryption, `R` is thrown away and is not used for anything else.
 
-2.
-After decryption we have
+2. After decryption we have
 
 ```
 prefix || R || iv || msg || hmac
@@ -73,11 +71,9 @@ prefix || R || iv || msg || hmac
 hmac = hmac256(iv || msg || prefix)
 ```
 
-3.
-The ciphertext of `msg` is not padded to be multiple of 16 bytes as is done in TLS and VPN.
+3. The ciphertext of `msg` is not padded to be multiple of 16 bytes as is done in TLS and VPN.
 
-4.
-From RLPx documentation
+4. From RLPx documentation
 
 ```
 auth-body = [sig, initiator-pubk, initiator-nonce, auth-vsn, ...]
