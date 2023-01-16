@@ -51,6 +51,8 @@ nib(void)
 	// establish connection
 
 	p->fd = client_connect("127.0.0.1", 30303);
+	if (p->fd < 0)
+		exit(1);
 
 	// handshake
 

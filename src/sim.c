@@ -40,11 +40,17 @@ sim(void)
 	// establish connection
 
 	listen_fd = start_listening(30303);
+	if (listen_fd < 0)
+		exit(1);
 	A.fd = client_connect("127.0.0.1", 30303);
+	if (A.fd < 0)
+		exit(1);
 	err = wait_for_pollin(listen_fd);
 	if (err)
 		exit(1);
 	B.fd = server_connect(listen_fd);
+	if (B.fd < 0)
+		exit(1);
 	close(listen_fd);
 
 	// handshake

@@ -4035,6 +4035,8 @@ nib(void)
 	// establish connection
 
 	p->fd = client_connect("127.0.0.1", 30303);
+	if (p->fd < 0)
+		exit(1);
 
 	// handshake
 
@@ -5199,11 +5201,17 @@ sim(void)
 	// establish connection
 
 	listen_fd = start_listening(30303);
+	if (listen_fd < 0)
+		exit(1);
 	A.fd = client_connect("127.0.0.1", 30303);
+	if (A.fd < 0)
+		exit(1);
 	err = wait_for_pollin(listen_fd);
 	if (err)
 		exit(1);
 	B.fd = server_connect(listen_fd);
+	if (B.fd < 0)
+		exit(1);
 	close(listen_fd);
 
 	// handshake
@@ -5331,8 +5339,9 @@ start_listening(int port)
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (fd < 0) {
+		trace();
 		perror("socket");
-		exit(1);
+		return -1;
 	}
 
 	// struct sockaddr {
@@ -5358,8 +5367,10 @@ start_listening(int port)
 	err = bind(fd, (struct sockaddr *) &addr, sizeof addr);
 
 	if (err) {
+		trace();
 		perror("bind");
-		exit(1);
+		close(fd);
+		return -1;
 	}
 
 	// listen
@@ -5367,8 +5378,10 @@ start_listening(int port)
 	err = listen(fd, 10);
 
 	if (err) {
+		trace();
 		perror("listen");
-		exit(1);
+		close(fd);
+		return -1;
 	}
 
 	return fd;
@@ -5401,8 +5414,9 @@ client_connect(char *ipaddr, int portnumber)
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (fd < 0) {
+		trace();
 		perror("socket");
-		exit(1);
+		return -1;
 	}
 
 	// struct sockaddr {
@@ -5428,19 +5442,21 @@ client_connect(char *ipaddr, int portnumber)
 	err = connect(fd, (struct sockaddr *) &addr, sizeof addr);
 
 	if (err) {
-		close(fd);
+		trace();
 		perror("connect");
-		exit(1);
+		close(fd);
+		return -1;
 	}
-
-	// set nonblocking
 #if 0
+	// set nonblocking
+
 	err = fcntl(fd, F_SETFL, O_NONBLOCK);
 
-	if (err == -1) {
-		close(fd);
+	if (err) {
+		trace();
 		perror("fcntl");
-		exit(1);
+		close(fd);
+		return -1;
 	}
 #endif
 	return fd;
@@ -5457,8 +5473,9 @@ server_connect(int listen_fd)
 	fd = accept(listen_fd, (struct sockaddr *) &addr, &addrlen);
 
 	if (fd < 0) {
+		trace();
 		perror("accept");
-		exit(1);
+		return -1;
 	}
 
 //	printf("connect from %s\n", inet_ntoa(addr.sin_addr));
