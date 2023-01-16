@@ -1,3 +1,5 @@
+// See 'Mathematical routines for the NIST prime elliptic curves'
+
 // Returns (1 / a) mod p
 
 uint32_t *

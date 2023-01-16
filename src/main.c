@@ -69,7 +69,7 @@ nib(void)
 
 	// session setup
 
-	session(&N, 1);
+	session_setup(&N, 1);
 
 	// wait for hello
 

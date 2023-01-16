@@ -122,8 +122,8 @@ sim(void)
 
 	// session setup
 
-	session(&A, 1);
-	session(&B, 0);
+	session_setup(&A, 1);
+	session_setup(&B, 0);
 
 	// compare aes secrets
 

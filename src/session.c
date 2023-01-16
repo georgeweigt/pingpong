@@ -1,5 +1,7 @@
+// this is done after completion of AUTH/ACK exchange
+
 void
-session(struct node *p, int initiator)
+session_setup(struct node *p, int initiator)
 {
 	int i;
 	uint8_t ephemeral_secret[32];

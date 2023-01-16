@@ -176,7 +176,6 @@ void free_list(struct atom *p);
 int compare_lists(struct atom *p, struct atom *q);
 void print_list(struct atom *p);
 void print_list_nib(struct atom *p, int level);
-void macs(struct node *p);
 int main(int argc, char *argv[]);
 void nib(void);
 int rdecode(uint8_t *buf, int length);
@@ -195,7 +194,7 @@ void send_ack(struct node *p);
 struct atom * ack_body(struct node *p);
 void send_auth(struct node *p);
 struct atom * auth_body(struct node *p);
-void session(struct node *p, int initiator);
+void session_setup(struct node *p, int initiator);
 void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
 void sha256(uint8_t *buf, int len, uint8_t *out);
 void sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out);
@@ -1027,6 +1026,8 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 
 	return 0;
 }
+// See 'Mathematical routines for the NIST prime elliptic curves'
+
 // Returns (1 / a) mod p
 
 uint32_t *
@@ -3259,6 +3260,8 @@ encap(uint8_t *buf, int len, struct node *p)
 
 	hmac_sha256(hmac_key, 32, buf + ENCAP_IV, msglen + 16 + 2, buf + len - 32);
 }
+// returns the number of bytes needed to encode p
+
 int
 enlength(struct atom *p)
 {
@@ -4108,7 +4111,7 @@ nib(void)
 
 	// session setup
 
-	session(&N, 1);
+	session_setup(&N, 1);
 
 	// wait for hello
 
@@ -4618,8 +4621,10 @@ auth_body(struct node *p)
 
 	return pop();
 }
+// this is done after completion of AUTH/ACK exchange
+
 void
-session(struct node *p, int initiator)
+session_setup(struct node *p, int initiator)
 {
 	int i;
 	uint8_t ephemeral_secret[32];
@@ -5142,8 +5147,8 @@ sim(void)
 
 	// session setup
 
-	session(&A, 1);
-	session(&B, 0);
+	session_setup(&A, 1);
+	session_setup(&B, 0);
 
 	// compare aes secrets
 
