@@ -3,7 +3,7 @@
 This project is under construction.
 Currently the `auth/ack` message exchange is working.
 
-All of the crypto code is here, see the directory `src` for individual source files.
+See directory `src` for individual source files.
 `pingpong.c` is the cat of source files.
 
 #
