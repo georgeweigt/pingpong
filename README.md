@@ -3,7 +3,7 @@
 This project is under construction.
 Currently the `auth/ack` message exchange is working.
 
-`pingpong.c` is the cat of source file from directory `src`.
+`pingpong.c` is the cat of source files from directory `src`.
 Function `main` can be found in `src/main.c`.
 
 #
