@@ -6,6 +6,8 @@ Currently the `auth/ack` message exchange is working.
 `pingpong.c` is the cat of source files from directory `src`.
 Function `main` can be found in `src/main.c`
 
+#
+
 To build and run
 
 ```
