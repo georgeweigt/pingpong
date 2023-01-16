@@ -9,7 +9,7 @@
 // d		hmac (32 bytes)
 
 void
-encap(uint8_t *buf, int len, struct node *p)
+encap(struct node *p, uint8_t *buf, int len)
 {
 	int i, msglen;
 	uint8_t *msg;

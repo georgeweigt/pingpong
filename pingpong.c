@@ -15,17 +15,10 @@
 #define trace() printf("trace: %s line %d\n", __FILE__, __LINE__)
 #define TIMEOUT 3000 // comm timeout in milliseconds
 #define SECP256K1 1 // set to 0 for secp256r1
-#define BOOT_PORT 30303
-#define HASHLEN 32
-#define SIGLEN 69
-#define R_INDEX (HASHLEN + 3)
-#define S_INDEX (HASHLEN + 36)
-
 #define ENCAP_R 2
 #define ENCAP_IV (2 + 65)
 #define ENCAP_C (2 + 65 + 16)
 #define ENCAP_OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
-
 #define len(p) (p)[-1]
 
 extern int ec_malloc_count;
@@ -80,8 +73,6 @@ extern int tos;
 extern int atom_count;
 extern int ec_malloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
-extern struct account account_table[];
-extern struct node initiator, recipient;
 void aes128ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
 void aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
 int mul(int a, int b);
@@ -141,7 +132,7 @@ void ec_genkey(uint8_t *private_key, uint8_t *public_key);
 void ec_pubkey(uint8_t *public_key, uint8_t *private_key);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
-void encap(uint8_t *buf, int len, struct node *p);
+void encap(struct node *p, uint8_t *buf, int len);
 void init(void);
 void read_account(struct account *p, char *filename);
 char * read_file(char *filename);
@@ -183,10 +174,8 @@ uint8_t * recv_msg(int fd);
 int recv_bytes(int fd, uint8_t *buf, int len);
 int recv_ack(struct node *p);
 int recv_ack_data(struct node *p, struct atom *q);
-void save_ack_for_later(struct node *p, uint8_t *ack, int len);
 int recv_auth(struct node *p);
 int recv_auth_data(struct node *p, struct atom *q);
-void save_auth_for_later(struct node *p, uint8_t *auth, int len);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
@@ -194,11 +183,14 @@ int rencode_string(uint8_t *buf, struct atom *p);
 int rlength(struct atom *p);
 int sublength(struct atom *p);
 int padlength(struct atom *p, int sublen);
-void send_ack(struct node *p);
+int send_bytes(int fd, uint8_t *buf, int len);
+int send_ack(struct node *p);
 struct atom * ack_body(struct node *p);
-void send_auth(struct node *p);
+int send_auth(struct node *p);
 struct atom * auth_body(struct node *p);
 void session_setup(struct node *p, int initiator);
+void save_auth_for_session_setup(struct node *p, uint8_t *auth, int len);
+void save_ack_for_session_setup(struct node *p, uint8_t *ack, int len);
 void hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out);
 void sha256(uint8_t *buf, int len, uint8_t *out);
 void sha256_with_key(uint8_t *key, uint8_t *buf, int len, uint8_t *out);
@@ -207,11 +199,11 @@ void test_sha256(void);
 void sign(uint8_t *msg, int msglen, uint8_t *private_key, uint8_t *public_key);
 void test_sign(void);
 void sim(void);
-void wait_for_pollin(int fd);
+int wait_for_pollin(int fd);
+int wait_for_pollout(int fd);
 int start_listening(int port);
 int client_connect(char *ipaddr, int portnumber);
 int server_connect(int listen_fd);
-uint8_t * receive(int fd, int *plen);
 void test(void);
 int test_public_key(char *public_key_x, char *public_key_y);
 void test_aes128(void);
@@ -980,8 +972,6 @@ aes256_test_encrypt(void)
 // iv		initialization vector (16 bytes)
 // c		ciphertext
 // d		hmac (32 bytes)
-
-// returns 0 ok, -1 err
 
 int
 decap(uint8_t *buf, int len, uint8_t *private_key)
@@ -3213,7 +3203,7 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, ui
 // d		hmac (32 bytes)
 
 void
-encap(uint8_t *buf, int len, struct node *p)
+encap(struct node *p, uint8_t *buf, int len)
 {
 	int i, msglen;
 	uint8_t *msg;
@@ -4015,8 +4005,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int err, i, len;
-	uint8_t *buf;
+	int err, i;
 	struct node *p;
 
 	// setup
@@ -4049,8 +4038,12 @@ nib(void)
 
 	// handshake
 
-	send_auth(p);
+	printf("sending auth\n");
+	err = send_auth(p);
+	if (err)
+		exit(1);
 
+	printf("receiving ack\n");
 	err = recv_ack(p);
 	if (err)
 		exit(1);
@@ -4059,19 +4052,19 @@ nib(void)
 
 	session_setup(p, 1);
 
-	// wait for hello
-
-	wait_for_pollin(p->fd);
-
-	buf = receive(p->fd, &len);
-
 	// the rest is under construction
 
-	printmem(buf, 16); // before decryption
+	uint8_t block[16];
 
-	aes256ctr_encrypt(p->decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
+	err = recv_bytes(p->fd, block, 16);
+	if (err)
+		exit(1);
 
-	printmem(buf, 16); // after decryption
+	printmem(block, 16); // before decryption
+
+	aes256ctr_encrypt(p->decrypt_state, block, 16); // encrypt does decrypt in ctr mode
+
+	printmem(block, 16); // after decryption
 
 	close(p->fd);
 }
@@ -4242,26 +4235,14 @@ recv_msg(int fd)
 int
 recv_bytes(int fd, uint8_t *buf, int len)
 {
-	int n;
-	struct pollfd pollfd;
-
-	pollfd.fd = fd;
-	pollfd.events = POLLIN;
+	int err, n;
 
 	while (len) {
 
-		n = poll(&pollfd, 1, TIMEOUT);
+		err = wait_for_pollin(fd);
 
-		if (n < 0) {
-			trace();
-			perror("poll");
+		if (err)
 			return -1;
-		}
-
-		if (n < 1) {
-			trace();
-			return -1; // timeout
-		}
 
 		n = recv(fd, buf, len, 0);
 
@@ -4282,8 +4263,6 @@ recv_bytes(int fd, uint8_t *buf, int len)
 
 	return 0;
 }
-// returns 0 ok, -1 err
-
 int
 recv_ack(struct node *p)
 {
@@ -4298,12 +4277,11 @@ recv_ack(struct node *p)
 
 	len = (buf[0] << 8 | buf[1]) + 2; // length from prefix
 
-	save_ack_for_later(p, buf, len);
+	save_ack_for_session_setup(p, buf, len);
 
 	err = decap(buf, len, p->private_key);
 
 	if (err) {
-		trace();
 		free(buf);
 		return -1;
 	}
@@ -4329,8 +4307,6 @@ recv_ack(struct node *p)
 	return err;
 }
 
-// returns 0 ok, -1 err
-
 int
 recv_ack_data(struct node *p, struct atom *q)
 {
@@ -4338,48 +4314,29 @@ recv_ack_data(struct node *p, struct atom *q)
 
 	// length == -1 indicates a list item
 
-	if (q == NULL || q->length != -1 || q->cdr == NULL)
+	if (q == NULL || q->length != -1 || q->cdr == NULL) {
+		trace();
 		return -1;
+	}
 
 	q1 = q->car;		// 1st item: ephemeral public key
 	q2 = q->cdr->car;	// 2nd item: nonce
 
-	if (q1 == NULL || q2 == NULL)
+	if (q1 == NULL || q2 == NULL) {
+		trace();
 		return -1;
+	}
 
-	if (q1->length != 64 || q2->length != 32)
+	if (q1->length != 64 || q2->length != 32) {
+		trace();
 		return -1;
+	}
 
 	memcpy(p->ack_public_key, q1->string, 64);
 	memcpy(p->ack_nonce, q2->string, 32);
 
 	return 0;
 }
-
-void
-save_ack_for_later(struct node *p, uint8_t *ack, int len)
-{
-	uint8_t *buf;
-
-	buf = malloc(len);
-
-	if (buf == NULL)
-		exit(1);
-
-	memcpy(buf, ack, len);
-
-	if (p->ack_buf)
-		free(p->ack_buf);
-
-	p->ack_buf = buf;
-	p->ack_len = len;
-}
-// prefix	2 bytes
-// public key	65 bytes
-// iv		16 bytes
-// ciphertext	msglen bytes
-// hmac		32 bytes
-
 int
 recv_auth(struct node *p)
 {
@@ -4394,12 +4351,11 @@ recv_auth(struct node *p)
 
 	len = (buf[0] << 8 | buf[1]) + 2; // length from prefix
 
-	save_auth_for_later(p, buf, len);
+	save_auth_for_session_setup(p, buf, len);
 
 	err = decap(buf, len, p->private_key);
 
 	if (err) {
-		trace();
 		free(buf);
 		return -1;
 	}
@@ -4431,41 +4387,28 @@ recv_auth_data(struct node *p, struct atom *q)
 
 	// length == -1 indicates a list item
 
-	if (q == NULL || q->length != -1 || q->cdr == NULL || q->cdr->cdr == NULL)
+	if (q == NULL || q->length != -1 || q->cdr == NULL || q->cdr->cdr == NULL) {
+		trace();
 		return -1;
+	}
 
 	q1 = q->car;		// 1st item: sig
 	q2 = q->cdr->car;	// 2nd item: public key
 	q3 = q->cdr->cdr->car;	// 3rd item: nonce
 
-	if (q1 == NULL || q2 == NULL || q3 == NULL)
+	if (q1 == NULL || q2 == NULL || q3 == NULL) {
+		trace();
 		return -1;
+	}
 
-	if (q2->length != 64 || q3->length != 32)
+	if (q2->length != 64 || q3->length != 32) {
+		trace();
 		return -1;
+	}
 
 	memcpy(p->auth_nonce, q3->string, 32);
 
 	return 0;
-}
-
-void
-save_auth_for_later(struct node *p, uint8_t *auth, int len)
-{
-	uint8_t *buf;
-
-	buf = malloc(len);
-
-	if (buf == NULL)
-		exit(1);
-
-	memcpy(buf, auth, len);
-
-	if (p->auth_buf)
-		free(p->auth_buf);
-
-	p->auth_buf = buf;
-	p->auth_len = len;
 }
 int
 rencode(uint8_t *buf, int len, struct atom *p)
@@ -4617,10 +4560,41 @@ padlength(struct atom *p, int sublen)
 
 	return 4;
 }
-void
+int
+send_bytes(int fd, uint8_t *buf, int len)
+{
+	int err, n;
+
+	while (len) {
+
+		err = wait_for_pollout(fd);
+
+		if (err)
+			return -1;
+
+		n = send(fd, buf, len, 0);
+
+		if (n < 0) {
+			trace();
+			perror("recv");
+			return -1;
+		}
+
+		if (n < 1) {
+			trace();
+			return -1; // disconnect
+		}
+
+		buf += n;
+		len -= n;
+	}
+
+	return 0;
+}
+int
 send_ack(struct node *p)
 {
-	int len, msglen, n;
+	int err, len, msglen, n;
 	uint8_t *buf;
 	struct atom *q;
 
@@ -4628,9 +4602,7 @@ send_ack(struct node *p)
 
 	msglen = rlength(q);
 
-	// pad with random amount of data, at least 100 bytes
-
-	n = 100 + random() % 100;
+	n = 100 + random() % 100; // random pad length, at least 100
 
 	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
@@ -4639,28 +4611,21 @@ send_ack(struct node *p)
 	if (buf == NULL)
 		exit(1);
 
+	memset(buf, 0, len);
+
 	rencode(buf + ENCAP_C, msglen, q); // ENCAP_C == 2 + 65 + 16
 
 	free_list(q);
 
-	encap(buf, len, p);
+	encap(p, buf, len);
 
-	// save buf for later
+	save_ack_for_session_setup(p, buf, len);
 
-	if (p->ack_buf)
-		free(p->ack_buf);
+	err = send_bytes(p->fd, buf, len);
 
-	p->ack_buf = buf;
-	p->ack_len = len;
+	free(buf);
 
-	// send buf
-
-	n = send(p->fd, buf, len, 0);
-
-	if (n < 0)
-		perror("send");
-
-	printf("%d bytes sent\n", n);
+	return err;
 }
 
 struct atom *
@@ -4682,10 +4647,10 @@ ack_body(struct node *p)
 
 	return pop();
 }
-void
+int
 send_auth(struct node *p)
 {
-	int len, msglen, n;
+	int err, len, msglen, n;
 	uint8_t *buf;
 	struct atom *q;
 
@@ -4693,9 +4658,7 @@ send_auth(struct node *p)
 
 	msglen = rlength(q);
 
-	// pad with random amount of data, at least 100 bytes
-
-	n = 100 + random() % 100;
+	n = 100 + random() % 100; // random pad length, at least 100
 
 	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
@@ -4704,28 +4667,21 @@ send_auth(struct node *p)
 	if (buf == NULL)
 		exit(1);
 
+	memset(buf, 0, len);
+
 	rencode(buf + ENCAP_C, msglen, q); // ENCAP_C == 2 + 65 + 16
 
 	free_list(q);
 
-	encap(buf, len, p);
+	encap(p, buf, len);
 
-	// save buf for later
+	save_auth_for_session_setup(p, buf, len);
 
-	if (p->auth_buf)
-		free(p->auth_buf);
+	err = send_bytes(p->fd, buf, len);
 
-	p->auth_buf = buf;
-	p->auth_len = len;
+	free(buf);
 
-	// send buf
-
-	n = send(p->fd, buf, len, 0);
-
-	if (n < 0)
-		perror("send");
-
-	printf("%d bytes sent\n", n);
+	return err;
 }
 
 struct atom *
@@ -4836,6 +4792,44 @@ session_setup(struct node *p, int initiator)
 	keccak256_init(b);
 	keccak256_update(b, buf, 32);
 	keccak256_update(b, p->auth_buf, p->auth_len);
+}
+
+void
+save_auth_for_session_setup(struct node *p, uint8_t *auth, int len)
+{
+	uint8_t *buf;
+
+	buf = malloc(len);
+
+	if (buf == NULL)
+		exit(1);
+
+	memcpy(buf, auth, len);
+
+	if (p->auth_buf)
+		free(p->auth_buf);
+
+	p->auth_buf = buf;
+	p->auth_len = len;
+}
+
+void
+save_ack_for_session_setup(struct node *p, uint8_t *ack, int len)
+{
+	uint8_t *buf;
+
+	buf = malloc(len);
+
+	if (buf == NULL)
+		exit(1);
+
+	memcpy(buf, ack, len);
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+
+	p->ack_buf = buf;
+	p->ack_len = len;
 }
 void
 hmac_sha256(uint8_t *key, int keylen, uint8_t *buf, int len, uint8_t *out)
@@ -5206,20 +5200,30 @@ sim(void)
 
 	listen_fd = start_listening(30303);
 	A.fd = client_connect("127.0.0.1", 30303);
-	wait_for_pollin(listen_fd);
+	err = wait_for_pollin(listen_fd);
+	if (err)
+		exit(1);
 	B.fd = server_connect(listen_fd);
 	close(listen_fd);
 
 	// handshake
 
-	send_auth(&A);
+	printf("sending auth\n");
+	err = send_auth(&A);
+	if (err)
+		exit(1);
 
+	printf("receiving auth\n");
 	err = recv_auth(&B);
 	if (err)
 		exit(1);
 
-	send_ack(&B);
+	printf("sending ack\n");
+	err = send_ack(&B);
+	if (err)
+		exit(1);
 
+	printf("receiving ack\n");
 	err = recv_ack(&A);
 	if (err)
 		exit(1);
@@ -5233,23 +5237,20 @@ sim(void)
 	// sanity check
 
 	err = memcmp(A.ack_public_key, B.ack_public_key, 64);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
 	err = memcmp(A.auth_nonce, B.auth_nonce, 32);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
 	err = memcmp(A.ack_nonce, B.ack_nonce, 32);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
@@ -5261,18 +5262,17 @@ sim(void)
 	// compare aes secrets
 
 	err = memcmp(A.aes_secret, B.aes_secret, 32);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
-	printf("ok\n");
-
 	close(A.fd);
 	close(B.fd);
+
+	printf("ok\n");
 }
-void
+int
 wait_for_pollin(int fd)
 {
 	int n;
@@ -5284,14 +5284,42 @@ wait_for_pollin(int fd)
 	n = poll(&pollfd, 1, TIMEOUT);
 
 	if (n < 0) {
+		trace();
 		perror("poll");
-		exit(1);
+		return -1;
 	}
 
 	if (n < 1) {
-		printf("timeout\n");
-		exit(1);
+		trace();
+		return -1; // timeout
 	}
+
+	return 0;
+}
+
+int
+wait_for_pollout(int fd)
+{
+	int n;
+	struct pollfd pollfd;
+
+	pollfd.fd = fd;
+	pollfd.events = POLLOUT;
+
+	n = poll(&pollfd, 1, TIMEOUT);
+
+	if (n < 0) {
+		trace();
+		perror("poll");
+		return -1;
+	}
+
+	if (n < 1) {
+		trace();
+		return -1; // timeout
+	}
+
+	return 0;
 }
 
 int
@@ -5436,30 +5464,6 @@ server_connect(int listen_fd)
 //	printf("connect from %s\n", inet_ntoa(addr.sin_addr));
 
 	return fd;
-}
-
-uint8_t *
-receive(int fd, int *plen)
-{
-	int n;
-	uint8_t *buf;
-
-	buf = malloc(1280);
-
-	if (buf == NULL)
-		exit(1);
-
-	n = recv(fd, buf, 1280, 0);
-
-	if (n < 0) {
-		perror("recv");
-		exit(1);
-	}
-
-	printf("%d bytes received\n", n);
-
-	*plen = n;
-	return buf;
 }
 void
 test(void)

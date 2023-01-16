@@ -21,8 +21,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int err, i, len;
-	uint8_t *buf;
+	int err, i;
 	struct node *p;
 
 	// setup
@@ -55,8 +54,12 @@ nib(void)
 
 	// handshake
 
-	send_auth(p);
+	printf("sending auth\n");
+	err = send_auth(p);
+	if (err)
+		exit(1);
 
+	printf("receiving ack\n");
 	err = recv_ack(p);
 	if (err)
 		exit(1);
@@ -65,19 +68,19 @@ nib(void)
 
 	session_setup(p, 1);
 
-	// wait for hello
-
-	wait_for_pollin(p->fd);
-
-	buf = receive(p->fd, &len);
-
 	// the rest is under construction
 
-	printmem(buf, 16); // before decryption
+	uint8_t block[16];
 
-	aes256ctr_encrypt(p->decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
+	err = recv_bytes(p->fd, block, 16);
+	if (err)
+		exit(1);
 
-	printmem(buf, 16); // after decryption
+	printmem(block, 16); // before decryption
+
+	aes256ctr_encrypt(p->decrypt_state, block, 16); // encrypt does decrypt in ctr mode
+
+	printmem(block, 16); // after decryption
 
 	close(p->fd);
 }

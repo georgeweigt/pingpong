@@ -1,7 +1,7 @@
-void
+int
 send_ack(struct node *p)
 {
-	int len, msglen, n;
+	int err, len, msglen, n;
 	uint8_t *buf;
 	struct atom *q;
 
@@ -9,9 +9,7 @@ send_ack(struct node *p)
 
 	msglen = rlength(q);
 
-	// pad with random amount of data, at least 100 bytes
-
-	n = 100 + random() % 100;
+	n = 100 + random() % 100; // random pad length, at least 100
 
 	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
@@ -20,28 +18,21 @@ send_ack(struct node *p)
 	if (buf == NULL)
 		exit(1);
 
+	memset(buf, 0, len);
+
 	rencode(buf + ENCAP_C, msglen, q); // ENCAP_C == 2 + 65 + 16
 
 	free_list(q);
 
-	encap(buf, len, p);
+	encap(p, buf, len);
 
-	// save buf for later
+	save_ack_for_session_setup(p, buf, len);
 
-	if (p->ack_buf)
-		free(p->ack_buf);
+	err = send_bytes(p->fd, buf, len);
 
-	p->ack_buf = buf;
-	p->ack_len = len;
+	free(buf);
 
-	// send buf
-
-	n = send(p->fd, buf, len, 0);
-
-	if (n < 0)
-		perror("send");
-
-	printf("%d bytes sent\n", n);
+	return err;
 }
 
 struct atom *

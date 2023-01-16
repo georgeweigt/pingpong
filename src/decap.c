@@ -8,8 +8,6 @@
 // c		ciphertext
 // d		hmac (32 bytes)
 
-// returns 0 ok, -1 err
-
 int
 decap(uint8_t *buf, int len, uint8_t *private_key)
 {

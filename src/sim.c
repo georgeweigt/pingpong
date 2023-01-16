@@ -41,20 +41,30 @@ sim(void)
 
 	listen_fd = start_listening(30303);
 	A.fd = client_connect("127.0.0.1", 30303);
-	wait_for_pollin(listen_fd);
+	err = wait_for_pollin(listen_fd);
+	if (err)
+		exit(1);
 	B.fd = server_connect(listen_fd);
 	close(listen_fd);
 
 	// handshake
 
-	send_auth(&A);
+	printf("sending auth\n");
+	err = send_auth(&A);
+	if (err)
+		exit(1);
 
+	printf("receiving auth\n");
 	err = recv_auth(&B);
 	if (err)
 		exit(1);
 
-	send_ack(&B);
+	printf("sending ack\n");
+	err = send_ack(&B);
+	if (err)
+		exit(1);
 
+	printf("receiving ack\n");
 	err = recv_ack(&A);
 	if (err)
 		exit(1);
@@ -68,23 +78,20 @@ sim(void)
 	// sanity check
 
 	err = memcmp(A.ack_public_key, B.ack_public_key, 64);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
 	err = memcmp(A.auth_nonce, B.auth_nonce, 32);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
 	err = memcmp(A.ack_nonce, B.ack_nonce, 32);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
@@ -96,14 +103,13 @@ sim(void)
 	// compare aes secrets
 
 	err = memcmp(A.aes_secret, B.aes_secret, 32);
-
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		exit(1);
 	}
 
-	printf("ok\n");
-
 	close(A.fd);
 	close(B.fd);
+
+	printf("ok\n");
 }

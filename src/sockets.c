@@ -1,4 +1,4 @@
-void
+int
 wait_for_pollin(int fd)
 {
 	int n;
@@ -10,14 +10,42 @@ wait_for_pollin(int fd)
 	n = poll(&pollfd, 1, TIMEOUT);
 
 	if (n < 0) {
+		trace();
 		perror("poll");
-		exit(1);
+		return -1;
 	}
 
 	if (n < 1) {
-		printf("timeout\n");
-		exit(1);
+		trace();
+		return -1; // timeout
 	}
+
+	return 0;
+}
+
+int
+wait_for_pollout(int fd)
+{
+	int n;
+	struct pollfd pollfd;
+
+	pollfd.fd = fd;
+	pollfd.events = POLLOUT;
+
+	n = poll(&pollfd, 1, TIMEOUT);
+
+	if (n < 0) {
+		trace();
+		perror("poll");
+		return -1;
+	}
+
+	if (n < 1) {
+		trace();
+		return -1; // timeout
+	}
+
+	return 0;
 }
 
 int
@@ -162,28 +190,4 @@ server_connect(int listen_fd)
 //	printf("connect from %s\n", inet_ntoa(addr.sin_addr));
 
 	return fd;
-}
-
-uint8_t *
-receive(int fd, int *plen)
-{
-	int n;
-	uint8_t *buf;
-
-	buf = malloc(1280);
-
-	if (buf == NULL)
-		exit(1);
-
-	n = recv(fd, buf, 1280, 0);
-
-	if (n < 0) {
-		perror("recv");
-		exit(1);
-	}
-
-	printf("%d bytes received\n", n);
-
-	*plen = n;
-	return buf;
 }

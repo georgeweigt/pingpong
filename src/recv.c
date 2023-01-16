@@ -41,26 +41,14 @@ recv_msg(int fd)
 int
 recv_bytes(int fd, uint8_t *buf, int len)
 {
-	int n;
-	struct pollfd pollfd;
-
-	pollfd.fd = fd;
-	pollfd.events = POLLIN;
+	int err, n;
 
 	while (len) {
 
-		n = poll(&pollfd, 1, TIMEOUT);
+		err = wait_for_pollin(fd);
 
-		if (n < 0) {
-			trace();
-			perror("poll");
+		if (err)
 			return -1;
-		}
-
-		if (n < 1) {
-			trace();
-			return -1; // timeout
-		}
 
 		n = recv(fd, buf, len, 0);
 

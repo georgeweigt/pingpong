@@ -15,17 +15,10 @@
 #define trace() printf("trace: %s line %d\n", __FILE__, __LINE__)
 #define TIMEOUT 3000 // comm timeout in milliseconds
 #define SECP256K1 1 // set to 0 for secp256r1
-#define BOOT_PORT 30303
-#define HASHLEN 32
-#define SIGLEN 69
-#define R_INDEX (HASHLEN + 3)
-#define S_INDEX (HASHLEN + 36)
-
 #define ENCAP_R 2
 #define ENCAP_IV (2 + 65)
 #define ENCAP_C (2 + 65 + 16)
 #define ENCAP_OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
-
 #define len(p) (p)[-1]
 
 extern int ec_malloc_count;
@@ -80,5 +73,3 @@ extern int tos;
 extern int atom_count;
 extern int ec_malloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
-extern struct account account_table[];
-extern struct node initiator, recipient;

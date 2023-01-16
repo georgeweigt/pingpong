@@ -1,5 +1,3 @@
-// returns 0 ok, -1 err
-
 int
 recv_ack(struct node *p)
 {
@@ -14,12 +12,11 @@ recv_ack(struct node *p)
 
 	len = (buf[0] << 8 | buf[1]) + 2; // length from prefix
 
-	save_ack_for_later(p, buf, len);
+	save_ack_for_session_setup(p, buf, len);
 
 	err = decap(buf, len, p->private_key);
 
 	if (err) {
-		trace();
 		free(buf);
 		return -1;
 	}
@@ -45,8 +42,6 @@ recv_ack(struct node *p)
 	return err;
 }
 
-// returns 0 ok, -1 err
-
 int
 recv_ack_data(struct node *p, struct atom *q)
 {
@@ -54,39 +49,26 @@ recv_ack_data(struct node *p, struct atom *q)
 
 	// length == -1 indicates a list item
 
-	if (q == NULL || q->length != -1 || q->cdr == NULL)
+	if (q == NULL || q->length != -1 || q->cdr == NULL) {
+		trace();
 		return -1;
+	}
 
 	q1 = q->car;		// 1st item: ephemeral public key
 	q2 = q->cdr->car;	// 2nd item: nonce
 
-	if (q1 == NULL || q2 == NULL)
+	if (q1 == NULL || q2 == NULL) {
+		trace();
 		return -1;
+	}
 
-	if (q1->length != 64 || q2->length != 32)
+	if (q1->length != 64 || q2->length != 32) {
+		trace();
 		return -1;
+	}
 
 	memcpy(p->ack_public_key, q1->string, 64);
 	memcpy(p->ack_nonce, q2->string, 32);
 
 	return 0;
-}
-
-void
-save_ack_for_later(struct node *p, uint8_t *ack, int len)
-{
-	uint8_t *buf;
-
-	buf = malloc(len);
-
-	if (buf == NULL)
-		exit(1);
-
-	memcpy(buf, ack, len);
-
-	if (p->ack_buf)
-		free(p->ack_buf);
-
-	p->ack_buf = buf;
-	p->ack_len = len;
 }
