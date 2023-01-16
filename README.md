@@ -3,8 +3,9 @@
 This project is under construction.
 Currently the `auth/ack` message exchange is working.
 
-See directory `src` for individual source files.
 `pingpong.c` is the cat of source files.
+See directory `src` for source files.
+Function `main` is in `main.c`
 
 #
 
