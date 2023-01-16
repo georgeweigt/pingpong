@@ -132,7 +132,7 @@ void ec_genkey(uint8_t *private_key, uint8_t *public_key);
 void ec_pubkey(uint8_t *public_key, uint8_t *private_key);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
-void encap(struct node *p, uint8_t *buf, int len);
+void encap(uint8_t *buf, int len, uint8_t *far_public_key);
 void init(void);
 void read_account(struct account *p, char *filename);
 char * read_file(char *filename);
@@ -3207,7 +3207,7 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, ui
 // d		hmac (32 bytes)
 
 void
-encap(struct node *p, uint8_t *buf, int len)
+encap(uint8_t *buf, int len, uint8_t *far_public_key)
 {
 	int i, msglen;
 	uint8_t *msg;
@@ -3225,7 +3225,7 @@ encap(struct node *p, uint8_t *buf, int len)
 
 	ec_genkey(ephemeral_private_key, ephemeral_public_key);
 
-	ec_ecdh(shared_secret, ephemeral_private_key, p->far_public_key);
+	ec_ecdh(shared_secret, ephemeral_private_key, far_public_key);
 
 	// derive AES and HMAC keys
 
@@ -4623,7 +4623,7 @@ send_ack(struct node *p)
 
 	free_list(q);
 
-	encap(p, buf, len);
+	encap(buf, len, p->far_public_key);
 
 	save_ack_for_session_setup(p, buf, len);
 
@@ -4679,7 +4679,7 @@ send_auth(struct node *p)
 
 	free_list(q);
 
-	encap(p, buf, len);
+	encap(buf, len, p->far_public_key);
 
 	save_auth_for_session_setup(p, buf, len);
 

@@ -57,7 +57,7 @@ void ec_genkey(uint8_t *private_key, uint8_t *public_key);
 void ec_pubkey(uint8_t *public_key, uint8_t *private_key);
 void ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key);
 int ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y);
-void encap(struct node *p, uint8_t *buf, int len);
+void encap(uint8_t *buf, int len, uint8_t *far_public_key);
 void init(void);
 void read_account(struct account *p, char *filename);
 char * read_file(char *filename);

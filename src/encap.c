@@ -9,7 +9,7 @@
 // d		hmac (32 bytes)
 
 void
-encap(struct node *p, uint8_t *buf, int len)
+encap(uint8_t *buf, int len, uint8_t *far_public_key)
 {
 	int i, msglen;
 	uint8_t *msg;
@@ -27,7 +27,7 @@ encap(struct node *p, uint8_t *buf, int len)
 
 	ec_genkey(ephemeral_private_key, ephemeral_public_key);
 
-	ec_ecdh(shared_secret, ephemeral_private_key, p->far_public_key);
+	ec_ecdh(shared_secret, ephemeral_private_key, far_public_key);
 
 	// derive AES and HMAC keys
 

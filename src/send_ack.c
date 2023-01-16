@@ -24,7 +24,7 @@ send_ack(struct node *p)
 
 	free_list(q);
 
-	encap(p, buf, len);
+	encap(buf, len, p->far_public_key);
 
 	save_ack_for_session_setup(p, buf, len);
 
