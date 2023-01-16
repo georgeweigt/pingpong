@@ -7,7 +7,7 @@ send_auth(struct node *p)
 
 	q = auth_body(p);
 
-	msglen = enlength(q);
+	msglen = rlength(q);
 
 	// pad with random amount of data, at least 100 bytes
 

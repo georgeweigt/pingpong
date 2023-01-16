@@ -1,13 +1,12 @@
-// node simulator for debugging stuff
+// simulates geth
 
 void
 sim(void)
 {
-	int err, i, len, listen_fd;
-	uint8_t *buf;
+	int err, i, listen_fd;
 
-	struct node A; // Alice
-	struct node B; // Bob
+	struct node A;
+	struct node B;
 
 	memset(&A, 0, sizeof A);
 	memset(&B, 0, sizeof B);
@@ -46,43 +45,19 @@ sim(void)
 	B.fd = server_connect(listen_fd);
 	close(listen_fd);
 
-	// send auth
+	// handshake
 
 	send_auth(&A);
 
-	// recv auth
-
-	wait_for_pollin(B.fd);
-
-	buf = receive(B.fd, &len);
-
-	err = recv_auth(&B, buf, len);
-
-	free(buf);
-
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+	err = recv_auth(&B);
+	if (err)
 		exit(1);
-	}
-
-	// send ack
 
 	send_ack(&B);
 
-	// recv ack
-
-	wait_for_pollin(A.fd);
-
-	buf = receive(A.fd, &len);
-
-	err = recv_ack(&A, buf, len);
-
-	free(buf);
-
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+	err = recv_ack(&A);
+	if (err)
 		exit(1);
-	}
 
 	// geth recovers public key from sig in auth msg
 
@@ -91,13 +66,6 @@ sim(void)
 	memcpy(B.auth_public_key, A.auth_public_key, 64);
 
 	// sanity check
-
-	err = memcmp(A.auth_public_key, B.auth_public_key, 64);
-
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		exit(1);
-	}
 
 	err = memcmp(A.ack_public_key, B.ack_public_key, 64);
 
@@ -138,28 +106,4 @@ sim(void)
 
 	close(A.fd);
 	close(B.fd);
-}
-
-uint8_t *
-receive(int fd, int *plen)
-{
-	int n;
-	uint8_t *buf;
-
-	buf = malloc(1280);
-
-	if (buf == NULL)
-		exit(1);
-
-	n = recv(fd, buf, 1280, 0);
-
-	if (n < 0) {
-		perror("recv");
-		exit(1);
-	}
-
-	printf("%d bytes received\n", n);
-
-	*plen = n;
-	return buf;
 }

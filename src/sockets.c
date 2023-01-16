@@ -1,5 +1,3 @@
-#define TIMEOUT 3000 // timeout in milliseconds
-
 void
 wait_for_pollin(int fd)
 {
@@ -164,4 +162,28 @@ server_connect(int listen_fd)
 //	printf("connect from %s\n", inet_ntoa(addr.sin_addr));
 
 	return fd;
+}
+
+uint8_t *
+receive(int fd, int *plen)
+{
+	int n;
+	uint8_t *buf;
+
+	buf = malloc(1280);
+
+	if (buf == NULL)
+		exit(1);
+
+	n = recv(fd, buf, 1280, 0);
+
+	if (n < 0) {
+		perror("recv");
+		exit(1);
+	}
+
+	printf("%d bytes received\n", n);
+
+	*plen = n;
+	return buf;
 }

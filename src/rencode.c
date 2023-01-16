@@ -1,7 +1,7 @@
 int
 rencode(uint8_t *buf, int len, struct atom *p)
 {
-	if (enlength(p) > len)
+	if (rlength(p) > len)
 		return 0;
 	else
 		return rencode_nib(buf, p);

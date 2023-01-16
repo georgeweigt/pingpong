@@ -1,34 +1,40 @@
+// returns 0 ok, -1 err
+
 int
-recv_ack(struct node *p, uint8_t *buf, int len)
+recv_ack(struct node *p)
 {
-	int err, msglen;
-	uint8_t *msg;
+	int err, msglen, len;
+	uint8_t *buf, *msg;
 	struct atom *q;
 
-	// save a copy of buf for later
+	buf = recv_msg(p->fd);
 
-	if (p->ack_buf)
-		free(p->ack_buf);
-	p->ack_buf = malloc(len);
-	if (p->ack_buf == NULL)
-		exit(1);
-	memcpy(p->ack_buf, buf, len);
-	p->ack_len = len;
+	if (buf == NULL)
+		return -1;
 
-	// decrypt
+	len = (buf[0] << 8 | buf[1]) + 2; // length from prefix
+
+	save_ack_for_later(p, buf, len);
 
 	err = decap(buf, len, p->private_key);
 
-	if (err)
+	if (err) {
+		trace();
+		free(buf);
 		return -1;
+	}
 
 	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
 	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
 	err = rdecode_relax(msg, msglen); // relax allows trailing data
 
-	if (err)
+	free(buf);
+
+	if (err) {
+		trace();
 		return -1;
+	}
 
 	q = pop(); // result from rdecode
 
@@ -64,4 +70,23 @@ recv_ack_data(struct node *p, struct atom *q)
 	memcpy(p->ack_nonce, q2->string, 32);
 
 	return 0;
+}
+
+void
+save_ack_for_later(struct node *p, uint8_t *ack, int len)
+{
+	uint8_t *buf;
+
+	buf = malloc(len);
+
+	if (buf == NULL)
+		exit(1);
+
+	memcpy(buf, ack, len);
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+
+	p->ack_buf = buf;
+	p->ack_len = len;
 }

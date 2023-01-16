@@ -23,67 +23,61 @@ nib(void)
 {
 	int err, i, len;
 	uint8_t *buf;
-	struct node N;
+	struct node *p;
 
-	memset(&N, 0, sizeof N);
+	// setup
 
-	hextobin(N.far_public_key, 64, GETH_PUBLIC_KEY);
+	p = malloc(sizeof (struct node));
 
-	// generate keyset
+	if (p == NULL)
+		exit(1);
 
-	ec_genkey(N.private_key, N.public_key);
+	memset(p, 0, sizeof (struct node));
+
+	hextobin(p->far_public_key, 64, GETH_PUBLIC_KEY);
+
+	ec_genkey(p->private_key, p->public_key);
 
 	// static_shared_secret = private_key * far_public_key
 
-	ec_ecdh(N.static_shared_secret, N.private_key, N.far_public_key);
+	ec_ecdh(p->static_shared_secret, p->private_key, p->far_public_key);
 
-	// ephemeral key, nonce
+	// setup auth msg
 
-	ec_genkey(N.auth_private_key, N.auth_public_key);
+	ec_genkey(p->auth_private_key, p->auth_public_key);
 
 	for (i = 0; i < 32; i++)
-		N.auth_nonce[i] = random();
+		p->auth_nonce[i] = random();
 
 	// establish connection
 
-	N.fd = client_connect("127.0.0.1", 30303);
+	p->fd = client_connect("127.0.0.1", 30303);
 
-	// send auth
+	// handshake
 
-	send_auth(&N);
+	send_auth(p);
 
-	// get ack
-
-	wait_for_pollin(N.fd);
-
-	buf = receive(N.fd, &len);
-
-	err = recv_ack(&N, buf, len);
-
-	free(buf);
-
-	if (err) {
-		printf("recv ack err\n");
+	err = recv_ack(p);
+	if (err)
 		exit(1);
-	}
 
 	// session setup
 
-	session_setup(&N, 1);
+	session_setup(p, 1);
 
 	// wait for hello
 
-	wait_for_pollin(N.fd);
+	wait_for_pollin(p->fd);
 
-	buf = receive(N.fd, &len);
+	buf = receive(p->fd, &len);
 
 	// the rest is under construction
 
 	printmem(buf, 16); // before decryption
 
-	aes256ctr_encrypt(N.decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
+	aes256ctr_encrypt(p->decrypt_state, buf, 16); // encrypt does decrypt in ctr mode
 
 	printmem(buf, 16); // after decryption
 
-	close(N.fd);
+	close(p->fd);
 }

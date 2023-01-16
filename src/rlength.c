@@ -1,7 +1,7 @@
 // returns the number of bytes needed to encode p
 
 int
-enlength(struct atom *p)
+rlength(struct atom *p)
 {
 	int len = sublength(p);
 	return padlength(p, len) + len;
@@ -20,7 +20,7 @@ sublength(struct atom *p)
 		// list
 		len = 0;
 		while (p) {
-			len += enlength(p->car);
+			len += rlength(p->car);
 			p = p->cdr;
 		}
 		return len;

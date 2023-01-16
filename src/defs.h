@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include <netdb.h>
 
-#define Trace printf("file %s, line %d\n", __FILE__, __LINE__);
-
+#define trace() printf("trace: %s line %d\n", __FILE__, __LINE__)
+#define TIMEOUT 3000 // comm timeout in milliseconds
 #define SECP256K1 1 // set to 0 for secp256r1
 #define BOOT_PORT 30303
 #define HASHLEN 32

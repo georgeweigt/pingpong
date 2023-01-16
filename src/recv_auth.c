@@ -5,26 +5,41 @@
 // hmac		32 bytes
 
 int
-recv_auth(struct node *p, uint8_t *buf, int len)
+recv_auth(struct node *p)
 {
-	int err, msglen;
+	int err, msglen, len;
+	uint8_t *buf;
 	struct atom *q;
+
+	buf = recv_msg(p->fd);
+
+	if (buf == NULL)
+		return -1;
+
+	len = (buf[0] << 8 | buf[1]) + 2; // length from prefix
+
+	save_auth_for_later(p, buf, len);
 
 	err = decap(buf, len, p->private_key);
 
-	if (err)
+	if (err) {
+		trace();
+		free(buf);
 		return -1;
-
-	memcpy(p->auth_public_key, buf + 3, 64);
+	}
 
 	msglen = len - ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
 	err = rdecode_relax(buf + ENCAP_C, msglen);
 
-	if (err)
-		return -1;
+	free(buf);
 
-	q = pop();
+	if (err) {
+		trace();
+		return -1;
+	}
+
+	q = pop(); // result of rdecode_relax()
 
 	err = recv_auth_data(p, q);
 
@@ -56,4 +71,23 @@ recv_auth_data(struct node *p, struct atom *q)
 	memcpy(p->auth_nonce, q3->string, 32);
 
 	return 0;
+}
+
+void
+save_auth_for_later(struct node *p, uint8_t *auth, int len)
+{
+	uint8_t *buf;
+
+	buf = malloc(len);
+
+	if (buf == NULL)
+		exit(1);
+
+	memcpy(buf, auth, len);
+
+	if (p->auth_buf)
+		free(p->auth_buf);
+
+	p->auth_buf = buf;
+	p->auth_len = len;
 }
