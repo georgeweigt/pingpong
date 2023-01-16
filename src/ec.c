@@ -155,7 +155,7 @@ ec_modinv_v2(uint32_t *a, uint32_t *p)
 
 // Ref. M. Brown, D. Hankerson, J. Lopez, A. Menezes paper
 
-// This code does not work
+// (not working)
 
 uint32_t *
 ec_modinv_v3(uint32_t *a, uint32_t *p)
