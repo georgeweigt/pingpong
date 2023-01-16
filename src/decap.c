@@ -23,8 +23,10 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 
 	// check length
 
-	if (msglen < 0 || (buf[0] << 8 | buf[1]) != len - 2)
+	if (msglen < 0 || (buf[0] << 8 | buf[1]) != len - 2) {
+		trace();
 		return -1;
+	}
 
 	// derive shared_secret from private_key and R
 
@@ -36,17 +38,19 @@ decap(uint8_t *buf, int len, uint8_t *private_key)
 
 	// check hmac
 
-	memcpy(hmac, buf + len - 32, 32); // save hmac
+	memcpy(hmac, buf + len - 32, 32); // save received hmac
 
 	buf[len - 32] = buf[0]; // copy prefix
 	buf[len - 31] = buf[1];
 
 	hmac_sha256(hmac_key, 32, buf + ENCAP_IV, msglen + 16 + 2, buf + len - 32); // overwrite received hmac
 
-	err = memcmp(hmac, buf + len - 32, 32); // compare
+	err = memcmp(hmac, buf + len - 32, 32); // compare hmacs
 
-	if (err)
+	if (err) {
+		trace();
 		return -1; // hmac err
+	}
 
 	// decrypt
 
