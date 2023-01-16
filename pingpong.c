@@ -4347,7 +4347,7 @@ int
 recv_auth(struct node *p)
 {
 	int err, msglen, len;
-	uint8_t *buf;
+	uint8_t *buf, *msg;
 	struct atom *q;
 
 	buf = recv_msg(p->fd);
@@ -4366,9 +4366,10 @@ recv_auth(struct node *p)
 		return -1;
 	}
 
-	msglen = len - ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
+	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
+	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	err = rdecode_relax(buf + ENCAP_C, msglen);
+	err = rdecode_relax(msg, msglen);
 
 	free(buf);
 
@@ -4377,7 +4378,7 @@ recv_auth(struct node *p)
 		return -1;
 	}
 
-	q = pop(); // result of rdecode_relax()
+	q = pop(); // result of rdecode
 
 	err = recv_auth_data(p, q);
 
@@ -5271,7 +5272,7 @@ sim(void)
 	session_setup(&A, 1);
 	session_setup(&B, 0);
 
-	// compare aes secrets
+	// compare aes secrets and state
 
 	err = memcmp(A.aes_secret, B.aes_secret, 32);
 	if (err) {
@@ -5279,10 +5280,42 @@ sim(void)
 		exit(1);
 	}
 
-	close(A.fd);
-	close(B.fd);
+	err = memcmp(A.encrypt_state, B.decrypt_state, 64);
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	err = memcmp(A.decrypt_state, B.encrypt_state, 64);
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	// compare mac secrets and state
+
+	err = memcmp(A.mac_secret, B.mac_secret, 32);
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	err = memcmp(&A.egress_mac, &B.ingress_mac, sizeof (struct mac));
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	err = memcmp(&A.ingress_mac, &B.egress_mac, sizeof (struct mac));
+	if (err) {
+		trace();
+		exit(1);
+	}
 
 	printf("ok\n");
+
+	close(A.fd);
+	close(B.fd);
 }
 int
 wait_for_pollin(int fd)

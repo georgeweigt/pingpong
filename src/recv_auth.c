@@ -2,7 +2,7 @@ int
 recv_auth(struct node *p)
 {
 	int err, msglen, len;
-	uint8_t *buf;
+	uint8_t *buf, *msg;
 	struct atom *q;
 
 	buf = recv_msg(p->fd);
@@ -21,9 +21,10 @@ recv_auth(struct node *p)
 		return -1;
 	}
 
-	msglen = len - ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
+	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
+	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	err = rdecode_relax(buf + ENCAP_C, msglen);
+	err = rdecode_relax(msg, msglen);
 
 	free(buf);
 
@@ -32,7 +33,7 @@ recv_auth(struct node *p)
 		return -1;
 	}
 
-	q = pop(); // result of rdecode_relax()
+	q = pop(); // result of rdecode
 
 	err = recv_auth_data(p, q);
 

@@ -106,7 +106,7 @@ sim(void)
 	session_setup(&A, 1);
 	session_setup(&B, 0);
 
-	// compare aes secrets
+	// compare aes secrets and state
 
 	err = memcmp(A.aes_secret, B.aes_secret, 32);
 	if (err) {
@@ -114,8 +114,40 @@ sim(void)
 		exit(1);
 	}
 
-	close(A.fd);
-	close(B.fd);
+	err = memcmp(A.encrypt_state, B.decrypt_state, 64);
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	err = memcmp(A.decrypt_state, B.encrypt_state, 64);
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	// compare mac secrets and state
+
+	err = memcmp(A.mac_secret, B.mac_secret, 32);
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	err = memcmp(&A.egress_mac, &B.ingress_mac, sizeof (struct mac));
+	if (err) {
+		trace();
+		exit(1);
+	}
+
+	err = memcmp(&A.ingress_mac, &B.egress_mac, sizeof (struct mac));
+	if (err) {
+		trace();
+		exit(1);
+	}
 
 	printf("ok\n");
+
+	close(A.fd);
+	close(B.fd);
 }
