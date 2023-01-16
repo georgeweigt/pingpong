@@ -5171,8 +5171,8 @@ sim(void)
 {
 	int err, i, listen_fd;
 
-	struct node A;
-	struct node B;
+	static struct node A;
+	static struct node B;
 
 	memset(&A, 0, sizeof A);
 	memset(&B, 0, sizeof B);
@@ -5316,6 +5316,12 @@ sim(void)
 
 	close(A.fd);
 	close(B.fd);
+
+	free(A.auth_buf);
+	free(A.ack_buf);
+
+	free(B.auth_buf);
+	free(B.ack_buf);
 }
 int
 wait_for_pollin(int fd)
