@@ -340,20 +340,22 @@ keccak256_setup(struct mac *p)
 	p->index = 0;
 }
 
+// reads from buf
+
 void
-keccak256_update(struct mac *p, uint8_t *inbuf, int len)
+keccak256_update(struct mac *p, uint8_t *buf, int len)
 {
 	int i, j, n;
 
 	// finish pending block
 
-	if (p->index + len > RATE)
-		n = RATE - p->index;
-	else
+	n = RATE - p->index;
+
+	if (n > len)
 		n = len;
 
 	for (i = 0; i < n; i++)
-		p->S[p->index + i] ^= inbuf[i];
+		p->S[p->index + i] ^= buf[i];
 
 	p->index += n;
 
@@ -364,14 +366,14 @@ keccak256_update(struct mac *p, uint8_t *inbuf, int len)
 
 	// remaining blocks
 
-	inbuf += n;
+	buf += n;
 	len -= n;
 
 	n = len / RATE; // number of full blocks
 
 	for (i = 0; i < n; i++) {
 		for (j = 0; j < RATE; j++)
-			p->S[j] ^= inbuf[RATE * i + j];
+			p->S[j] ^= buf[RATE * i + j];
 		Keccak(p->S);
 	}
 
@@ -380,11 +382,13 @@ keccak256_update(struct mac *p, uint8_t *inbuf, int len)
 	p->index = len % RATE;
 
 	for (i = 0; i < p->index; i++)
-		p->S[i] ^= inbuf[RATE * n + i];
+		p->S[i] ^= buf[RATE * n + i];
 }
 
+// writes to buf
+
 void
-keccak256_digest(struct mac *p, uint8_t *outbuf)
+keccak256_digest(struct mac *p, uint8_t *buf)
 {
 	uint8_t S[200];
 
@@ -395,7 +399,7 @@ keccak256_digest(struct mac *p, uint8_t *outbuf)
 
 	Keccak(S);
 
-	memcpy(outbuf, S, 32);
+	memcpy(buf, S, 32);
 }
 
 #undef RATE
