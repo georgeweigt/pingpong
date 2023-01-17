@@ -4,6 +4,7 @@ main(int argc, char *argv[])
 	ec_init();
 	aes128_init();
 	aes256_init();
+	keccak_init();
 
 	if (argc > 1) {
 		if (strcmp(argv[1], "test") == 0)
