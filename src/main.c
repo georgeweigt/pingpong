@@ -78,4 +78,12 @@ nib(void)
 		exit(1);
 
 	close(p->fd);
+
+	if (p->auth_buf)
+		free(p->auth_buf);
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+
+	free(p);
 }
