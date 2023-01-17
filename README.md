@@ -1,16 +1,14 @@
-`pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`
-
+`pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`.
 This project is under construction.
-Currently the `auth/ack` message exchange is working.
-
-`pingpong.c` is the cat of source files from directory `src`.
-Function `main` can be found in `src/main.c`
+Currently `pingpong` connects to Geth, receives and prints a capability list, then exits.
+See `src/main.c` for the top level process.
 
 #
 
 To build and run
 
 ```
+cd src
 make
 ./pingpong
 ```
