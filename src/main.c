@@ -72,6 +72,8 @@ nib(void)
 
 	// the rest is under construction
 
+	recv_frame(p);
+#if 0
 	uint8_t block[16];
 
 	err = recv_bytes(p->fd, block, 16);
@@ -83,6 +85,6 @@ nib(void)
 	aes256ctr_encrypt(p->decrypt_state, block, 16); // encrypt does decrypt in ctr mode
 
 	printmem(block, 16); // after decryption
-
+#endif
 	close(p->fd);
 }

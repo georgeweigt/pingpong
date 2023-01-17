@@ -48,12 +48,20 @@ session_setup(struct node *p, int initiator)
 	aes256ctr_setup(p->encrypt_state, p->aes_secret, iv);
 	aes256ctr_setup(p->decrypt_state, p->aes_secret, iv);
 
+	aes256ctr_setup(p->ingress_mac.enc_state, p->mac_secret, iv);
+	aes256ctr_setup(p->egress_mac.enc_state, p->mac_secret, iv);
+
+	// macs
+
+	keccak256_setup(&p->ingress_mac);
+	keccak256_setup(&p->egress_mac);
+
 	if (initiator) {
 		a = &p->ingress_mac;
 		b = &p->egress_mac;
 	} else {
-		a = &p->egress_mac; // interchange for recipient
-		b = &p->ingress_mac;
+		b = &p->ingress_mac; // interchange for recipient
+		a = &p->egress_mac;
 	}
 
 	// initiator ingress-mac = keccak256.init((mac-secret ^ initiator-nonce) || ack)
@@ -61,7 +69,6 @@ session_setup(struct node *p, int initiator)
 	for (i = 0; i < 32; i++)
 		buf[i] = p->mac_secret[i] ^ p->auth_nonce[i];
 
-	keccak256_init(a);
 	keccak256_update(a, buf, 32);
 	keccak256_update(a, p->ack_buf, p->ack_len);
 
@@ -70,7 +77,6 @@ session_setup(struct node *p, int initiator)
 	for (i = 0; i < 32; i++)
 		buf[i] = p->mac_secret[i] ^ p->ack_nonce[i];
 
-	keccak256_init(b);
 	keccak256_update(b, buf, 32);
 	keccak256_update(b, p->auth_buf, p->auth_len);
 }

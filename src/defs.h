@@ -43,6 +43,7 @@ struct account {
 struct mac {
 	uint8_t S[200]; // 1600 bits
 	int index;
+	uint32_t enc_state[64];
 };
 
 struct node {

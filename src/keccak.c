@@ -279,7 +279,8 @@ test_keccak256(void)
 {
 	int err;
 	char *s;
-	uint8_t buf[RATE + 1];
+	uint8_t buf[RATE + 1], hash[32];
+	struct mac m;
 
 	printf("Test keccak256 ");
 
@@ -320,11 +321,20 @@ test_keccak256(void)
 		return;
 	}
 
+	keccak256_setup(&m);
+	keccak256_update(&m, buf, RATE + 1);
+	keccak256_digest(&m, hash);
+	err = memcmp(hash, "\xd8\x69\xf6\x39\xc7\x04\x6b\x49\x29\xfc\x92\xa4\xd9\x88\xa8\xb2\x2c\x55\xfb\xad\xb8\x02\xc0\xc6\x6e\xbc\xd4\x84\xf1\x91\x5f\x39", 32);
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		return;
+	}
+
 	printf("ok\n");
 }
 
 void
-keccak256_init(struct mac *p)
+keccak256_setup(struct mac *p)
 {
 	memset(p->S, 0, 200);
 	p->index = 0;
