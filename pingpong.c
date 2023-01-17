@@ -4564,6 +4564,7 @@ printmem(data, 10);
 	}
 
 	q = pop(); // list from rdecode
+	print_list(q);
 	print_client_id(q);
 	free_list(q);
 
