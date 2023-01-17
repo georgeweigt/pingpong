@@ -77,7 +77,5 @@ nib(void)
 	if (err)
 		exit(1);
 
-	printf("ok\n");
-
 	close(p->fd);
 }
