@@ -181,6 +181,7 @@ int recv_auth_data(struct node *p, struct atom *q);
 int recv_hello(struct node *p);
 void recv_hello_data(struct atom *q);
 void print_client_id(struct atom *p);
+void print_capabilities(struct atom *p);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
@@ -4222,19 +4223,17 @@ recv_frame(struct node *p)
 		return NULL;
 
 	// header-mac-seed = aes(mac-secret, keccak256.digest(ingress-mac)[:16]) ^ header-ciphertext
-
 	// ingress-mac = keccak256.update(ingress-mac, header-mac-seed)
-
 	// header-mac = keccak256.digest(ingress-mac)[:16]
 
 	keccak256_digest(&p->ingress_mac, mac);
 
-	aes256_encrypt_block(p->ingress_mac.enc_state, mac, mac);
+	aes256_encrypt_block(p->ingress_mac.enc_state, mac, seed);
 
 	for (i = 0; i < 16; i++)
-		mac[i] ^= header[i];
+		seed[i] ^= header[i];
 
-	keccak256_update(&p->ingress_mac, mac, 16);
+	keccak256_update(&p->ingress_mac, seed, 16);
 
 	keccak256_digest(&p->ingress_mac, mac);
 
@@ -4267,11 +4266,8 @@ recv_frame(struct node *p)
 	recv_bytes(p->fd, buf + 32, 16 * n + 16);
 
 	// ingress-mac = keccak256.update(ingress-mac, frame-ciphertext)
-
 	// frame-mac-seed = aes(mac-secret, keccak256.digest(ingress-mac)[:16]) ^ keccak256.digest(ingress-mac)[:16]
-
 	// ingress-mac = keccak256.update(ingress-mac, frame-mac-seed)
-
 	// frame-mac = keccak256.digest(ingress-mac)[:16]
 
 	keccak256_update(&p->ingress_mac, buf + 32, 16 * n);
@@ -4572,8 +4568,9 @@ recv_hello(struct node *p)
 void
 recv_hello_data(struct atom *q)
 {
-	print_list(q);
+//	print_list(q);
 	print_client_id(q);
+	print_capabilities(q);
 }
 
 void
@@ -4593,6 +4590,53 @@ print_client_id(struct atom *p)
 		printf("%c", p->string[i]);
 
 	printf("\n");
+}
+
+void
+print_capabilities(struct atom *p)
+{
+	int i, n;
+	struct atom *q, *q1, *q2;
+
+	if (p == NULL || p->cdr == NULL || p->cdr->cdr == NULL)
+		return;
+
+	p = p->cdr->cdr->car;
+
+	while (p) {
+
+		q = p->car;
+
+		if (q == NULL || q->cdr == NULL)
+			return;
+
+		q1 = q->car; // capability
+		q2 = q->cdr->car; // version
+
+		if (q1 == NULL || q2 == NULL)
+			return;
+
+		if (q1->length < 0 || q2->length < 0)
+			return;
+
+		// print capability
+
+		for (i = 0; i < q1->length; i++)
+			printf("%c", q1->string[i]);
+
+		printf("/");
+
+		// version
+
+		n = 0;
+
+		for (i = 0; i < q2->length; i++)
+			n = 10 * n + q2->string[i];
+
+		printf("%d\n", n);
+
+		p = p->cdr;
+	}
 }
 int
 rencode(uint8_t *buf, int len, struct atom *p)

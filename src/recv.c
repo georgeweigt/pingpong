@@ -10,19 +10,17 @@ recv_frame(struct node *p)
 		return NULL;
 
 	// header-mac-seed = aes(mac-secret, keccak256.digest(ingress-mac)[:16]) ^ header-ciphertext
-
 	// ingress-mac = keccak256.update(ingress-mac, header-mac-seed)
-
 	// header-mac = keccak256.digest(ingress-mac)[:16]
 
 	keccak256_digest(&p->ingress_mac, mac);
 
-	aes256_encrypt_block(p->ingress_mac.enc_state, mac, mac);
+	aes256_encrypt_block(p->ingress_mac.enc_state, mac, seed);
 
 	for (i = 0; i < 16; i++)
-		mac[i] ^= header[i];
+		seed[i] ^= header[i];
 
-	keccak256_update(&p->ingress_mac, mac, 16);
+	keccak256_update(&p->ingress_mac, seed, 16);
 
 	keccak256_digest(&p->ingress_mac, mac);
 
@@ -55,11 +53,8 @@ recv_frame(struct node *p)
 	recv_bytes(p->fd, buf + 32, 16 * n + 16);
 
 	// ingress-mac = keccak256.update(ingress-mac, frame-ciphertext)
-
 	// frame-mac-seed = aes(mac-secret, keccak256.digest(ingress-mac)[:16]) ^ keccak256.digest(ingress-mac)[:16]
-
 	// ingress-mac = keccak256.update(ingress-mac, frame-mac-seed)
-
 	// frame-mac = keccak256.digest(ingress-mac)[:16]
 
 	keccak256_update(&p->ingress_mac, buf + 32, 16 * n);

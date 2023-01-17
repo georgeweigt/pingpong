@@ -105,6 +105,7 @@ int recv_auth_data(struct node *p, struct atom *q);
 int recv_hello(struct node *p);
 void recv_hello_data(struct atom *q);
 void print_client_id(struct atom *p);
+void print_capabilities(struct atom *p);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
