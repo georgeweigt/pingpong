@@ -1,2 +1,2 @@
 #!/bin/bash
-geth --goerli --nodiscover --allow-insecure-unlock --verbosity 5
+geth --goerli --nodiscover --verbosity 5
