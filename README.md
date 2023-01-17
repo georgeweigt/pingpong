@@ -88,6 +88,8 @@ Note that `recipient-ephemeral-pubk` is shown but there is no `initiator-ephemer
 Of course, both are required to establish a shared secret from which session keys are derived.
 It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
+5. The AES encryption used for MACs is ECB mode, not CTR mode.
+
 #
 
 [Documentation](https://georgeweigt.github.io/pingpong.pdf)
