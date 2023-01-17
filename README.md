@@ -31,7 +31,7 @@ brew install ethereum
 To run `geth`
 
 ```
-geth --goerli --nodiscover --allow-insecure-unlock --http --ws --verbosity 5
+geth --goerli --nodiscover --allow-insecure-unlock --verbosity 5
 ```
 
 `geth` prints its public key on start up
