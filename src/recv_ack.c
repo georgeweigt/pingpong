@@ -1,7 +1,7 @@
 int
 recv_ack(struct node *p)
 {
-	int err, msglen, len;
+	int err, msglen, len, n;
 	uint8_t *buf, *msg;
 	struct atom *q;
 
@@ -24,11 +24,11 @@ recv_ack(struct node *p)
 	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
 	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	err = rdecode_relax(msg, msglen); // relax allows trailing data
+	n = rdecode_relax(msg, msglen); // relax allows trailing data
 
 	free(buf);
 
-	if (err) {
+	if (n < 0) {
 		trace();
 		return -1;
 	}

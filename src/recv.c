@@ -45,12 +45,14 @@ recv_frame(struct node *p)
 
 	n = (len + 15) / 16; // number of blocks
 
-	buf = malloc(16 * n + 16); // one additional block for mac
+	buf = malloc(16 * n + 48); // additional blocks for header and mac
 
 	if (buf == NULL)
 		exit(1);
 
-	recv_bytes(p->fd, buf, 16 * n + 16);
+	memcpy(buf, header, 32);
+
+	recv_bytes(p->fd, buf + 32, 16 * n + 16);
 
 	// ingress-mac = keccak256.update(ingress-mac, frame-ciphertext)
 
@@ -60,7 +62,7 @@ recv_frame(struct node *p)
 
 	// frame-mac = keccak256.digest(ingress-mac)[:16]
 
-	keccak256_update(&p->ingress_mac, buf, 16 * n);
+	keccak256_update(&p->ingress_mac, buf + 32, 16 * n);
 
 	keccak256_digest(&p->ingress_mac, mac);
 
@@ -75,7 +77,7 @@ recv_frame(struct node *p)
 
 	// check frame mac
 
-	err = memcmp(mac, buf + 16 * n, 16);
+	err = memcmp(mac, buf + 32 + 16 * n, 16);
 
 	if (err) {
 		trace();
@@ -85,11 +87,10 @@ recv_frame(struct node *p)
 
 	// decrypt
 
-	aes256ctr_encrypt(p->decrypt_state, buf, 16 * n);
+	aes256ctr_encrypt(p->decrypt_state, buf + 32, 16 * n);
 
 	return buf;
 }
-
 
 // receives AUTH or ACK
 

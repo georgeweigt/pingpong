@@ -43,6 +43,7 @@ struct account {
 struct mac {
 	uint8_t S[200]; // 1600 bits
 	int index;
+	uint32_t enc_state[64];
 };
 
 struct node {
@@ -150,7 +151,7 @@ uint8_t * sponge(uint8_t *N, int len);
 void keccak256(uint8_t *outbuf, uint8_t *inbuf, int inbuflen);
 char * keccak256str(uint8_t *buf, int len);
 void test_keccak256(void);
-void keccak256_init(struct mac *p);
+void keccak256_setup(struct mac *p);
 void keccak256_update(struct mac *p, uint8_t *inbuf, int len);
 void keccak256_digest(struct mac *p, uint8_t *outbuf);
 void list(int n);
@@ -170,12 +171,14 @@ int rdecode(uint8_t *buf, int length);
 int rdecode_relax(uint8_t *buf, int length);
 int rdecode_nib(uint8_t *buf, int length);
 int rdecode_list(uint8_t *buf, int length);
+uint8_t * recv_frame(struct node *p);
 uint8_t * recv_msg(int fd);
 int recv_bytes(int fd, uint8_t *buf, int len);
 int recv_ack(struct node *p);
 int recv_ack_data(struct node *p, struct atom *q);
 int recv_auth(struct node *p);
 int recv_auth_data(struct node *p, struct atom *q);
+int recv_hello(struct node *p);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);
@@ -3672,7 +3675,8 @@ test_keccak256(void)
 {
 	int err;
 	char *s;
-	uint8_t buf[RATE + 1];
+	uint8_t buf[RATE + 1], hash[32];
+	struct mac m;
 
 	printf("Test keccak256 ");
 
@@ -3713,11 +3717,20 @@ test_keccak256(void)
 		return;
 	}
 
+	keccak256_setup(&m);
+	keccak256_update(&m, buf, RATE + 1);
+	keccak256_digest(&m, hash);
+	err = memcmp(hash, "\xd8\x69\xf6\x39\xc7\x04\x6b\x49\x29\xfc\x92\xa4\xd9\x88\xa8\xb2\x2c\x55\xfb\xad\xb8\x02\xc0\xc6\x6e\xbc\xd4\x84\xf1\x91\x5f\x39", 32);
+	if (err) {
+		printf("err %s line %d\n", __FILE__, __LINE__);
+		return;
+	}
+
 	printf("ok\n");
 }
 
 void
-keccak256_init(struct mac *p)
+keccak256_setup(struct mac *p)
 {
 	memset(p->S, 0, 200);
 	p->index = 0;
@@ -4060,17 +4073,12 @@ nib(void)
 
 	// the rest is under construction
 
-	uint8_t block[16];
-
-	err = recv_bytes(p->fd, block, 16);
+	printf("receiving hello\n");
+	err = recv_hello(p);
 	if (err)
 		exit(1);
 
-	printmem(block, 16); // before decryption
-
-	aes256ctr_encrypt(p->decrypt_state, block, 16); // encrypt does decrypt in ctr mode
-
-	printmem(block, 16); // after decryption
+	printf("ok\n");
 
 	close(p->fd);
 }
@@ -4086,7 +4094,7 @@ rdecode(uint8_t *buf, int length)
 		free_list(pop());
 		return -1; // buffer underrun
 	} else
-		return 0; // ok
+		return n; // ok
 }
 
 // ok to have trailing data
@@ -4098,7 +4106,7 @@ rdecode_relax(uint8_t *buf, int length)
 	if (n == -1)
 		return -1; // decode error
 	else
-		return 0; // ok
+		return n; // ok
 }
 
 // returns number of bytes read from buf or -1 on error
@@ -4198,6 +4206,100 @@ rdecode_list(uint8_t *buf, int length)
 	list(tos - h);
 	return 0; // ok
 }
+uint8_t *
+recv_frame(struct node *p)
+{
+	int err, i, len, n;
+	uint8_t *buf, header[32], mac[32], seed[32];
+
+	err = recv_bytes(p->fd, header, 32);
+
+	if (err)
+		return NULL;
+
+	// header-mac-seed = aes(mac-secret, keccak256.digest(ingress-mac)[:16]) ^ header-ciphertext
+
+	// ingress-mac = keccak256.update(ingress-mac, header-mac-seed)
+
+	// header-mac = keccak256.digest(ingress-mac)[:16]
+
+	keccak256_digest(&p->ingress_mac, mac);
+
+	aes256_encrypt_block(p->ingress_mac.enc_state, mac, mac);
+
+	for (i = 0; i < 16; i++)
+		mac[i] ^= header[i];
+
+	keccak256_update(&p->ingress_mac, mac, 16);
+
+	keccak256_digest(&p->ingress_mac, mac);
+
+	// check header mac
+
+	err = memcmp(mac, header + 16, 16);
+
+	if (err) {
+		trace();
+		NULL;
+	}
+
+	// decrypt header
+
+	aes256ctr_encrypt(p->decrypt_state, header, 16);
+
+	// length from prefix
+
+	len = header[0] << 16 | header[1] << 8 | header[2];
+
+	n = (len + 15) / 16; // number of blocks
+
+	buf = malloc(16 * n + 48); // additional blocks for header and mac
+
+	if (buf == NULL)
+		exit(1);
+
+	memcpy(buf, header, 32);
+
+	recv_bytes(p->fd, buf + 32, 16 * n + 16);
+
+	// ingress-mac = keccak256.update(ingress-mac, frame-ciphertext)
+
+	// frame-mac-seed = aes(mac-secret, keccak256.digest(ingress-mac)[:16]) ^ keccak256.digest(ingress-mac)[:16]
+
+	// ingress-mac = keccak256.update(ingress-mac, frame-mac-seed)
+
+	// frame-mac = keccak256.digest(ingress-mac)[:16]
+
+	keccak256_update(&p->ingress_mac, buf + 32, 16 * n);
+
+	keccak256_digest(&p->ingress_mac, mac);
+
+	aes256_encrypt_block(p->ingress_mac.enc_state, mac, seed);
+
+	for (i = 0; i < 16; i++)
+		seed[i] ^= mac[i];
+
+	keccak256_update(&p->ingress_mac, seed, 16);
+
+	keccak256_digest(&p->ingress_mac, mac);
+
+	// check frame mac
+
+	err = memcmp(mac, buf + 32 + 16 * n, 16);
+
+	if (err) {
+		trace();
+		free(buf);
+		return NULL;
+	}
+
+	// decrypt
+
+	aes256ctr_encrypt(p->decrypt_state, buf + 32, 16 * n);
+
+	return buf;
+}
+
 // receives AUTH or ACK
 
 uint8_t *
@@ -4272,7 +4374,7 @@ recv_bytes(int fd, uint8_t *buf, int len)
 int
 recv_ack(struct node *p)
 {
-	int err, msglen, len;
+	int err, msglen, len, n;
 	uint8_t *buf, *msg;
 	struct atom *q;
 
@@ -4295,11 +4397,11 @@ recv_ack(struct node *p)
 	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
 	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	err = rdecode_relax(msg, msglen); // relax allows trailing data
+	n = rdecode_relax(msg, msglen); // relax allows trailing data
 
 	free(buf);
 
-	if (err) {
+	if (n < 0) {
 		trace();
 		return -1;
 	}
@@ -4346,7 +4448,7 @@ recv_ack_data(struct node *p, struct atom *q)
 int
 recv_auth(struct node *p)
 {
-	int err, msglen, len;
+	int err, msglen, len, n;
 	uint8_t *buf, *msg;
 	struct atom *q;
 
@@ -4369,11 +4471,11 @@ recv_auth(struct node *p)
 	msg = buf + ENCAP_C;		// ENCAP_C == 2 + 65 + 16
 	msglen = len - ENCAP_OVERHEAD;	// ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	err = rdecode_relax(msg, msglen);
+	n = rdecode_relax(msg, msglen);
 
 	free(buf);
 
-	if (err) {
+	if (n < 0) {
 		trace();
 		return -1;
 	}
@@ -4414,6 +4516,61 @@ recv_auth_data(struct node *p, struct atom *q)
 	}
 
 	memcpy(p->auth_nonce, q3->string, 32);
+
+	return 0;
+}
+int
+recv_hello(struct node *p)
+{
+	int len, nbytes;
+	uint8_t *buf, *data;
+	struct atom *q;
+
+	buf = recv_frame(p);
+
+	if (buf == NULL)
+		return -1;
+
+	data = buf + 32; // skip over header
+
+	len = buf[0] << 16 | buf[1] << 8 | buf[2]; // length of data
+
+	// msg id
+
+	nbytes = rdecode_relax(data, len);
+
+printf("msg id nbytes = %d\n", nbytes);
+
+	if (nbytes < 0) {
+		trace();
+		free(buf);
+		return -1;
+	}
+
+	q = pop(); // list from rdecode
+	print_list(q);
+	free_list(q);
+
+	// msg data
+
+	data += nbytes;
+	len -= nbytes;
+
+	nbytes = rdecode_relax(data, len);
+
+printf("msg data nbytes = %d\n", nbytes);
+
+	if (nbytes < 0) {
+		trace();
+		free(buf);
+		return -1;
+	}
+
+	q = pop(); // list from rdecode
+	print_list(q);
+	free_list(q);
+
+	free(buf);
 
 	return 0;
 }
@@ -4774,12 +4931,20 @@ session_setup(struct node *p, int initiator)
 	aes256ctr_setup(p->encrypt_state, p->aes_secret, iv);
 	aes256ctr_setup(p->decrypt_state, p->aes_secret, iv);
 
+	aes256ctr_setup(p->ingress_mac.enc_state, p->mac_secret, iv);
+	aes256ctr_setup(p->egress_mac.enc_state, p->mac_secret, iv);
+
+	// macs
+
+	keccak256_setup(&p->ingress_mac);
+	keccak256_setup(&p->egress_mac);
+
 	if (initiator) {
 		a = &p->ingress_mac;
 		b = &p->egress_mac;
 	} else {
-		a = &p->egress_mac; // interchange for recipient
-		b = &p->ingress_mac;
+		b = &p->ingress_mac; // interchange for recipient
+		a = &p->egress_mac;
 	}
 
 	// initiator ingress-mac = keccak256.init((mac-secret ^ initiator-nonce) || ack)
@@ -4787,7 +4952,6 @@ session_setup(struct node *p, int initiator)
 	for (i = 0; i < 32; i++)
 		buf[i] = p->mac_secret[i] ^ p->auth_nonce[i];
 
-	keccak256_init(a);
 	keccak256_update(a, buf, 32);
 	keccak256_update(a, p->ack_buf, p->ack_len);
 
@@ -4796,7 +4960,6 @@ session_setup(struct node *p, int initiator)
 	for (i = 0; i < 32; i++)
 		buf[i] = p->mac_secret[i] ^ p->ack_nonce[i];
 
-	keccak256_init(b);
 	keccak256_update(b, buf, 32);
 	keccak256_update(b, p->auth_buf, p->auth_len);
 }
@@ -5885,7 +6048,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -5905,7 +6068,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -5926,7 +6089,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -5945,7 +6108,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -5965,7 +6128,7 @@ test_rdecode(void)
 		p = pop();
 		len = rencode(buf, sizeof buf, p);
 		err = rdecode(buf, len);
-		if (err)
+		if (err < 0)
 			q = NULL;
 		else {
 			q = pop();
@@ -5986,7 +6149,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -6006,7 +6169,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -6026,7 +6189,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -6046,7 +6209,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();

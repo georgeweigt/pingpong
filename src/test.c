@@ -358,7 +358,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -378,7 +378,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -399,7 +399,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -418,7 +418,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -438,7 +438,7 @@ test_rdecode(void)
 		p = pop();
 		len = rencode(buf, sizeof buf, p);
 		err = rdecode(buf, len);
-		if (err)
+		if (err < 0)
 			q = NULL;
 		else {
 			q = pop();
@@ -459,7 +459,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -479,7 +479,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -499,7 +499,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();
@@ -519,7 +519,7 @@ test_rdecode(void)
 	p = pop();
 	len = rencode(buf, sizeof buf, p);
 	err = rdecode(buf, len);
-	if (err)
+	if (err < 0)
 		q = NULL;
 	else {
 		q = pop();

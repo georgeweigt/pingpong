@@ -10,7 +10,7 @@ rdecode(uint8_t *buf, int length)
 		free_list(pop());
 		return -1; // buffer underrun
 	} else
-		return 0; // ok
+		return n; // ok
 }
 
 // ok to have trailing data
@@ -22,7 +22,7 @@ rdecode_relax(uint8_t *buf, int length)
 	if (n == -1)
 		return -1; // decode error
 	else
-		return 0; // ok
+		return n; // ok
 }
 
 // returns number of bytes read from buf or -1 on error

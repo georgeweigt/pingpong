@@ -102,6 +102,7 @@ int recv_ack(struct node *p);
 int recv_ack_data(struct node *p, struct atom *q);
 int recv_auth(struct node *p);
 int recv_auth_data(struct node *p, struct atom *q);
+int recv_hello(struct node *p);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
 int rencode_list(uint8_t *buf, struct atom *p);

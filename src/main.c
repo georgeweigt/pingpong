@@ -72,19 +72,12 @@ nib(void)
 
 	// the rest is under construction
 
-	recv_frame(p);
-#if 0
-	uint8_t block[16];
-
-	err = recv_bytes(p->fd, block, 16);
+	printf("receiving hello\n");
+	err = recv_hello(p);
 	if (err)
 		exit(1);
 
-	printmem(block, 16); // before decryption
+	printf("ok\n");
 
-	aes256ctr_encrypt(p->decrypt_state, block, 16); // encrypt does decrypt in ctr mode
-
-	printmem(block, 16); // after decryption
-#endif
 	close(p->fd);
 }
