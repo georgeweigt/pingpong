@@ -197,6 +197,8 @@ print_list_nib(struct atom *p, int level)
 		return;
 	}
 
-	for (i = 0; i < p->length; i++)
+	if (p->length == 0)
+		printf("\"\""); // empty string ""
+	else for (i = 0; i < p->length; i++)
 		printf("%02x", p->string[i]);
 }

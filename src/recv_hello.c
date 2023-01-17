@@ -14,43 +14,41 @@ recv_hello(struct node *p)
 
 	len = buf[0] << 16 | buf[1] << 8 | buf[2]; // length of data
 
-printmem(data, 10);
+	// verify that msg id is the empty string ""
 
-	// msg id
-
-	nbytes = rdecode_relax(data, len);
-
-	if (nbytes < 0) {
+	if (len < 1 || data[0] != 0x80) {
 		trace();
 		free(buf);
-		return -1;
+		return -1; // not hello msg
 	}
 
-	q = pop(); // list from rdecode
-	print_list(q);
-	free_list(q);
+	data += 1;
+	len -= 1;
 
 	// msg data
 
-	data += nbytes;
-	len -= nbytes;
-
 	nbytes = rdecode_relax(data, len);
 
 	if (nbytes < 0) {
 		trace();
 		free(buf);
-		return -1;
+		return -1; // fmt error
 	}
 
 	q = pop(); // list from rdecode
-	print_list(q);
-	print_client_id(q);
+	recv_hello_data(q);
 	free_list(q);
 
 	free(buf);
 
 	return 0;
+}
+
+void
+recv_hello_data(struct atom *q)
+{
+	print_list(q);
+	print_client_id(q);
 }
 
 void

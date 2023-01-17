@@ -1,4 +1,6 @@
-// returns result on stack or -1 on error
+// returns number of bytes read or -1 on error
+
+// if no error then list is returned on stack
 
 int
 rdecode(uint8_t *buf, int length)
@@ -13,7 +15,7 @@ rdecode(uint8_t *buf, int length)
 		return n; // ok
 }
 
-// ok to have trailing data
+// trailing data ok
 
 int
 rdecode_relax(uint8_t *buf, int length)

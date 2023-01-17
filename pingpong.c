@@ -179,6 +179,7 @@ int recv_ack_data(struct node *p, struct atom *q);
 int recv_auth(struct node *p);
 int recv_auth_data(struct node *p, struct atom *q);
 int recv_hello(struct node *p);
+void recv_hello_data(struct atom *q);
 void print_client_id(struct atom *p);
 int rencode(uint8_t *buf, int len, struct atom *p);
 int rencode_nib(uint8_t *buf, struct atom *p);
@@ -3997,7 +3998,9 @@ print_list_nib(struct atom *p, int level)
 		return;
 	}
 
-	for (i = 0; i < p->length; i++)
+	if (p->length == 0)
+		printf("\"\""); // empty string ""
+	else for (i = 0; i < p->length; i++)
 		printf("%02x", p->string[i]);
 }
 int
@@ -4081,7 +4084,9 @@ nib(void)
 
 	close(p->fd);
 }
-// returns result on stack or -1 on error
+// returns number of bytes read or -1 on error
+
+// if no error then list is returned on stack
 
 int
 rdecode(uint8_t *buf, int length)
@@ -4096,7 +4101,7 @@ rdecode(uint8_t *buf, int length)
 		return n; // ok
 }
 
-// ok to have trailing data
+// trailing data ok
 
 int
 rdecode_relax(uint8_t *buf, int length)
@@ -4534,43 +4539,41 @@ recv_hello(struct node *p)
 
 	len = buf[0] << 16 | buf[1] << 8 | buf[2]; // length of data
 
-printmem(data, 10);
+	// verify that msg id is the empty string ""
 
-	// msg id
-
-	nbytes = rdecode_relax(data, len);
-
-	if (nbytes < 0) {
+	if (len < 1 || data[0] != 0x80) {
 		trace();
 		free(buf);
-		return -1;
+		return -1; // not hello msg
 	}
 
-	q = pop(); // list from rdecode
-	print_list(q);
-	free_list(q);
+	data += 1;
+	len -= 1;
 
 	// msg data
 
-	data += nbytes;
-	len -= nbytes;
-
 	nbytes = rdecode_relax(data, len);
 
 	if (nbytes < 0) {
 		trace();
 		free(buf);
-		return -1;
+		return -1; // fmt error
 	}
 
 	q = pop(); // list from rdecode
-	print_list(q);
-	print_client_id(q);
+	recv_hello_data(q);
 	free_list(q);
 
 	free(buf);
 
 	return 0;
+}
+
+void
+recv_hello_data(struct atom *q)
+{
+	print_list(q);
+	print_client_id(q);
 }
 
 void
