@@ -91,6 +91,7 @@ void print_list(struct atom *p);
 void print_list_nib(struct atom *p, int level);
 int main(int argc, char *argv[]);
 void nib(void);
+void nib1(struct node *p);
 int rdecode(uint8_t *buf, int length);
 int rdecode_relax(uint8_t *buf, int length);
 int rdecode_nib(uint8_t *buf, int length);

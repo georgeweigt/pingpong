@@ -21,10 +21,7 @@ main(int argc, char *argv[])
 void
 nib(void)
 {
-	int err, i;
 	struct node *p;
-
-	// setup
 
 	p = malloc(sizeof (struct node));
 
@@ -32,6 +29,33 @@ nib(void)
 		exit(1);
 
 	memset(p, 0, sizeof (struct node));
+
+	// connect
+
+	p->fd = client_connect("127.0.0.1", 30303);
+
+	if (p->fd < 0) {
+		free(p);
+		return;
+	}
+
+	nib1(p);
+
+	close(p->fd);
+
+	if (p->auth_buf)
+		free(p->auth_buf);
+
+	if (p->ack_buf)
+		free(p->ack_buf);
+
+	free(p);
+}
+
+void
+nib1(struct node *p)
+{
+	int err, i;
 
 	hextobin(p->far_public_key, 64, GETH_PUBLIC_KEY);
 
@@ -48,23 +72,17 @@ nib(void)
 	for (i = 0; i < 32; i++)
 		p->auth_nonce[i] = random();
 
-	// establish connection
-
-	p->fd = client_connect("127.0.0.1", 30303);
-	if (p->fd < 0)
-		exit(1);
-
 	// handshake
 
 	printf("sending auth\n");
 	err = send_auth(p);
 	if (err)
-		exit(1);
+		return;
 
 	printf("receiving ack\n");
 	err = recv_ack(p);
 	if (err)
-		exit(1);
+		return;
 
 	// session setup
 
@@ -75,15 +93,5 @@ nib(void)
 	printf("receiving hello\n");
 	err = recv_hello(p);
 	if (err)
-		exit(1);
-
-	close(p->fd);
-
-	if (p->auth_buf)
-		free(p->auth_buf);
-
-	if (p->ack_buf)
-		free(p->ack_buf);
-
-	free(p);
+		return;
 }
