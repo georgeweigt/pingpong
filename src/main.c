@@ -89,7 +89,12 @@ nib1(struct node *p)
 
 	session_setup(p, 1);
 
-	// the rest is under construction
+	// send and receive hello
+
+	printf("sending hello\n");
+	err = send_hello(p);
+	if (err)
+		return;
 
 	printf("receiving hello\n");
 	err = recv_hello(p);
