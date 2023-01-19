@@ -1,9 +1,5 @@
-`pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`.
-This project is under construction.
-Currently `pingpong` connects to Geth, receives and prints a capability list, then exits.
-See `src/main.c` for the top level process.
-
-#
+This project is intended to be a reference design for the RLPx protocol.
+To verify functionality, `pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`
 
 To build and run
 
@@ -11,12 +7,33 @@ To build and run
 cd src
 make
 ./pingpong
+sending auth
+receiving ack
+sending hello
+receiving hello
+Geth/v1.10.26-stable/darwin-amd64/go1.19.3
+eth/66
+eth/67
+snap/1
 ```
 
 To run a self test
 
 ```
 ./pingpong test
+Test aes128 ok
+Test aes256 ok
+Test sha256 ok
+Test keccak256 ok
+Test rencode ok
+Test rdecode ok
+Test genkey ok
+Test pubkey ok
+Test kdf ok
+Test hmac ok
+Test sign ok
+Test decrypt ok
+Test snappy ok
 ```
 
 #
