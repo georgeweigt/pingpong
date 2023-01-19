@@ -131,7 +131,7 @@ Rnd(uint8_t *A, int ir)
 	return iota(chi(pi(rho(theta(A)))), ir);
 }
 
-uint8_t mask[8] = {1,2,4,8,0x10,0x20,0x40,0x80};
+uint8_t keccak_mask[8] = {1,2,4,8,0x10,0x20,0x40,0x80};
 
 void
 Keccak(uint8_t *S)
@@ -147,7 +147,7 @@ Keccak(uint8_t *S)
 		for (y = 0; y < 5; y++)
 			for (z = 0; z < 64; z++) {
 				k = 64 * (5 * y + x) + z;
-				if (S[k / 8] & mask[k % 8])
+				if (S[k / 8] & keccak_mask[k % 8])
 					A(x,y,z) = 1;
 			}
 
@@ -163,7 +163,7 @@ Keccak(uint8_t *S)
 			for (z = 0; z < 64; z++)
 				if (A(x,y,z)) {
 					k = 64 * (5 * y + x) + z;
-					S[k / 8] |= mask[k % 8];
+					S[k / 8] |= keccak_mask[k % 8];
 				}
 }
 
@@ -203,80 +203,6 @@ keccak256(uint8_t *outbuf, uint8_t *inbuf, int inbuflen)
 {
 	uint8_t *S = sponge(inbuf, inbuflen);
 	memcpy(outbuf, S, 32);
-}
-
-char *
-keccak256str(uint8_t *buf, int len)
-{
-	int i;
-	uint8_t *S;
-	static char Z[65];
-
-	S = sponge(buf, len);
-
-	for (i = 0; i < 32; i++)
-		sprintf(Z + 2 * i, "%02x", S[i]);
-
-	return Z;
-}
-
-void
-test_keccak256(void)
-{
-	int err;
-	char *s;
-	uint8_t buf[RATE + 1], hash[32];
-	struct mac m;
-
-	printf("Test keccak256 ");
-
-	memset(buf, 'a', sizeof buf);
-
-	s = keccak256str(NULL, 0);
-	err = strcmp(s, "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
-
-	s = keccak256str((uint8_t *) "hello", 5);
-	err = strcmp(s, "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8");
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
-
-	s = keccak256str(buf, RATE - 1);
-	err = strcmp(s, "34367dc248bbd832f4e3e69dfaac2f92638bd0bbd18f2912ba4ef454919cf446");
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
-
-	s = keccak256str(buf, RATE);
-	err = strcmp(s, "a6c4d403279fe3e0af03729caada8374b5ca54d8065329a3ebcaeb4b60aa386e");
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
-
-	s = keccak256str(buf, RATE + 1);
-	err = strcmp(s, "d869f639c7046b4929fc92a4d988a8b22c55fbadb802c0c66ebcd484f1915f39");
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
-
-	keccak256_setup(&m);
-	keccak256_update(&m, buf, RATE + 1);
-	keccak256_digest(&m, hash);
-	err = memcmp(hash, "\xd8\x69\xf6\x39\xc7\x04\x6b\x49\x29\xfc\x92\xa4\xd9\x88\xa8\xb2\x2c\x55\xfb\xad\xb8\x02\xc0\xc6\x6e\xbc\xd4\x84\xf1\x91\x5f\x39", 32);
-	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
-		return;
-	}
-
-	printf("ok\n");
 }
 
 void
