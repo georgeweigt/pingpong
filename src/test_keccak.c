@@ -12,7 +12,7 @@ test_keccak256(void)
 	uint8_t buf[RATE + 1], h[32], hash[32];
 	struct mac state;
 
-	printf("Test keccak256 ");
+	printf("Test keccak ");
 
 	memset(buf, 'a', sizeof buf);
 

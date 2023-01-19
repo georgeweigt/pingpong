@@ -5,8 +5,8 @@ test(void)
 	test_aes256();
 	test_sha256();
 	test_keccak256();
-	test_rencode();
-	test_rdecode();
+	test_encode();
+	test_decode();
 	test_genkey();
 	test_pubkey();
 	test_kdf();
@@ -90,13 +90,13 @@ test_aes256(void)
 }
 
 void
-test_rencode(void)
+test_encode(void)
 {
 	int err, i, n;
 	struct atom *p;
 	uint8_t buf[256], enc[256];
 
-	printf("Test rencode ");
+	printf("Test encode ");
 
 	// items
 
@@ -344,13 +344,13 @@ test_rencode(void)
 }
 
 void
-test_rdecode(void)
+test_decode(void)
 {
 	int err, len, n;
 	struct atom *p, *q;
 	uint8_t buf[2000];
 
-	printf("Test rdecode ");
+	printf("Test decode ");
 
 	// []
 

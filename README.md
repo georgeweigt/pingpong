@@ -24,9 +24,9 @@ To run a self test
 Test aes128 ok
 Test aes256 ok
 Test sha256 ok
-Test keccak256 ok
-Test rencode ok
-Test rdecode ok
+Test keccak ok
+Test encode ok
+Test decode ok
 Test genkey ok
 Test pubkey ok
 Test kdf ok
