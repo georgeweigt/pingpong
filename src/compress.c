@@ -11,20 +11,17 @@ compress(uint8_t *inbuf, int inlength, int *plen)
 	state.inindex = 0;
 	state.inlength = inlength;
 
-	state.outlength = inlength + 16;
-	state.outbuf = malloc(state.outlength);
-	if (state.outbuf == NULL)
-		exit(1);
+	state.outbuf = NULL;
 	state.outindex = 0;
 
 	// emit length
 
 	while (inlength > 128) {
-		state.outbuf[state.outindex++] = (inlength % 128) | 0x80;
+		compress_emit_byte(&state, (inlength % 128) | 0x80);
 		inlength /= 128;
 	}
 
-	state.outbuf[state.outindex++] = inlength;
+	compress_emit_byte(&state, inlength);
 
 	// compress
 
@@ -50,7 +47,8 @@ compress_emit_literal(struct compress_state *p)
 	k = p->inindex;
 
 	while (p->inindex < p->inlength) {
-		if (compress_match(p))
+		compress_match(p);
+		if (p->match_length > 0)
 			break;
 		p->inindex++;
 	}
@@ -87,30 +85,28 @@ compress_emit_literal(struct compress_state *p)
 	compress_emit_mem(p, k, len);
 }
 
-int
+void
 compress_match(struct compress_state *p)
 {
 	int len, offset;
 
-	offset = p->inindex; // offset is how far to go back to find a match
+	p->match_length = 0;
 
-	if (offset > 0xffff)
-		offset = 0xffff;
+	offset = 1;
 
-	while (offset > 0) {
+	while (offset <= p->inindex && offset <= 0xffff) {
 
 		len = compress_match_length(p, offset);
 
-		if (len) {
+		if (len > p->match_length) {
 			p->match_offset = offset;
 			p->match_length = len;
-			return 1;
+			if (len == 64)
+				return;
 		}
 
-		offset--;
+		offset++;
 	}
-
-	return 0;
 }
 
 // returns length of match
@@ -118,22 +114,20 @@ compress_match(struct compress_state *p)
 int
 compress_match_length(struct compress_state *p, int offset)
 {
-	int len, n;
-	uint8_t *s, *t;
+	int i, j, k;
 
-	t = p->inbuf + p->inindex;
-	s = t - offset;
+	j = p->inindex;
 
-	n = p->inlength - p->inindex; // number of bytes to match
+	k = p->inindex + 64;
 
-	if (n > 64)
-		n = 64;
+	if (k > p->inlength)
+		k = p->inlength;
 
-	for (len = 0; len < n; len++)
-		if (s[len] != t[len])
+	for (i = j; i < k; i++)
+		if (p->inbuf[i - offset] != p->inbuf[i])
 			break;
 
-	return len;
+	return i - j;
 }
 
 void
@@ -159,24 +153,21 @@ compress_emit_copy(struct compress_state *p)
 void
 compress_emit_byte(struct compress_state *p, uint32_t c)
 {
-	if (p->outindex == p->outlength) {
-		p->outlength++;
-		p->outbuf = realloc(p->outbuf, p->outlength);
-		if (p->outbuf == NULL)
-			exit(1);
-	}
+	p->outbuf = realloc(p->outbuf, p->outindex + 1);
+
+	if (p->outbuf == NULL)
+		exit(1);
+
 	p->outbuf[p->outindex++] = c;
 }
 
 void
 compress_emit_mem(struct compress_state *p, int index, int len)
 {
-	if (p->outindex + len > p->outlength) {
-		p->outlength += len;
-		p->outbuf = realloc(p->outbuf, p->outlength);
-		if (p->outbuf == NULL)
-			exit(1);
-	}
+	p->outbuf = realloc(p->outbuf, p->outindex + len);
+
+	if (p->outbuf == NULL)
+		exit(1);
 
 	memcpy(p->outbuf + p->outindex, p->inbuf + index, len);
 

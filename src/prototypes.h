@@ -14,7 +14,7 @@ void aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out);
 int aes256_test_encrypt(void);
 uint8_t * compress(uint8_t *inbuf, int inlength, int *plen);
 void compress_emit_literal(struct compress_state *p);
-int compress_match(struct compress_state *p);
+void compress_match(struct compress_state *p);
 int compress_match_length(struct compress_state *p, int offset);
 void compress_emit_copy(struct compress_state *p);
 void compress_emit_byte(struct compress_state *p, uint32_t c);

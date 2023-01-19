@@ -76,7 +76,6 @@ struct compress_state {
 	int inlength;
 	uint8_t *outbuf;
 	int outindex;
-	int outlength;
 	int match_offset;
 	int match_length;
 };
