@@ -1,6 +1,6 @@
 // snappy compression
 
-#define MIN_LENGTH 4 // minimum length that triggers a copy
+#define MIN_LENGTH 4 // match lengths less than this do not trigger a copy
 #define MAX_OFFSET 2048 // how far to look back, shorter = faster
 
 uint8_t *
