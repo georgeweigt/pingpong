@@ -1,4 +1,7 @@
-// snappy compress
+// snappy compression
+
+#define MIN_LENGTH 4 // minimum length that triggers a copy
+#define MAX_OFFSET 2048 // how far to look back, shorter = faster
 
 uint8_t *
 compress(uint8_t *inbuf, int inlength, int *plen)
@@ -94,11 +97,11 @@ compress_match(struct compress_state *p)
 
 	offset = 1;
 
-	while (offset <= p->inindex && offset <= 0xffff) {
+	while (offset <= p->inindex && offset <= MAX_OFFSET) {
 
 		len = compress_match_length(p, offset);
 
-		if (len >= 4 && len > p->match_length) {
+		if (len >= MIN_LENGTH && len > p->match_length) {
 			p->match_offset = offset;
 			p->match_length = len;
 			if (len == 64)
