@@ -15,7 +15,7 @@ recv_frame(struct node *p)
 
 	keccak256_digest(&p->ingress_mac, mac);
 
-	aes256_encrypt_block(p->ingress_mac.enc_state, mac, seed);
+	aes256_encrypt_block(p->ingress_mac.expanded_key, mac, seed);
 
 	for (i = 0; i < 16; i++)
 		seed[i] ^= header[i];
@@ -61,7 +61,7 @@ recv_frame(struct node *p)
 
 	keccak256_digest(&p->ingress_mac, mac);
 
-	aes256_encrypt_block(p->ingress_mac.enc_state, mac, seed);
+	aes256_encrypt_block(p->ingress_mac.expanded_key, mac, seed);
 
 	for (i = 0; i < 16; i++)
 		seed[i] ^= mac[i];

@@ -40,10 +40,10 @@ struct account {
 	uint8_t public_key[64];
 };
 
-struct mac {
+struct mac_state_t {
 	uint8_t S[200]; // 1600 bits
 	int index;
-	uint32_t enc_state[64];
+	uint32_t expanded_key[64];
 };
 
 struct node {
@@ -62,8 +62,8 @@ struct node {
 	uint8_t mac_secret[32];
 	uint32_t encrypt_state[64];
 	uint32_t decrypt_state[64];
-	struct mac ingress_mac;
-	struct mac egress_mac;
+	struct mac_state_t ingress_mac;
+	struct mac_state_t egress_mac;
 	uint8_t *auth_buf;
 	int auth_len;
 	uint8_t *ack_buf;

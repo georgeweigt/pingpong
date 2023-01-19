@@ -134,13 +134,13 @@ sim(void)
 		exit(1);
 	}
 
-	err = memcmp(&A.egress_mac, &B.ingress_mac, sizeof (struct mac));
+	err = memcmp(&A.egress_mac, &B.ingress_mac, sizeof (struct mac_state_t));
 	if (err) {
 		trace();
 		exit(1);
 	}
 
-	err = memcmp(&A.ingress_mac, &B.egress_mac, sizeof (struct mac));
+	err = memcmp(&A.ingress_mac, &B.egress_mac, sizeof (struct mac_state_t));
 	if (err) {
 		trace();
 		exit(1);

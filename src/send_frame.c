@@ -35,7 +35,7 @@ send_frame(struct node *p, struct atom *msg_id, struct atom *msg_data)
 
 	keccak256_digest(&p->egress_mac, mac);
 
-	aes256_encrypt_block(p->egress_mac.enc_state, mac, seed);
+	aes256_encrypt_block(p->egress_mac.expanded_key, mac, seed);
 
 	for (i = 0; i < 16; i++)
 		seed[i] ^= buf[i];
@@ -62,7 +62,7 @@ send_frame(struct node *p, struct atom *msg_id, struct atom *msg_data)
 
 	keccak256_digest(&p->egress_mac, mac);
 
-	aes256_encrypt_block(p->egress_mac.enc_state, mac, seed);
+	aes256_encrypt_block(p->egress_mac.expanded_key, mac, seed);
 
 	for (i = 0; i < 16; i++)
 		seed[i] ^= mac[i];

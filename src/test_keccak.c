@@ -10,7 +10,7 @@ test_keccak256(void)
 {
 	int err;
 	uint8_t buf[RATE + 1], h[32], hash[32];
-	struct mac state;
+	struct mac_state_t mac_state;
 
 	printf("Test keccak ");
 
@@ -56,9 +56,9 @@ test_keccak256(void)
 		return;
 	}
 
-	keccak256_setup(&state);
-	keccak256_update(&state, buf, RATE + 1);
-	keccak256_digest(&state, hash);
+	keccak256_setup(&mac_state);
+	keccak256_update(&mac_state, buf, RATE + 1);
+	keccak256_digest(&mac_state, hash);
 	err = memcmp(h, hash, 32);
 	if (err) {
 		trace();

@@ -206,7 +206,7 @@ keccak256(uint8_t *outbuf, uint8_t *inbuf, int inbuflen)
 }
 
 void
-keccak256_setup(struct mac *p)
+keccak256_setup(struct mac_state_t *p)
 {
 	memset(p->S, 0, 200);
 	p->index = 0;
@@ -215,7 +215,7 @@ keccak256_setup(struct mac *p)
 // reads from buf
 
 void
-keccak256_update(struct mac *p, uint8_t *buf, int len)
+keccak256_update(struct mac_state_t *p, uint8_t *buf, int len)
 {
 	int i, j, n;
 
@@ -260,7 +260,7 @@ keccak256_update(struct mac *p, uint8_t *buf, int len)
 // writes to buf
 
 void
-keccak256_digest(struct mac *p, uint8_t *buf)
+keccak256_digest(struct mac_state_t *p, uint8_t *buf)
 {
 	uint8_t S[200];
 
