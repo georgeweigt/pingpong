@@ -16,7 +16,7 @@ compress(uint8_t *inbuf, int inlength, int *plen)
 
 	// emit length
 
-	while (inlength > 128) {
+	while (inlength >= 128) {
 		compress_emit_byte(&state, (inlength % 128) | 0x80);
 		inlength /= 128;
 	}

@@ -161,6 +161,6 @@ void test_kdf(void);
 void test_hmac(void);
 void test_pubkey(void);
 void test_decrypt(void);
-void test_compress(void);
+void test_snappy(void);
 void printmem(uint8_t *mem, int n);
 void hextobin(uint8_t *buf, int len, char *str);

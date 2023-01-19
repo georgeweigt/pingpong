@@ -12,25 +12,32 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 	inindex = 0;
 	outindex = 0;
 
+	// advance to end of length
+
+	while (inindex < inlength && (inbuf[inindex] & 0x80))
+		inindex++;
+
+	if (inindex == inlength)
+		return NULL;
+
+	// compute length
+
 	u = 0;
 
-	do {
-		if (inindex == inlength)
-			return NULL;
+	for (off = inindex; off >= 0; off--) {
 
-		u |= (uint64_t) (I[0] & 0x7f) << (8 * inindex);
+		u = (u << 7) | (inbuf[off] & 0x7f);
 
 		if (u > 0x7fffffff)
 			return NULL;
-
-		inindex++;
-
-	} while (I[0] & 0x80);
+	}
 
 	if (u == 0)
 		return NULL;
 
 	outlength = u;
+
+	inindex++;
 
 	// sanity check
 
@@ -44,7 +51,7 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 	while (inindex < inlength) {
 
-		if ((I[0] & 0x02) == 0x00) {
+		if ((I[0] & 0x03) == 0x00) {
 
 			// literal
 
@@ -131,11 +138,11 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			// copy
 
-			switch (I[0] & 0x02) {
+			switch (I[0] & 0x03) {
 
 			case 0x01:
 
-				// copy 1
+				// 1 byte offset
 
 				if (inindex + 2 > inlength) {
 					free(outbuf);
@@ -151,7 +158,7 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			case 0x02:
 
-				// copy 2
+				// 2 byte offset
 
 				if (inindex + 3 > inlength) {
 					free(outbuf);
@@ -167,7 +174,7 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			case 0x03:
 
-				// copy 3
+				// 4 byte offset
 
 				if (inindex + 5 > inlength) {
 					free(outbuf);
@@ -189,18 +196,18 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 				break;
 			}
 
-			if (off == 0 || off > inindex || outindex + len > outlength) {
+			if (off < 1 || off > outindex || outindex + len > outlength) {
 				free(outbuf);
 				return NULL;
 			}
 
 			while (len > off) {
-				memcpy(outbuf + outindex, inbuf + inindex - off, off);
+				memcpy(outbuf + outindex, outbuf + outindex - off, off);
 				outindex += off;
 				len -= off;
 			}
 
-			memcpy(outbuf + outindex , inbuf + inindex - off, len);
+			memcpy(outbuf + outindex , outbuf + outindex - off, len);
 
 			outindex += len;
 		}
