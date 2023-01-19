@@ -1,4 +1,4 @@
-This project is intended to be a reference design for the RLPx protocol.
+This project is intended to be a code reference design for the RLPx protocol.
 In order to debug the code, the build product `pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`
 
 To build and run
