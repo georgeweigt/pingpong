@@ -14,6 +14,7 @@ test(void)
 	test_sign();
 //	test_ping(account_table + 0);
 	test_decrypt();
+	test_compress();
 }
 
 // does this public key belong to secp256k1? (0 yes, -1 no)
@@ -921,3 +922,22 @@ test_decrypt(void)
 #undef K
 #undef C
 #undef P
+
+#define STR "aa"
+
+void
+test_compress(void)
+{
+	int len;
+	uint8_t *buf;
+
+	printf("Test compress ");
+
+	buf = compress((uint8_t *) STR, strlen(STR), &len);
+
+	printf("len = %d\n", len);
+
+	printmem(buf, len);
+}
+
+#undef STR

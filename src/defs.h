@@ -70,6 +70,17 @@ struct node {
 	int ack_len;
 };
 
+struct compress_state {
+	uint8_t *inbuf;
+	int inindex;
+	int inlength;
+	uint8_t *outbuf;
+	int outindex;
+	int outlength;
+	int match_offset;
+	int match_length;
+};
+
 extern int tos;
 extern int atom_count;
 extern int ec_malloc_count;
