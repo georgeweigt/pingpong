@@ -61,7 +61,7 @@ test_keccak256(void)
 	keccak256_digest(&state, hash);
 	err = memcmp(h, hash, 32);
 	if (err) {
-		printf("err %s line %d\n", __FILE__, __LINE__);
+		trace();
 		return;
 	}
 
