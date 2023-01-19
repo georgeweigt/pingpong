@@ -1,7 +1,7 @@
 // snappy compress
 
 uint8_t *
-compress(uint8_t *inbuf, int inlength, int *outlength)
+compress(uint8_t *inbuf, int inlength, int *plen)
 {
 	struct compress_state state;
 
@@ -28,15 +28,16 @@ compress(uint8_t *inbuf, int inlength, int *outlength)
 
 	// compress
 
-	compress_emit_literal(&state);
-
-	while (state.inindex < state.inlength) {
-		compress_emit_copy(&state);
+	for (;;) {
 		compress_emit_literal(&state);
-
+		if (state.inindex == state.inlength)
+			break;
+		compress_emit_copy(&state);
+		if (state.inindex == state.inlength)
+			break;
 	}
 
-	*outlength = state.outindex;
+	*plen = state.outindex;
 
 	return state.outbuf;
 }
@@ -138,13 +139,10 @@ compress_match_length(struct compress_state *p, int offset)
 void
 compress_emit_copy(struct compress_state *p)
 {
-trace();
 	int len, off;
 
 	off = p->match_offset;
 	len = p->match_length;
-
-printf("off = %d, len = %d\n", off, len);
 
 	if (len >= 4 && len <= 11 && off < 2048) {
 		compress_emit_byte(p, (off >> 3 & 0xe0) | (len - 4) << 2 | 0x01);

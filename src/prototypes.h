@@ -12,7 +12,7 @@ void aes256_init();
 void aes256_expand_key(uint32_t *w, uint8_t *key);
 void aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out);
 int aes256_test_encrypt(void);
-uint8_t * compress(uint8_t *inbuf, int inlength, int *outlength);
+uint8_t * compress(uint8_t *inbuf, int inlength, int *plen);
 void compress_emit_literal(struct compress_state *p);
 int compress_match(struct compress_state *p);
 int compress_match_length(struct compress_state *p, int offset);
