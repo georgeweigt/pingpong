@@ -7,7 +7,7 @@ test_snappy(void)
 	printf("Test snappy ");
 
 	for (i = 0; i < sizeof buf; i++)
-		buf[i] = random() % 10 + 'a';
+		buf[i] = random() % 3 + 'a';
 
 	for (len = 1; len <= sizeof buf; len *= 10) {
 
