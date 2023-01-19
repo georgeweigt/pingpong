@@ -1,5 +1,5 @@
 This project is intended to be a reference implementation of the RLPx protocol.
-In order to test project functionality, the build product `pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`
+The build product `pingpong` communicates with a local `geth` process over the loopback interface `127.0.0.1`
 
 To build and run
 
