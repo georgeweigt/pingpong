@@ -98,7 +98,7 @@ compress_match(struct compress_state *p)
 
 		len = compress_match_length(p, offset);
 
-		if (len > p->match_length) {
+		if (len >= 4 && len > p->match_length) {
 			p->match_offset = offset;
 			p->match_length = len;
 			if (len == 64)
