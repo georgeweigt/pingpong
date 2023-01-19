@@ -6,7 +6,7 @@
 uint8_t *
 compress(uint8_t *inbuf, int inlength, int *plen)
 {
-	struct compress_state state;
+	struct compress_state_t state;
 
 	// init
 
@@ -43,7 +43,7 @@ compress(uint8_t *inbuf, int inlength, int *plen)
 }
 
 void
-compress_emit_literal(struct compress_state *p)
+compress_emit_literal(struct compress_state_t *p)
 {
 	int k, len;
 
@@ -89,7 +89,7 @@ compress_emit_literal(struct compress_state *p)
 }
 
 void
-compress_match(struct compress_state *p)
+compress_match(struct compress_state_t *p)
 {
 	int len, offset;
 
@@ -115,7 +115,7 @@ compress_match(struct compress_state *p)
 // returns length of match
 
 int
-compress_match_length(struct compress_state *p, int offset)
+compress_match_length(struct compress_state_t *p, int offset)
 {
 	int i, j, k;
 
@@ -134,7 +134,7 @@ compress_match_length(struct compress_state *p, int offset)
 }
 
 void
-compress_emit_copy(struct compress_state *p)
+compress_emit_copy(struct compress_state_t *p)
 {
 	int len, off;
 
@@ -154,7 +154,7 @@ compress_emit_copy(struct compress_state *p)
 }
 
 void
-compress_emit_byte(struct compress_state *p, uint32_t c)
+compress_emit_byte(struct compress_state_t *p, uint32_t c)
 {
 	p->outbuf = realloc(p->outbuf, p->outindex + 1);
 
@@ -165,7 +165,7 @@ compress_emit_byte(struct compress_state *p, uint32_t c)
 }
 
 void
-compress_emit_mem(struct compress_state *p, int index, int len)
+compress_emit_mem(struct compress_state_t *p, int index, int len)
 {
 	p->outbuf = realloc(p->outbuf, p->outindex + len);
 

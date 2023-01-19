@@ -43,7 +43,7 @@ struct account {
 struct mac_state_t {
 	uint8_t S[200]; // 1600 bits
 	int index;
-	uint32_t expanded_key[64];
+	uint32_t expanded_key[64]; // RLPx uses AES256-ECB for MACs
 };
 
 struct node {
@@ -70,7 +70,7 @@ struct node {
 	int ack_len;
 };
 
-struct compress_state {
+struct compress_state_t {
 	uint8_t *inbuf;
 	int inindex;
 	int inlength;
