@@ -115,7 +115,7 @@ mul(int a, int b)
 // Initialize encryption and decryption tables
 
 void
-aes128_init()
+aes_init()
 {
 	int i, k;
 
@@ -385,6 +385,235 @@ aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
 	out[13] = s3 >> 8;
 	out[14] = s3 >> 16;
 	out[15] = s3 >> 24;
+}
+
+#undef CTR
+#undef MUL
+
+#undef s03
+#undef s02
+#undef s01
+#undef s00
+
+#undef s13
+#undef s12
+#undef s11
+#undef s10
+
+#undef s23
+#undef s22
+#undef s21
+#undef s20
+
+#undef s33
+#undef s32
+#undef s31
+#undef s30
+
+#undef t03
+#undef t02
+#undef t01
+#undef t00
+
+#undef t13
+#undef t12
+#undef t11
+#undef t10
+
+#undef t23
+#undef t22
+#undef t21
+#undef t20
+
+#undef t33
+#undef t32
+#undef t31
+#undef t30
+
+#define CTR ((uint8_t *) state + 240)
+
+// state	256 bytes (64 uint32_t)
+// key		32 bytes
+// iv		16 bytes
+
+void
+aes256ctr_setup(uint32_t *state, uint8_t *key, uint8_t *iv)
+{
+	aes256_expand_key(state, key);
+	memcpy(CTR, iv, 16);
+}
+
+// used for both encryption and decryption
+
+void
+aes256ctr_encrypt(uint32_t *state, uint8_t *buf, int len)
+{
+	int i;
+	uint8_t block[16];
+
+	while (len > 0) {
+
+		aes256_encrypt_block(state, CTR, block);
+
+		for (i = 0; i < 16 && i < len; i++)
+			buf[i] ^= block[i];
+
+		// increment counter
+
+		for (i = 15; i >= 0; i--)
+			if (++CTR[i] > 0)
+				break;
+
+		buf += 16;
+		len -= 16;
+	}
+}
+
+void
+aes256_expand_key(uint32_t *w, uint8_t *key)
+{
+	int i;
+	uint32_t temp;
+
+	w[0] = key[3] << 24 | key[2] << 16 | key[1] << 8 | key[0];
+	w[1] = key[7] << 24 | key[6] << 16 | key[5] << 8 | key[4];
+	w[2] = key[11] << 24 | key[10] << 16 | key[9] << 8 | key[8];
+	w[3] = key[15] << 24 | key[14] << 16 | key[13] << 8 | key[12];
+
+	w[4] = key[19] << 24 | key[18] << 16 | key[17] << 8 | key[16];
+	w[5] = key[23] << 24 | key[22] << 16 | key[21] << 8 | key[20];
+	w[6] = key[27] << 24 | key[26] << 16 | key[25] << 8 | key[24];
+	w[7] = key[31] << 24 | key[30] << 16 | key[29] << 8 | key[28];
+
+	for (i = 8; i < 60; i++) {
+
+		temp = w[i - 1];
+
+		if (i % 8 == 0)
+			temp = ((etab2[temp >> 8 & 0xff] & 0xff) | (etab3[temp >> 16 & 0xff] & 0xff00) | (etab0[temp >> 24] & 0xff0000) | (etab1[temp & 0xff] & 0xff000000)) ^ rcon[i / 8 - 1];
+		else if (i % 8 == 4)
+			temp = (sbox[temp >> 24] << 24) | (sbox[temp >> 16 & 0xff] << 16) | (sbox[temp >> 8 & 0xff] << 8) | sbox[temp & 0xff];
+
+		w[i] = w[i - 8] ^ temp;
+	}
+}
+
+#define s03 (s0 >> 24)
+#define s02 (s0 >> 16 & 0xff)
+#define s01 (s0 >> 8 & 0xff)
+#define s00 (s0 & 0xff)
+
+#define s13 (s1 >> 24)
+#define s12 (s1 >> 16 & 0xff)
+#define s11 (s1 >> 8 & 0xff)
+#define s10 (s1 & 0xff)
+
+#define s23 (s2 >> 24)
+#define s22 (s2 >> 16 & 0xff)
+#define s21 (s2 >> 8 & 0xff)
+#define s20 (s2 & 0xff)
+
+#define s33 (s3 >> 24)
+#define s32 (s3 >> 16 & 0xff)
+#define s31 (s3 >> 8 & 0xff)
+#define s30 (s3 & 0xff)
+
+#define t03 (t0 >> 24)
+#define t02 (t0 >> 16 & 0xff)
+#define t01 (t0 >> 8 & 0xff)
+#define t00 (t0 & 0xff)
+
+#define t13 (t1 >> 24)
+#define t12 (t1 >> 16 & 0xff)
+#define t11 (t1 >> 8 & 0xff)
+#define t10 (t1 & 0xff)
+
+#define t23 (t2 >> 24)
+#define t22 (t2 >> 16 & 0xff)
+#define t21 (t2 >> 8 & 0xff)
+#define t20 (t2 & 0xff)
+
+#define t33 (t3 >> 24)
+#define t32 (t3 >> 16 & 0xff)
+#define t31 (t3 >> 8 & 0xff)
+#define t30 (t3 & 0xff)
+
+void
+aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
+{
+	int i;
+	uint32_t s0, s1, s2, s3, t0, t1, t2, t3;
+
+	s0 = in[3] << 24 | in[2] << 16 | in[1] << 8 | in[0];
+	s1 = in[7] << 24 | in[6] << 16 | in[5] << 8 | in[4];
+	s2 = in[11] << 24 | in[10] << 16 | in[9] << 8 | in[8];
+	s3 = in[15] << 24 | in[14] << 16 | in[13] << 8 | in[12];
+
+	s0 ^= w[0];
+	s1 ^= w[1];
+	s2 ^= w[2];
+	s3 ^= w[3];
+
+	for (i = 4; i < 52; i += 8) {
+
+		t0 = etab0[s00] ^ etab1[s11] ^ etab2[s22] ^ etab3[s33] ^ w[i + 0];
+		t1 = etab0[s10] ^ etab1[s21] ^ etab2[s32] ^ etab3[s03] ^ w[i + 1];
+		t2 = etab0[s20] ^ etab1[s31] ^ etab2[s02] ^ etab3[s13] ^ w[i + 2];
+		t3 = etab0[s30] ^ etab1[s01] ^ etab2[s12] ^ etab3[s23] ^ w[i + 3];
+
+		s0 = etab0[t00] ^ etab1[t11] ^ etab2[t22] ^ etab3[t33] ^ w[i + 4];
+		s1 = etab0[t10] ^ etab1[t21] ^ etab2[t32] ^ etab3[t03] ^ w[i + 5];
+		s2 = etab0[t20] ^ etab1[t31] ^ etab2[t02] ^ etab3[t13] ^ w[i + 6];
+		s3 = etab0[t30] ^ etab1[t01] ^ etab2[t12] ^ etab3[t23] ^ w[i + 7];
+	}
+
+	t0 = etab0[s00] ^ etab1[s11] ^ etab2[s22] ^ etab3[s33] ^ w[52];
+	t1 = etab0[s10] ^ etab1[s21] ^ etab2[s32] ^ etab3[s03] ^ w[53];
+	t2 = etab0[s20] ^ etab1[s31] ^ etab2[s02] ^ etab3[s13] ^ w[54];
+	t3 = etab0[s30] ^ etab1[s01] ^ etab2[s12] ^ etab3[s23] ^ w[55];
+
+	s0 = (etab2[t00] & 0xff) ^ (etab3[t11] & 0xff00) ^ (etab0[t22] & 0xff0000) ^ (etab1[t33] & 0xff000000) ^ w[56];
+	s1 = (etab2[t10] & 0xff) ^ (etab3[t21] & 0xff00) ^ (etab0[t32] & 0xff0000) ^ (etab1[t03] & 0xff000000) ^ w[57];
+	s2 = (etab2[t20] & 0xff) ^ (etab3[t31] & 0xff00) ^ (etab0[t02] & 0xff0000) ^ (etab1[t13] & 0xff000000) ^ w[58];
+	s3 = (etab2[t30] & 0xff) ^ (etab3[t01] & 0xff00) ^ (etab0[t12] & 0xff0000) ^ (etab1[t23] & 0xff000000) ^ w[59];
+
+	out[0] = s0;
+	out[1] = s0 >> 8;
+	out[2] = s0 >> 16;
+	out[3] = s0 >> 24;
+
+	out[4] = s1;
+	out[5] = s1 >> 8;
+	out[6] = s1 >> 16;
+	out[7] = s1 >> 24;
+
+	out[8] = s2;
+	out[9] = s2 >> 8;
+	out[10] = s2 >> 16;
+	out[11] = s2 >> 24;
+
+	out[12] = s3;
+	out[13] = s3 >> 8;
+	out[14] = s3 >> 16;
+	out[15] = s3 >> 24;
+}
+
+int
+aes256_test_encrypt(void)
+{
+	uint8_t key[32] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f};
+	uint8_t plaintext[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+	uint8_t ciphertext[16] = {0x8e,0xa2,0xb7,0xca,0x51,0x67,0x45,0xbf,0xea,0xfc,0x49,0x90,0x4b,0x49,0x60,0x89};
+	uint32_t w[60];
+
+	aes256_expand_key(w, key);
+
+	aes256_encrypt_block(w, plaintext, plaintext);
+
+	if (memcmp(plaintext, ciphertext, 16) == 0)
+		return 0;
+	else
+		return -1;
 }
 
 #undef CTR
