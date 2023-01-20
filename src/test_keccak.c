@@ -67,10 +67,3 @@ test_keccak256(void)
 
 	printf("ok\n");
 }
-
-#undef RATE
-#undef STR1
-#undef STR2
-#undef STR3
-#undef STR4
-#undef STR5

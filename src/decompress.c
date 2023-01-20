@@ -222,5 +222,3 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 	return outbuf;
 }
-
-#undef I

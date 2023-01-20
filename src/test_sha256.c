@@ -45,8 +45,3 @@ test_sha256(void)
 
 	printf("ok\n");
 }
-
-#undef STR1
-#undef STR2
-#undef STR3
-#undef STR4

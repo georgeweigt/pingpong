@@ -863,7 +863,3 @@ test_decrypt(void)
 
 	printf("ok\n");
 }
-
-#undef K
-#undef C
-#undef P

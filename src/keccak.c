@@ -273,7 +273,3 @@ keccak256_digest(struct mac_state_t *p, uint8_t *buf)
 
 	memcpy(buf, S, 32);
 }
-
-#undef RATE
-#undef A
-#undef Aprime
