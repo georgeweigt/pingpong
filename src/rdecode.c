@@ -1,3 +1,5 @@
+// recursive length prefix decoder
+
 // returns number of bytes read or -1 on error
 
 // if no error then list is returned on stack

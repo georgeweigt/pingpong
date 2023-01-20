@@ -1,3 +1,5 @@
+// recursive length prefix encoder
+
 int
 rencode(uint8_t *buf, int len, struct atom *p)
 {
