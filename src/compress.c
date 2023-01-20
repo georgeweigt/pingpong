@@ -1,7 +1,7 @@
 // snappy compression
 
 #define MIN_LENGTH 4 // match lengths less than this do not trigger a copy
-#define MAX_OFFSET 1000 // how far to look back, shorter = faster
+#define MAX_OFFSET 1000 // how far back to search, shorter = faster
 
 uint8_t *
 compress(uint8_t *inbuf, int inlength, int *plen)

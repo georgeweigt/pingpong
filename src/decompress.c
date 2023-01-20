@@ -7,8 +7,6 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 	uint64_t u;
 	uint8_t *outbuf;
 
-	*plen = -1; // err
-
 	inindex = 0;
 	outindex = 0;
 
