@@ -1,43 +1,42 @@
-#define CTR ((uint8_t *) expanded_key + 176)
+#define s03 (s0 >> 24)
+#define s02 (s0 >> 16 & 0xff)
+#define s01 (s0 >> 8 & 0xff)
+#define s00 (s0 & 0xff)
 
-// expanded_key		192 bytes (48 uint32_t)
-// key			16 bytes
-// iv			16 bytes
+#define s13 (s1 >> 24)
+#define s12 (s1 >> 16 & 0xff)
+#define s11 (s1 >> 8 & 0xff)
+#define s10 (s1 & 0xff)
 
-void
-aes128ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
-{
-	uint32_t w[44], v[44];
-	aes128_expand_key(key, w, v);
-	memcpy(expanded_key, w, 176);
-	memcpy(CTR, iv, 16);
-}
+#define s23 (s2 >> 24)
+#define s22 (s2 >> 16 & 0xff)
+#define s21 (s2 >> 8 & 0xff)
+#define s20 (s2 & 0xff)
 
-// used for both encryption and decryption
+#define s33 (s3 >> 24)
+#define s32 (s3 >> 16 & 0xff)
+#define s31 (s3 >> 8 & 0xff)
+#define s30 (s3 & 0xff)
 
-void
-aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
-{
-	int i;
-	uint8_t block[16];
+#define t03 (t0 >> 24)
+#define t02 (t0 >> 16 & 0xff)
+#define t01 (t0 >> 8 & 0xff)
+#define t00 (t0 & 0xff)
 
-	while (len > 0) {
+#define t13 (t1 >> 24)
+#define t12 (t1 >> 16 & 0xff)
+#define t11 (t1 >> 8 & 0xff)
+#define t10 (t1 & 0xff)
 
-		aes128_encrypt_block(expanded_key, CTR, block);
+#define t23 (t2 >> 24)
+#define t22 (t2 >> 16 & 0xff)
+#define t21 (t2 >> 8 & 0xff)
+#define t20 (t2 & 0xff)
 
-		for (i = 0; i < 16 && i < len; i++)
-			buf[i] ^= block[i];
-
-		// increment counter
-
-		for (i = 15; i >= 0; i--)
-			if (++CTR[i] > 0)
-				break;
-
-		buf += 16;
-		len -= 16;
-	}
-}
+#define t33 (t3 >> 24)
+#define t32 (t3 >> 16 & 0xff)
+#define t31 (t3 >> 8 & 0xff)
+#define t30 (t3 & 0xff)
 
 uint32_t etab0[256]; // encryption tables
 uint32_t etab1[256];
@@ -133,7 +132,46 @@ aes_init()
 	}
 }
 
-// Initialize w[44] and v[44] from encryption key
+#define CTR ((uint8_t *) expanded_key + 176)
+
+// expanded_key		192 bytes (48 uint32_t)
+// key			16 bytes
+// iv			16 bytes
+
+void
+aes128ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv)
+{
+	uint32_t w[44], v[44];
+	aes128_expand_key(key, w, v);
+	memcpy(expanded_key, w, 176);
+	memcpy(CTR, iv, 16);
+}
+
+// used for both encryption and decryption
+
+void
+aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len)
+{
+	int i;
+	uint8_t block[16];
+
+	while (len > 0) {
+
+		aes128_encrypt_block(expanded_key, CTR, block);
+
+		for (i = 0; i < 16 && i < len; i++)
+			buf[i] ^= block[i];
+
+		// increment counter
+
+		for (i = 15; i >= 0; i--)
+			if (++CTR[i] > 0)
+				break;
+
+		buf += 16;
+		len -= 16;
+	}
+}
 
 void
 aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
@@ -170,46 +208,6 @@ aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
 		k[3] = dtab0[etab1[k[3] & 0xff] >> 24] ^ dtab1[etab1[k[3] >> 8 & 0xff] >> 24] ^ dtab2[etab1[k[3] >> 16 & 0xff] >> 24] ^ dtab3[etab1[k[3] >> 24 & 0xff] >> 24];
 	}
 }
-
-#define s03 (s0 >> 24)
-#define s02 (s0 >> 16 & 0xff)
-#define s01 (s0 >> 8 & 0xff)
-#define s00 (s0 & 0xff)
-
-#define s13 (s1 >> 24)
-#define s12 (s1 >> 16 & 0xff)
-#define s11 (s1 >> 8 & 0xff)
-#define s10 (s1 & 0xff)
-
-#define s23 (s2 >> 24)
-#define s22 (s2 >> 16 & 0xff)
-#define s21 (s2 >> 8 & 0xff)
-#define s20 (s2 & 0xff)
-
-#define s33 (s3 >> 24)
-#define s32 (s3 >> 16 & 0xff)
-#define s31 (s3 >> 8 & 0xff)
-#define s30 (s3 & 0xff)
-
-#define t03 (t0 >> 24)
-#define t02 (t0 >> 16 & 0xff)
-#define t01 (t0 >> 8 & 0xff)
-#define t00 (t0 & 0xff)
-
-#define t13 (t1 >> 24)
-#define t12 (t1 >> 16 & 0xff)
-#define t11 (t1 >> 8 & 0xff)
-#define t10 (t1 & 0xff)
-
-#define t23 (t2 >> 24)
-#define t22 (t2 >> 16 & 0xff)
-#define t21 (t2 >> 8 & 0xff)
-#define t20 (t2 & 0xff)
-
-#define t33 (t3 >> 24)
-#define t32 (t3 >> 16 & 0xff)
-#define t31 (t3 >> 8 & 0xff)
-#define t30 (t3 & 0xff)
 
 // encrypt one block (16 bytes)
 
@@ -455,6 +453,8 @@ aes256_expand_key(uint32_t *w, uint8_t *key)
 		w[i] = w[i - 8] ^ temp;
 	}
 }
+
+// encrypt one block (16 bytes)
 
 void
 aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
