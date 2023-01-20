@@ -496,7 +496,7 @@ test_genkey(void)
 
 	ec_sign(r, s, hash, private_key);
 
-	err = ec_verify(hash, r, s, public_key, public_key + 32);
+	err = ec_verify(hash, r, s, public_key);
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);

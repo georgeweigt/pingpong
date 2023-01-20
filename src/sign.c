@@ -50,7 +50,7 @@ test_sign(void)
 	keccak256(buf + 28, (uint8_t *) "hello", 5);
 	keccak256(hash, buf, 60);
 
-	err = ec_verify(hash, r, s, public_key, public_key + 32);
+	err = ec_verify(hash, r, s, public_key);
 
 	free_list(list);
 

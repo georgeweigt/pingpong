@@ -1,7 +1,12 @@
-// hash, r, s, public_key_x, public_key y --> ec_verify --> -1 or 0
+// returns 0 ok, -1 not ok
+
+// hash		32 bytes (typically the sha256 of text or binary data)
+// rbuf		32 bytes (r of signature)
+// sbuf		32 bytes (s of signature)
+// public_key	64 bytes
 
 int
-ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, uint8_t *public_key_y)
+ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key)
 {
 	int err;
 	uint32_t *h, *r, *s, *u, *v, *w;
@@ -19,8 +24,8 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key_x, ui
 	S.y = gy256;
 	S.z = ec_int(1);
 
-	T.x = ec_buf_to_bignum(public_key_x, 32);
-	T.y = ec_buf_to_bignum(public_key_y, 32);
+	T.x = ec_buf_to_bignum(public_key, 32);
+	T.y = ec_buf_to_bignum(public_key + 32, 32);
 	T.z = ec_int(1);
 
 	w = ec_modinv(s, q256);
