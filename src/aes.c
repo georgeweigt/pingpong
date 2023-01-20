@@ -388,48 +388,6 @@ aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
 }
 
 #undef CTR
-#undef MUL
-
-#undef s03
-#undef s02
-#undef s01
-#undef s00
-
-#undef s13
-#undef s12
-#undef s11
-#undef s10
-
-#undef s23
-#undef s22
-#undef s21
-#undef s20
-
-#undef s33
-#undef s32
-#undef s31
-#undef s30
-
-#undef t03
-#undef t02
-#undef t01
-#undef t00
-
-#undef t13
-#undef t12
-#undef t11
-#undef t10
-
-#undef t23
-#undef t22
-#undef t21
-#undef t20
-
-#undef t33
-#undef t32
-#undef t31
-#undef t30
-
 #define CTR ((uint8_t *) state + 240)
 
 // state	256 bytes (64 uint32_t)
@@ -497,46 +455,6 @@ aes256_expand_key(uint32_t *w, uint8_t *key)
 		w[i] = w[i - 8] ^ temp;
 	}
 }
-
-#define s03 (s0 >> 24)
-#define s02 (s0 >> 16 & 0xff)
-#define s01 (s0 >> 8 & 0xff)
-#define s00 (s0 & 0xff)
-
-#define s13 (s1 >> 24)
-#define s12 (s1 >> 16 & 0xff)
-#define s11 (s1 >> 8 & 0xff)
-#define s10 (s1 & 0xff)
-
-#define s23 (s2 >> 24)
-#define s22 (s2 >> 16 & 0xff)
-#define s21 (s2 >> 8 & 0xff)
-#define s20 (s2 & 0xff)
-
-#define s33 (s3 >> 24)
-#define s32 (s3 >> 16 & 0xff)
-#define s31 (s3 >> 8 & 0xff)
-#define s30 (s3 & 0xff)
-
-#define t03 (t0 >> 24)
-#define t02 (t0 >> 16 & 0xff)
-#define t01 (t0 >> 8 & 0xff)
-#define t00 (t0 & 0xff)
-
-#define t13 (t1 >> 24)
-#define t12 (t1 >> 16 & 0xff)
-#define t11 (t1 >> 8 & 0xff)
-#define t10 (t1 & 0xff)
-
-#define t23 (t2 >> 24)
-#define t22 (t2 >> 16 & 0xff)
-#define t21 (t2 >> 8 & 0xff)
-#define t20 (t2 & 0xff)
-
-#define t33 (t3 >> 24)
-#define t32 (t3 >> 16 & 0xff)
-#define t31 (t3 >> 8 & 0xff)
-#define t30 (t3 & 0xff)
 
 void
 aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
@@ -615,46 +533,3 @@ aes256_test_encrypt(void)
 	else
 		return -1;
 }
-
-#undef CTR
-#undef MUL
-
-#undef s03
-#undef s02
-#undef s01
-#undef s00
-
-#undef s13
-#undef s12
-#undef s11
-#undef s10
-
-#undef s23
-#undef s22
-#undef s21
-#undef s20
-
-#undef s33
-#undef s32
-#undef s31
-#undef s30
-
-#undef t03
-#undef t02
-#undef t01
-#undef t00
-
-#undef t13
-#undef t12
-#undef t11
-#undef t10
-
-#undef t23
-#undef t22
-#undef t21
-#undef t20
-
-#undef t33
-#undef t32
-#undef t31
-#undef t30
