@@ -38,19 +38,21 @@
 #define t31 (t3 >> 8 & 0xff)
 #define t30 (t3 & 0xff)
 
-uint32_t etab0[256]; // encryption tables
+// encryption tables
+
+uint32_t etab0[256];
 uint32_t etab1[256];
 uint32_t etab2[256];
 uint32_t etab3[256];
 
-uint32_t dtab0[256]; // decryption tables
+// decryption tables
+
+uint32_t dtab0[256];
 uint32_t dtab1[256];
 uint32_t dtab2[256];
 uint32_t dtab3[256];
 
 uint32_t rcon[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
-
-// sbox[] and inv_sbox[] are from FIPS Publication 197
 
 uint8_t sbox[256] = {
 0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
