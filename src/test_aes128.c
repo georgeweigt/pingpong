@@ -1,3 +1,5 @@
+// see FIPS Pub 197
+
 #define KEY "000102030405060708090a0b0c0d0e0f"
 #define PLAIN "00112233445566778899aabbccddeeff"
 #define CRYPTO "69c4e0d86a7b0430d8cdb78070b4c55a"
