@@ -76,6 +76,7 @@ struct compress_state_t {
 	int inlength;
 	uint8_t *outbuf;
 	int outindex;
+	int outmax;
 	int match_offset;
 	int match_length;
 };

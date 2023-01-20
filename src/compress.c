@@ -8,14 +8,17 @@ compress(uint8_t *inbuf, int inlength, int *plen)
 {
 	struct compress_state_t state;
 
-	// init
+	// init state
 
 	state.inbuf = inbuf;
 	state.inindex = 0;
 	state.inlength = inlength;
 
-	state.outbuf = NULL;
 	state.outindex = 0;
+	state.outmax = 64 * (inlength / 64 + 1);
+	state.outbuf = malloc(state.outmax);
+	if (state.outbuf == NULL)
+		return NULL;
 
 	// emit length
 
@@ -156,10 +159,14 @@ compress_emit_copy(struct compress_state_t *p)
 void
 compress_emit_byte(struct compress_state_t *p, uint32_t c)
 {
-	p->outbuf = realloc(p->outbuf, p->outindex + 1);
-
-	if (p->outbuf == NULL)
-		exit(1);
+	if (p->outindex == p->outmax) {
+		p->outmax += 64;
+		p->outbuf = realloc(p->outbuf, p->outmax);
+		if (p->outbuf == NULL) {
+			trace();
+			exit(1);
+		}
+	}
 
 	p->outbuf[p->outindex++] = c;
 }
@@ -167,10 +174,14 @@ compress_emit_byte(struct compress_state_t *p, uint32_t c)
 void
 compress_emit_mem(struct compress_state_t *p, int index, int len)
 {
-	p->outbuf = realloc(p->outbuf, p->outindex + len);
-
-	if (p->outbuf == NULL)
-		exit(1);
+	if (p->outindex == p->outmax) {
+		p->outmax += 64 * (len / 64 + 1);
+		p->outbuf = realloc(p->outbuf, p->outmax);
+		if (p->outbuf == NULL) {
+			trace();
+			exit(1);
+		}
+	}
 
 	memcpy(p->outbuf + p->outindex, p->inbuf + index, len);
 
