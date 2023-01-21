@@ -2,7 +2,7 @@
 
 #define KEY "000102030405060708090a0b0c0d0e0f"
 #define PLAIN "00112233445566778899aabbccddeeff"
-#define CRYPTO "69c4e0d86a7b0430d8cdb78070b4c55a"
+#define CIPHER "69c4e0d86a7b0430d8cdb78070b4c55a"
 
 void
 test_aes128(void)
@@ -15,7 +15,7 @@ test_aes128(void)
 
 	hextobin(k, 16, KEY);
 	hextobin(p, 16, PLAIN);
-	hextobin(c, 16, CRYPTO);
+	hextobin(c, 16, CIPHER);
 
 	aes128_expand_key(k, w, v);
 
