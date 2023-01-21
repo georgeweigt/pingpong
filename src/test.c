@@ -872,7 +872,7 @@ test_snappy(void)
 
 	printf("Test snappy ");
 
-	// uniform distribution is incompressible so do this
+	// switch stmt because uniform distribution is incompressible
 
 	for (i = 0; i < sizeof buf; i++) {
 		switch (random() % 10) {
