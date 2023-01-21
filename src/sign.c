@@ -31,7 +31,7 @@ sign(uint8_t *msg, int msglen, uint8_t *private_key, uint8_t *public_key)
 void
 test_sign(void)
 {
-	int good;
+	int err;
 	uint8_t buf[60], hash[32], private_key[32], public_key[64], *r, *s;
 	struct atom *list;
 
@@ -50,11 +50,11 @@ test_sign(void)
 	keccak256(buf + 28, (uint8_t *) "hello", 5);
 	keccak256(hash, buf, 60);
 
-	good = ec_verify(hash, r, s, public_key);
+	err = !ec_verify(hash, r, s, public_key);
 
 	free_list(list);
 
-	if (!good) {
+	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}

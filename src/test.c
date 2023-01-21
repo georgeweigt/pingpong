@@ -484,7 +484,7 @@ test_decode(void)
 void
 test_genkey(void)
 {
-	int good;
+	int err;
 	uint8_t private_key[32], public_key[64];
 	uint8_t r[32], s[32], hash[32];
 
@@ -496,9 +496,9 @@ test_genkey(void)
 
 	ec_sign(r, s, hash, private_key);
 
-	good = ec_verify(hash, r, s, public_key);
+	err = !ec_verify(hash, r, s, public_key);
 
-	if (!good) {
+	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
