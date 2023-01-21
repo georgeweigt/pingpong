@@ -1,4 +1,6 @@
-// returns 0 ok, -1 not ok
+// verify that signature is a convolution of hash
+
+// returns 1 yes, 0 no
 
 // hash		32 bytes (typically the sha256 of text or binary data)
 // rbuf		32 bytes (r of signature)
@@ -42,7 +44,7 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key)
 
 	ec_mod(R.x, q256);
 
-	err = ec_cmp(R.x, r) == 0 ? 0 : -1;
+	err = ec_cmp(R.x, r) == 0 ? 1 : 0;
 
 	ec_free(h);
 	ec_free(r);
