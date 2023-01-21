@@ -5,7 +5,7 @@
 // hash		32 bytes (typically the sha256 of text or binary data)
 // rbuf		32 bytes (r of signature)
 // sbuf		32 bytes (s of signature)
-// public_key	64 bytes
+// public_key	64 bytes (x,y)
 
 int
 ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key)
@@ -44,7 +44,7 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key)
 
 	ec_mod(R.x, q256);
 
-	err = ec_cmp(R.x, r) == 0 ? 1 : 0;
+	err = ec_cmp(R.x, r); // err = 0 for equality
 
 	ec_free(h);
 	ec_free(r);
@@ -58,5 +58,5 @@ ec_verify(uint8_t *hash, uint8_t *rbuf, uint8_t *sbuf, uint8_t *public_key)
 	ec_free_xyz(&R);
 	ec_free_xyz(&T);
 
-	return err;
+	return !err;
 }

@@ -15,7 +15,7 @@ compress(uint8_t *inbuf, int inlength, int *plen)
 	state.inlength = inlength;
 
 	state.outindex = 0;
-	state.outmax = 64 * (inlength / 64 + 1);
+	state.outmax = inlength + 100;
 	state.outbuf = malloc(state.outmax);
 	if (state.outbuf == NULL)
 		return NULL;
@@ -160,7 +160,7 @@ void
 compress_emit_byte(struct compress_state_t *p, uint32_t c)
 {
 	if (p->outindex == p->outmax) {
-		p->outmax += 64;
+		p->outmax += 100;
 		p->outbuf = realloc(p->outbuf, p->outmax);
 		if (p->outbuf == NULL) {
 			trace();
@@ -175,7 +175,7 @@ void
 compress_emit_mem(struct compress_state_t *p, int index, int len)
 {
 	if (p->outindex == p->outmax) {
-		p->outmax += 64 * (len / 64 + 1);
+		p->outmax += len + 100;
 		p->outbuf = realloc(p->outbuf, p->outmax);
 		if (p->outbuf == NULL) {
 			trace();
