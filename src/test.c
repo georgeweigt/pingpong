@@ -872,8 +872,30 @@ test_snappy(void)
 
 	printf("Test snappy ");
 
-	for (i = 0; i < sizeof buf; i++)
-		buf[i] = random() % 3 + 'a';
+	// uniform distribution is incompressible so do this
+
+	for (i = 0; i < sizeof buf; i++) {
+		switch (random() % 10) {
+		case 0:
+			buf[i] = ' ';
+			break;
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+			buf[i] = 'a';
+			break;
+		case 5:
+		case 6:
+		case 7:
+			buf[i] = 'b';
+			break;
+		case 8:
+		case 9:
+			buf[i] = 'c';
+			break;
+		}
+	}
 
 	for (len = 1; len <= sizeof buf; len *= 10) {
 

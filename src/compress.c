@@ -108,7 +108,7 @@ compress_match(struct compress_state_t *p)
 			p->match_offset = offset;
 			p->match_length = len;
 			if (len == 64)
-				return;
+				return; // snappy max length is 64
 		}
 
 		offset++;
