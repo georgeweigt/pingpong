@@ -517,3 +517,65 @@ aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 	out[14] = s3 >> 16;
 	out[15] = s3 >> 24;
 }
+
+#define KEY1 "000102030405060708090a0b0c0d0e0f"
+#define PLAIN1 "00112233445566778899aabbccddeeff"
+#define CIPHER1 "69c4e0d86a7b0430d8cdb78070b4c55a"
+
+void
+test_aes128(void)
+{
+	int err;
+	uint8_t k[16], p[16], c[16];
+	uint32_t w[44], v[44];
+
+	printf("Test aes128 ");
+
+	hextobin(k, 16, KEY1);
+	hextobin(p, 16, PLAIN1);
+	hextobin(c, 16, CIPHER1);
+
+	aes128_expand_key(k, w, v);
+
+	aes128_encrypt_block(w, p, p);
+
+	err = memcmp(p, c, 16);
+
+	if (err) {
+		trace();
+		return;
+	}
+
+	printf("ok\n");
+}
+
+#define KEY2 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+#define PLAIN2 "00112233445566778899aabbccddeeff"
+#define CIPHER2 "8ea2b7ca516745bfeafc49904b496089"
+
+void
+test_aes256(void)
+{
+	int err;
+	uint8_t k[32], p[16], c[16];
+	uint32_t w[60];
+
+	printf("Test aes256 ");
+
+	hextobin(k, 32, KEY2);
+	hextobin(p, 16, PLAIN2);
+	hextobin(c, 16, CIPHER2);
+
+	aes256_expand_key(k, w);
+
+	aes256_encrypt_block(w, p, p);
+
+	err = memcmp(p, c, 16);
+
+	if (err) {
+		trace();
+		return;
+	}
+
+	printf("ok\n");
+}
