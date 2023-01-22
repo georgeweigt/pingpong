@@ -94,7 +94,7 @@ recv_frame_uncompressed(struct node *p)
 
 	// msg id
 
-	nbytes = rdecode_relax(buf, len);
+	nbytes = rdecode_relax(buf, len); // 'relax' trailing data ok
 
 	if (nbytes < 0) {
 		trace();
@@ -104,7 +104,7 @@ recv_frame_uncompressed(struct node *p)
 
 	// msg data
 
-	nbytes = rdecode_relax(buf + nbytes, len - nbytes);
+	nbytes = rdecode(buf + nbytes, len - nbytes);
 
 	if (nbytes < 0) {
 		trace();
