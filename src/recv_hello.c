@@ -1,55 +1,33 @@
+// returns 0 ok, -1 err
+
 int
 recv_hello(struct node *p)
 {
-	int len, nbytes;
-	uint8_t *buf, *data;
-	struct atom *q;
+	int err;
+	struct atom *msgid, *msgdata;
 
-	buf = recv_frame(p);
+	err = recv_frame_uncompressed(p);
 
-	if (buf == NULL)
+	if (err)
 		return -1;
 
-	data = buf + 32; // skip over header
+	msgdata = pop();
+	msgid = pop();
 
-	len = buf[0] << 16 | buf[1] << 8 | buf[2]; // length of data
+	recv_hello_data(msgdata);
 
-	// verify that msg id is the empty string ""
-
-	if (len < 1 || data[0] != 0x80) {
-		trace();
-		free(buf);
-		return -1; // not hello msg
-	}
-
-	data += 1;
-	len -= 1;
-
-	// msg data
-
-	nbytes = rdecode_relax(data, len);
-
-	if (nbytes < 0) {
-		trace();
-		free(buf);
-		return -1; // fmt error
-	}
-
-	q = pop(); // list from rdecode
-	recv_hello_data(q);
-	free_list(q);
-
-	free(buf);
+	free_list(msgid);
+	free_list(msgdata);
 
 	return 0;
 }
 
 void
-recv_hello_data(struct atom *q)
+recv_hello_data(struct atom *p)
 {
-//	print_list(q);
-	print_client_id(q);
-	print_capabilities(q);
+//	print_list(p);
+	print_client_id(p);
+	print_capabilities(p);
 }
 
 void

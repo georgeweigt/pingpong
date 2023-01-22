@@ -106,6 +106,4 @@ nib1(struct node *p)
 		return;
 
 	printf("ok\n");
-
-	sleep(2);
 }
