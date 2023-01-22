@@ -3,16 +3,23 @@
 int
 send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 {
-	int err, len, n;
+	int err, len, n, overhead;
 	int framelen, msgidlen, msgdatalen, msglen;
 	uint8_t *framebuf, *msgbuf;
 
 	msgidlen = rlength(msgid);
 	msgdatalen = rlength(msgdata);
 
+	// compensate for possible compression expansion
+
+	if (msgdatalen < 10000)
+		overhead = 100; // min
+	else
+		overhead = msgdatalen / 100; // 1%
+
 	// get frame buffer
 
-	framelen = msgidlen + msgdatalen + 74; // hdr (32) + pad (16) + mac (16) + expansion (10)
+	framelen = msgidlen + msgdatalen + overhead + 64; // hdr (32) + pad (16) + mac (16)
 
 	framebuf = malloc(framelen);
 
@@ -35,7 +42,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	// compress
 
-	len = compress(framebuf + 32 + msgidlen, msgdatalen + 10, msgbuf, msgdatalen);
+	len = compress(framebuf + 32 + msgidlen, msgdatalen + overhead, msgbuf, msgdatalen);
 
 	free(msgbuf);
 

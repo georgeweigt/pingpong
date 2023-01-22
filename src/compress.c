@@ -8,11 +8,6 @@ compress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
 {
 	struct compress_state_t s;
 
-	// sanity check
-
-	if (inlength + 10 > outmax)
-		return 0; // err
-
 	// init state
 
 	s.inbuf = inbuf;
@@ -42,6 +37,9 @@ compress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
 		if (s.inindex == s.inlength)
 			break;
 	}
+
+	if (s.outindex > s.outmax)
+		s.outindex = 0; // buffer overrun
 
 	return s.outindex;
 }
@@ -160,20 +158,15 @@ compress_emit_copy(struct compress_state_t *p)
 void
 compress_emit_byte(struct compress_state_t *p, uint32_t c)
 {
-	if (p->outindex + 1 > p->outmax) {
-		trace();
-		exit(1);
-	}
-	p->outbuf[p->outindex++] = c;
+	if (p->outindex + 1 <= p->outmax)
+		p->outbuf[p->outindex] = c;
+	p->outindex++;
 }
 
 void
 compress_emit_mem(struct compress_state_t *p, int k, int len)
 {
-	if (p->outindex + len > p->outmax) {
-		trace();
-		exit(1);
-	}
-	memcpy(p->outbuf + p->outindex, p->inbuf + k, len);
+	if (p->outindex + len <= p->outmax)
+		memcpy(p->outbuf + p->outindex, p->inbuf + k, len);
 	p->outindex += len;
 }
