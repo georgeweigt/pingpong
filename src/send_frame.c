@@ -19,7 +19,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	// get frame buffer
 
-	framelen = msgidlen + msgdatalen + overhead + 64; // hdr (32) + pad (16) + mac (16)
+	framelen = msgidlen + msgdatalen + overhead + 63; // 63 == hdr (32) + pad (15) + mac (16)
 
 	framebuf = malloc(framelen);
 
