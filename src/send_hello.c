@@ -2,10 +2,10 @@ int
 send_hello(struct node *p)
 {
 	int err;
-	struct atom *msg_id, *msg_data;
+	struct atom *msgid, *msgdata;
 
 	push_string(NULL, 0); // empty string ""
-	msg_id = pop();
+	msgid = pop();
 
 	// msg data
 
@@ -23,12 +23,12 @@ send_hello(struct node *p)
 	push_string(p->public_key, 64); // public key
 
 	list(5);
-	msg_data = pop();
+	msgdata = pop();
 
-	err = send_frame_unc(p, msg_id, msg_data);
+	err = send_frame_uncompressed(p, msgid, msgdata);
 
-	free_list(msg_id);
-	free_list(msg_data);
+	free_list(msgid);
+	free_list(msgdata);
 
 	return err;
 }
