@@ -78,7 +78,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	// new frame length
 
-	framelen = 16 * n + 48; // header (32) + mac (16)
+	framelen = 16 * n + 48; // 48 == header (32) + mac (16)
 
 	// encap
 
