@@ -45,7 +45,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 		return -1;
 	}
 
-	msglen = msgidlen + len;
+	msglen = msgidlen + len; // len is compressed length
 
 	// header
 
@@ -71,7 +71,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	// new frame length
 
-	framelen = 16 * n + 48;
+	framelen = 16 * n + 48; // header (32) + mac (16)
 
 	// encap
 
