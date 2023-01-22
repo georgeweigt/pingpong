@@ -90,9 +90,7 @@ recv_frame_uncompressed(struct node *p)
 
 	aes256ctr_encrypt(p->decrypt_state, buf, 16 * nblocks);
 
-	// decode
-
-	// msg id
+	// decode msg id
 
 	nbytes = rdecode_relax(buf, len); // 'relax' trailing data ok
 
@@ -102,7 +100,7 @@ recv_frame_uncompressed(struct node *p)
 		return -1;
 	}
 
-	// msg data
+	// decode msg data
 
 	nbytes = rdecode(buf + nbytes, len - nbytes);
 
