@@ -3,46 +3,47 @@
 #define MIN_LENGTH 4 // match lengths less than this do not trigger a copy
 #define MAX_OFFSET 1000 // how far back to search, shorter = faster
 
-uint8_t *
-compress(uint8_t *inbuf, int inlength, int *plen)
+int
+compress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
 {
-	struct compress_state_t state;
+	struct compress_state_t s;
+
+	// sanity check
+
+	if (inlength + 10 > outmax)
+		return 0; // err
 
 	// init state
 
-	state.inbuf = inbuf;
-	state.inindex = 0;
-	state.inlength = inlength;
+	s.inbuf = inbuf;
+	s.inindex = 0;
+	s.inlength = inlength;
 
-	state.outindex = 0;
-	state.outmax = inlength + 100;
-	state.outbuf = malloc(state.outmax);
-	if (state.outbuf == NULL)
-		return NULL;
+	s.outbuf = outbuf;
+	s.outindex = 0;
+	s.outmax = outmax;
 
 	// emit length
 
 	while (inlength >= 128) {
-		compress_emit_byte(&state, (inlength % 128) | 0x80);
+		compress_emit_byte(&s, (inlength % 128) | 0x80);
 		inlength /= 128;
 	}
 
-	compress_emit_byte(&state, inlength);
+	compress_emit_byte(&s, inlength);
 
 	// compress
 
 	for (;;) {
-		compress_emit_literal(&state);
-		if (state.inindex == state.inlength)
+		compress_emit_literal(&s);
+		if (s.inindex == s.inlength)
 			break;
-		compress_emit_copy(&state);
-		if (state.inindex == state.inlength)
+		compress_emit_copy(&s);
+		if (s.inindex == s.inlength)
 			break;
 	}
 
-	*plen = state.outindex;
-
-	return state.outbuf;
+	return s.outindex;
 }
 
 void
@@ -159,31 +160,20 @@ compress_emit_copy(struct compress_state_t *p)
 void
 compress_emit_byte(struct compress_state_t *p, uint32_t c)
 {
-	if (p->outindex == p->outmax) {
-		p->outmax += 100;
-		p->outbuf = realloc(p->outbuf, p->outmax);
-		if (p->outbuf == NULL) {
-			trace();
-			exit(1);
-		}
+	if (p->outindex + 1 > p->outmax) {
+		trace();
+		exit(1);
 	}
-
 	p->outbuf[p->outindex++] = c;
 }
 
 void
-compress_emit_mem(struct compress_state_t *p, int index, int len)
+compress_emit_mem(struct compress_state_t *p, int k, int len)
 {
-	if (p->outindex == p->outmax) {
-		p->outmax += len + 100;
-		p->outbuf = realloc(p->outbuf, p->outmax);
-		if (p->outbuf == NULL) {
-			trace();
-			exit(1);
-		}
+	if (p->outindex + len > p->outmax) {
+		trace();
+		exit(1);
 	}
-
-	memcpy(p->outbuf + p->outindex, p->inbuf + index, len);
-
+	memcpy(p->outbuf + p->outindex, p->inbuf + k, len);
 	p->outindex += len;
 }

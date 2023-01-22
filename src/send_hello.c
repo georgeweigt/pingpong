@@ -25,7 +25,7 @@ send_hello(struct node *p)
 	list(5);
 	msg_data = pop();
 
-	err = send_frame(p, msg_id, msg_data);
+	err = send_frame_unc(p, msg_id, msg_data);
 
 	free_list(msg_id);
 	free_list(msg_data);

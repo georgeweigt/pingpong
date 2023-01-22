@@ -867,8 +867,9 @@ test_decrypt(void)
 void
 test_snappy(void)
 {
-	int err, i, len, n;
-	uint8_t buf[1000], *c, *d;
+	int err, i, len;
+	int inlength, outlength;
+	uint8_t buf[1000], inbuf[1000], outbuf[1010];
 
 	printf("Test snappy ");
 
@@ -899,39 +900,26 @@ test_snappy(void)
 
 	for (len = 1; len <= sizeof buf; len *= 10) {
 
-		c = compress(buf, len, &n);
+		outlength = compress(outbuf, sizeof outbuf, buf, len);
 
-		if (c == NULL) {
+		if (outlength == 0) {
 			trace();
 			return;
 		}
 
-		d = decompress(c, n, &n);
+		inlength = decompress(inbuf, sizeof inbuf, outbuf, outlength);
 
-		if (d == NULL) {
+		if (len != inlength) {
 			trace();
-			free(c);
 			return;
 		}
 
-		if (n != len) {
-			trace();
-			free(c);
-			free(d);
-			return;
-		}
-
-		err = memcmp(buf, d, len);
+		err = memcmp(buf, inbuf, len);
 
 		if (err) {
 			trace();
-			free(c);
-			free(d);
 			return;
 		}
-
-		free(c);
-		free(d);
 	}
 
 	printf("ok\n");

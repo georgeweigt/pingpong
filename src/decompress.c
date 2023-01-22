@@ -1,11 +1,10 @@
 #define I (inbuf + inindex)
 
-uint8_t *
-decompress(uint8_t *inbuf, int inlength, int *plen)
+int
+decompress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
 {
 	int len, off, inindex, outindex, outlength;
 	uint64_t u;
-	uint8_t *outbuf;
 
 	inindex = 0;
 	outindex = 0;
@@ -16,7 +15,7 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 		inindex++;
 
 	if (inindex == inlength)
-		return NULL;
+		return 0; // err
 
 	// compute length
 
@@ -27,11 +26,11 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 		u = (u << 7) | (inbuf[off] & 0x7f);
 
 		if (u > 0x7fffffff)
-			return NULL;
+			return 0; // err
 	}
 
 	if (u == 0)
-		return NULL;
+		return 0; // err
 
 	outlength = u;
 
@@ -39,13 +38,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 	// sanity check
 
-	if (outlength > 64 * inlength)
-		return NULL;
-
-	outbuf = malloc(outlength);
-
-	if (outbuf == NULL)
-		return NULL;
+	if (outlength > outmax)
+		return 0; // err
 
 	while (inindex < inlength) {
 
@@ -57,10 +51,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			case 60: // 1 length byte
 
-				if (inindex + 2 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 2 > inlength)
+					return 0; // err
 
 				len = I[1] + 1;
 
@@ -70,10 +62,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			case 61: // 2 length bytes
 
-				if (inindex + 3 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 3 > inlength)
+					return 0; // err
 
 				len = (I[2] << 8 | I[1]) + 1;
 
@@ -83,10 +73,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			case 62: // 3 length bytes
 
-				if (inindex + 4 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 4 > inlength)
+					return 0; // err
 
 				len = (I[3] << 16 | I[2] << 8 | I[1]) + 1;
 
@@ -96,17 +84,13 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 			case 63: // 4 length bytes
 
-				if (inindex + 5 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 5 > inlength)
+					return 0; // err
 
 				u = (uint64_t) (I[4] << 24 | I[3] << 16 || I[2] << 8 | I[1]) + 1;
 
-				if (u > 0x7fffffff) {
-					free(outbuf);
-					return NULL;
-				}
+				if (u > 0x7fffffff)
+					return 0; // err
 
 				len = u;
 
@@ -122,10 +106,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 				break;
 			}
 
-			if (inindex + len > inlength || outindex + len > outlength) {
-				free(outbuf);
-				return NULL;
-			}
+			if (inindex + len > inlength || outindex + len > outlength)
+				return 0; // err
 
 			memcpy(outbuf + outindex, inbuf + inindex, len);
 
@@ -142,10 +124,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 				// 1 byte offset
 
-				if (inindex + 2 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 2 > inlength)
+					return 0; // err
 
 				off = (I[0] << 3 & 0x700) | I[1];
 				len = (I[0] >> 2 & 0x07) + 4;
@@ -158,10 +138,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 				// 2 byte offset
 
-				if (inindex + 3 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 3 > inlength)
+					return 0; // err
 
 				off = I[2] << 8 | I[1];
 				len = (I[0] >> 2) + 1;
@@ -174,17 +152,13 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 				// 4 byte offset
 
-				if (inindex + 5 > inlength) {
-					free(outbuf);
-					return NULL;
-				}
+				if (inindex + 5 > inlength)
+					return 0; // err
 
 				u = (uint64_t) (I[4] << 24 | I[3] << 16 | I[2] << 8 | I[1]) + 1;
 
-				if (u > 0xffff) {
-					free(outbuf);
-					return NULL;
-				}
+				if (u > 0xffff)
+					return 0; // err
 
 				off = u;
 				len = (I[0] >> 2) + 1;
@@ -194,10 +168,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 				break;
 			}
 
-			if (off < 1 || off > outindex || outindex + len > outlength) {
-				free(outbuf);
-				return NULL;
-			}
+			if (off < 1 || off > outindex || outindex + len > outlength)
+				return 0; // err
 
 			while (len > off) {
 				memcpy(outbuf + outindex, outbuf + outindex - off, off);
@@ -211,12 +183,8 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 		}
 	}
 
-	if (outindex < outlength) {
-		free(outbuf);
-		return NULL;
-	}
+	if (outindex < outlength)
+		return 0; // err
 
-	*plen = outlength;
-
-	return outbuf;
+	return outlength;
 }

@@ -99,4 +99,13 @@ nib1(struct node *p)
 	err = recv_hello(p);
 	if (err)
 		return;
+
+	printf("sending disconnect\n");
+	err = send_disconnect(p);
+	if (err)
+		return;
+
+	printf("ok\n");
+
+	sleep(2);
 }
