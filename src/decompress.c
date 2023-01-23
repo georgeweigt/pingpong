@@ -22,7 +22,7 @@ decompress(uint8_t *inbuf, int inlength, int *plen)
 
 	len = decompress_nib(outbuf, outlength, inbuf, inlength);
 
-	if (len < 1) {
+	if (len != outlength) {
 		trace();
 		free_mem(outbuf);
 		return NULL;
