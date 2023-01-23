@@ -21,7 +21,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	framelen = msgidlen + msgdatalen + overhead + 63; // 63 == hdr (32) + pad (15) + mac (16)
 
-	framebuf = malloc(framelen);
+	framebuf = alloc_mem(framelen);
 
 	if (framebuf == NULL) {
 		trace();
@@ -30,11 +30,11 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	// encode msg data
 
-	msgbuf = malloc(msgdatalen);
+	msgbuf = alloc_mem(msgdatalen);
 
 	if (msgbuf == NULL) {
 		trace();
-		free(framebuf);
+		free_mem(framebuf);
 		return -1;
 	}
 
@@ -44,11 +44,11 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	len = compress(framebuf + 32 + msgidlen, msgdatalen + overhead, msgbuf, msgdatalen);
 
-	free(msgbuf);
+	free_mem(msgbuf);
 
 	if (len == 0) {
 		trace();
-		free(framebuf);
+		free_mem(framebuf);
 		return -1;
 	}
 
@@ -88,7 +88,7 @@ send_frame(struct node *p, struct atom *msgid, struct atom *msgdata)
 
 	err = send_bytes(p->fd, framebuf, framelen);
 
-	free(framebuf);
+	free_mem(framebuf);
 
 	return err;
 }
@@ -111,7 +111,7 @@ send_frame_uncompressed(struct node *p, struct atom *msgid, struct atom *msgdata
 
 	framelen = 16 * n + 48; // header (32) + mac (16)
 
-	framebuf = malloc(framelen);
+	framebuf = alloc_mem(framelen);
 
 	if (framebuf == NULL) {
 		trace();
@@ -147,7 +147,7 @@ send_frame_uncompressed(struct node *p, struct atom *msgid, struct atom *msgdata
 
 	err = send_bytes(p->fd, framebuf, framelen);
 
-	free(framebuf);
+	free_mem(framebuf);
 
 	return err;
 }

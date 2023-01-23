@@ -503,7 +503,7 @@ test_genkey(void)
 		return;
 	}
 
-	if (ec_malloc_count != 0) {
+	if (ec_alloc_count != 0) {
 		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
@@ -796,7 +796,7 @@ test_pubkey(void)
 		return;
 	}
 
-	if (ec_malloc_count != 0) {
+	if (ec_alloc_count != 0) {
 		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
@@ -907,7 +907,7 @@ test_snappy(void)
 			return;
 		}
 
-		inlength = decompress(inbuf, sizeof inbuf, outbuf, outlength);
+		inlength = decompress_nib(inbuf, sizeof inbuf, outbuf, outlength);
 
 		if (len != inlength) {
 			trace();

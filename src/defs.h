@@ -83,5 +83,6 @@ struct compress_state_t {
 
 extern int tos;
 extern int atom_count;
-extern int ec_malloc_count;
+extern int alloc_count;
+extern int ec_alloc_count;
 extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;

@@ -13,7 +13,7 @@ send_auth(struct node *p)
 
 	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
-	buf = malloc(len);
+	buf = alloc_mem(len);
 
 	if (buf == NULL)
 		exit(1);
@@ -30,7 +30,7 @@ send_auth(struct node *p)
 
 	err = send_bytes(p->fd, buf, len);
 
-	free(buf);
+	free_mem(buf);
 
 	return err;
 }

@@ -22,3 +22,23 @@ hextobin(uint8_t *buf, int len, char *str)
 		buf[i] = d;
 	}
 }
+
+int alloc_count;
+
+void *
+alloc_mem(int len)
+{
+	void *p = malloc(len);
+	if (p)
+		alloc_count++;
+	return p;
+}
+
+void
+free_mem(void *p)
+{
+	if (p) {
+		free(p);
+		alloc_count--;
+	}
+}

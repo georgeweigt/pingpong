@@ -151,9 +151,9 @@ sim(void)
 	close(A.fd);
 	close(B.fd);
 
-	free(A.auth_buf);
-	free(A.ack_buf);
+	free_mem(A.auth_buf);
+	free_mem(A.ack_buf);
 
-	free(B.auth_buf);
-	free(B.ack_buf);
+	free_mem(B.auth_buf);
+	free_mem(B.ack_buf);
 }

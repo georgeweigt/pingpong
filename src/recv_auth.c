@@ -17,7 +17,7 @@ recv_auth(struct node *p)
 	err = decap(buf, len, p->private_key);
 
 	if (err) {
-		free(buf);
+		free_mem(buf);
 		return -1;
 	}
 
@@ -26,7 +26,7 @@ recv_auth(struct node *p)
 
 	n = rdecode_relax(msg, msglen);
 
-	free(buf);
+	free_mem(buf);
 
 	if (n < 0) {
 		trace();

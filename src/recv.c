@@ -18,7 +18,7 @@ recv_msg(int fd)
 		return NULL;
 	}
 
-	buf = malloc(len + 2);
+	buf = alloc_mem(len + 2);
 
 	if (buf == NULL)
 		exit(1);
@@ -29,7 +29,7 @@ recv_msg(int fd)
 	err = recv_bytes(fd, buf + 2, len);
 
 	if (err) {
-		free(buf);
+		free_mem(buf);
 		return NULL;
 	}
 

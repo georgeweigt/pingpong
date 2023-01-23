@@ -1,45 +1,54 @@
+uint8_t *
+decompress(uint8_t *inbuf, int inlength, int *plen)
+{
+	int len, outlength;
+	uint8_t *outbuf;
+
+	outlength = decompress_length(inbuf, inlength, NULL);
+
+	// sanity check
+
+	if (outlength < 1 || outlength > 64 * inlength) {
+		trace();
+		return NULL;
+	}
+
+	outbuf = alloc_mem(outlength);
+
+	if (outbuf == NULL) {
+		trace();
+		return NULL;
+	}
+
+	len = decompress_nib(outbuf, outlength, inbuf, inlength);
+
+	if (len < 1) {
+		trace();
+		free_mem(outbuf);
+		return NULL;
+	}
+
+	*plen = len;
+
+	return outbuf;
+}
+
 #define I (inbuf + inindex)
 
 int
-decompress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
+decompress_nib(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
 {
 	int len, off, inindex, outindex, outlength;
 	uint64_t u;
 
-	inindex = 0;
-	outindex = 0;
-
-	// advance to end of length
-
-	while (inindex < inlength && (inbuf[inindex] & 0x80))
-		inindex++;
-
-	if (inindex == inlength)
-		return 0; // err
-
-	// compute length
-
-	u = 0;
-
-	for (off = inindex; off >= 0; off--) {
-
-		u = (u << 7) | (inbuf[off] & 0x7f);
-
-		if (u > 0x7fffffff)
-			return 0; // err
-	}
-
-	if (u == 0)
-		return 0; // err
-
-	outlength = u;
-
-	inindex++;
+	outlength = decompress_length(inbuf, inlength, &inindex);
 
 	// sanity check
 
-	if (outlength > outmax)
+	if (outlength < 1 || outlength > outmax)
 		return 0; // err
+
+	outindex = 0;
 
 	while (inindex < inlength) {
 
@@ -187,4 +196,40 @@ decompress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength)
 		return 0; // err
 
 	return outlength;
+}
+
+// returns length from inbuf
+
+int
+decompress_length(uint8_t *inbuf, int inlength, int *inindex)
+{
+	int i, k;
+	uint64_t u;
+
+	// advance to end of length field
+
+	k = 0;
+
+	while (k < inlength && (inbuf[k] & 0x80))
+		k++;
+
+	if (k == inlength)
+		return 0; // err
+
+	// compute length
+
+	u = 0;
+
+	for (i = k; i >= 0; i--) {
+
+		u = (u << 7) | (inbuf[i] & 0x7f);
+
+		if (u > 0x7fffffff)
+			return 0; // err
+	}
+
+	if (inindex)
+		*inindex = k + 1;
+
+	return (int) u;
 }

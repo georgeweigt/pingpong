@@ -20,13 +20,13 @@ read_account(struct account *p, char *filename)
 		return;
 
 	if (strlen(buf) < 64) {
-		free(buf);
+		free_mem(buf);
 		return;
 	}
 
 	hextobin(p->private_key, 32, buf);
 
-	free(buf);
+	free_mem(buf);
 
 	ec_pubkey(p->public_key, p->private_key);
 
@@ -63,7 +63,7 @@ read_file(char *filename)
 		return NULL;
 	}
 
-	buf = malloc(n + 1);
+	buf = alloc_mem(n + 1);
 
 	if (buf == NULL) {
 		close(fd);
@@ -72,7 +72,7 @@ read_file(char *filename)
 
 	if (read(fd, buf, n) != n) {
 		close(fd);
-		free(buf);
+		free_mem(buf);
 		return NULL;
 	}
 

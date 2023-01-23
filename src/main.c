@@ -16,6 +16,9 @@ main(int argc, char *argv[])
 	}
 
 	nib();
+
+	if (alloc_count)
+		printf("memory leak\n");
 }
 
 void
@@ -23,7 +26,7 @@ nib(void)
 {
 	struct node *p;
 
-	p = malloc(sizeof (struct node));
+	p = alloc_mem(sizeof (struct node));
 
 	if (p == NULL)
 		exit(1);
@@ -35,7 +38,7 @@ nib(void)
 	p->fd = client_connect("127.0.0.1", 30303);
 
 	if (p->fd < 0) {
-		free(p);
+		free_mem(p);
 		return;
 	}
 
@@ -44,12 +47,12 @@ nib(void)
 	close(p->fd);
 
 	if (p->auth_buf)
-		free(p->auth_buf);
+		free_mem(p->auth_buf);
 
 	if (p->ack_buf)
-		free(p->ack_buf);
+		free_mem(p->ack_buf);
 
-	free(p);
+	free_mem(p);
 }
 
 void
@@ -100,10 +103,13 @@ nib1(struct node *p)
 	if (err)
 		return;
 
+	printf("receiving status\n");
+	err = recv_status(p);
+	if (err)
+		return;
+
 	printf("sending disconnect\n");
 	err = send_disconnect(p);
 	if (err)
 		return;
-
-	printf("ok\n");
 }

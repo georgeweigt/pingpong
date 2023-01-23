@@ -91,7 +91,7 @@ alloc_atom(int string_length)
 	n = string_length;
 	if (n < 0)
 		n = 0;
-	p = malloc(sizeof (struct atom) + n);
+	p = alloc_mem(sizeof (struct atom) + n);
 	if (p == NULL)
 		exit(1);
 	p->car = NULL;
@@ -113,12 +113,12 @@ free_list(struct atom *p)
 		while (p) {
 			t = p->cdr;
 			free_list(p->car);
-			free(p);
+			free_mem(p);
 			atom_count--;
 			p = t;
 		}
 	else {
-		free(p);
+		free_mem(p);
 		atom_count--;
 	}
 }
@@ -172,7 +172,7 @@ print_list_nib(struct atom *p, int level)
 	int i;
 
 	for (i = 0; i < level; i++)
-		printf("\t");
+		printf("  ");
 
 	if (p == NULL) {
 		printf("[]");
@@ -190,7 +190,7 @@ print_list_nib(struct atom *p, int level)
 		}
 
 		for (i = 0; i < level; i++)
-			printf("\t");
+			printf("  ");
 
 		printf("]");
 

@@ -86,7 +86,7 @@ save_auth_for_session_setup(struct node *p, uint8_t *auth, int len)
 {
 	uint8_t *buf;
 
-	buf = malloc(len);
+	buf = alloc_mem(len);
 
 	if (buf == NULL)
 		exit(1);
@@ -94,7 +94,7 @@ save_auth_for_session_setup(struct node *p, uint8_t *auth, int len)
 	memcpy(buf, auth, len);
 
 	if (p->auth_buf)
-		free(p->auth_buf);
+		free_mem(p->auth_buf);
 
 	p->auth_buf = buf;
 	p->auth_len = len;
@@ -105,7 +105,7 @@ save_ack_for_session_setup(struct node *p, uint8_t *ack, int len)
 {
 	uint8_t *buf;
 
-	buf = malloc(len);
+	buf = alloc_mem(len);
 
 	if (buf == NULL)
 		exit(1);
@@ -113,7 +113,7 @@ save_ack_for_session_setup(struct node *p, uint8_t *ack, int len)
 	memcpy(buf, ack, len);
 
 	if (p->ack_buf)
-		free(p->ack_buf);
+		free_mem(p->ack_buf);
 
 	p->ack_buf = buf;
 	p->ack_len = len;

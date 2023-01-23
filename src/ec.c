@@ -1627,7 +1627,7 @@ ec_int(int k)
 	return u;
 }
 
-int ec_malloc_count;
+int ec_alloc_count;
 
 uint32_t *
 ec_new(int n)
@@ -1635,10 +1635,10 @@ ec_new(int n)
 	uint32_t *u;
 	u = (uint32_t *) malloc((n + 1) * sizeof (uint32_t));
 	if (u == NULL) {
-		printf("malloc error\n");
+		trace();
 		exit(1);
 	}
-	ec_malloc_count++;
+	ec_alloc_count++;
 	u[0] = n;
 	return u + 1;
 }
@@ -1648,7 +1648,7 @@ ec_free(uint32_t *u)
 {
 	if (u) {
 		free(u - 1);
-		ec_malloc_count--;
+		ec_alloc_count--;
 	}
 }
 
@@ -1755,5 +1755,5 @@ ec_init(void)
 	a256 = ec_hexstr_to_bignum(STR_A);
 	b256 = ec_hexstr_to_bignum(STR_B);
 
-	ec_malloc_count = 0;
+	ec_alloc_count = 0;
 }
