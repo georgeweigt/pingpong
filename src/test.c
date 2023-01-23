@@ -14,6 +14,9 @@ test(void)
 	test_sign();
 	test_decrypt();
 	test_snappy();
+
+	if (alloc_count)
+		printf("memory leak\n");
 }
 
 // does this public key belong to secp256k1? (0 yes, -1 no)

@@ -1,3 +1,5 @@
+// returns 0 ok, -1 err
+
 int
 recv_status(struct node *p)
 {
@@ -20,5 +22,5 @@ recv_status(struct node *p)
 	free_list(msgid);
 	free_list(msgdata);
 
-	return 0; // ok
+	return 0;
 }
