@@ -113,6 +113,7 @@ int recv_auth(struct node *p);
 int recv_auth_data(struct node *p, struct atom *q);
 int recv_frame(struct node *p);
 int recv_frame_uncompressed(struct node *p);
+int recv_frame_nib(struct node *p, int compr);
 int recv_hello(struct node *p);
 void recv_hello_data(struct atom *p);
 void print_client_id(struct atom *p);
