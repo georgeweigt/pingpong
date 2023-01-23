@@ -15,7 +15,7 @@ recv_frame_uncompressed(struct node *p)
 int
 recv_frame_nib(struct node *p, int compr)
 {
-	int err, i, len, nblocks, nbytes;
+	int err, i, msglen, nblocks, nbytes;
 	uint8_t *buf, *outbuf;
 	uint8_t header[32], mac[32], seed[32];
 
@@ -54,11 +54,11 @@ recv_frame_nib(struct node *p, int compr)
 
 	aes256ctr_encrypt(p->decrypt_state, header, 16);
 
-	// length from prefix
+	// msg length from prefix
 
-	len = header[0] << 16 | header[1] << 8 | header[2];
+	msglen = header[0] << 16 | header[1] << 8 | header[2];
 
-	nblocks = (len + 15) / 16; // number of blocks
+	nblocks = (msglen + 15) / 16; // number of blocks
 
 	buf = alloc_mem(16 * nblocks + 16); // one additional block for mac
 
@@ -103,7 +103,7 @@ recv_frame_nib(struct node *p, int compr)
 
 	// decode msg id
 
-	nbytes = rdecode_relax(buf, len); // 'relax' trailing data ok
+	nbytes = rdecode_relax(buf, msglen); // 'relax' trailing data ok
 
 	if (nbytes < 0) {
 		trace();
@@ -115,13 +115,13 @@ recv_frame_nib(struct node *p, int compr)
 
 	if (compr) {
 
-		outbuf = decompress(buf + nbytes, len - nbytes, &len);
+		outbuf = decompress(buf + nbytes, msglen - nbytes, &msglen);
 
 		free_mem(buf);
 
 		if (outbuf == NULL) {
 			trace();
-			free_list(pop());
+			free_list(pop()); // discard msg id
 			return -1;
 		}
 
@@ -129,15 +129,15 @@ recv_frame_nib(struct node *p, int compr)
 
 	} else {
 		outbuf = buf + nbytes;
-		len -= nbytes;
+		msglen -= nbytes;
 	}
 
-	nbytes = rdecode(outbuf, len);
+	nbytes = rdecode(outbuf, msglen);
 
 	if (nbytes < 0) {
 		trace();
 		free_mem(buf);
-		free_list(pop());
+		free_list(pop()); // discard msg id
 		return -1;
 	}
 
