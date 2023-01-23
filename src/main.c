@@ -46,12 +46,8 @@ nib(void)
 
 	close(p->fd);
 
-	if (p->auth_buf)
-		free_mem(p->auth_buf);
-
-	if (p->ack_buf)
-		free_mem(p->ack_buf);
-
+	free_mem(p->auth_buf);
+	free_mem(p->ack_buf);
 	free_mem(p);
 }
 
