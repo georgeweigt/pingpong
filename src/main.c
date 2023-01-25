@@ -20,7 +20,9 @@ main(int argc, char *argv[])
 
 	nib();
 
-	if (alloc_count)
+	if (alloc_count == 0)
+		printf("ok\n");
+	else
 		printf("memory leak\n");
 }
 
