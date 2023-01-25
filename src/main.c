@@ -6,6 +6,8 @@ main(int argc, char *argv[])
 	aes_init();
 	keccak_init();
 
+	alloc_count = 0;
+
 	if (argc > 1) {
 		if (strcmp(argv[1], "test") == 0)
 			test();
@@ -18,7 +20,7 @@ main(int argc, char *argv[])
 
 	nib();
 
-	if (alloc_count == 0 && ec_alloc_count == 0)
+	if (alloc_count == 0)
 		printf("ok\n");
 	else
 		printf("memory leak\n");

@@ -21,8 +21,6 @@
 #define ENCAP_OVERHEAD (2 + 65 + 16 + 32) // prefix + R + iv + hmac
 #define len(p) (p)[-1]
 
-extern int ec_malloc_count;
-
 struct point {
 	uint32_t *x, *y, *z;
 };

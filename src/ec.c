@@ -1627,18 +1627,15 @@ ec_int(int k)
 	return u;
 }
 
-int ec_alloc_count;
-
 uint32_t *
 ec_new(int n)
 {
 	uint32_t *u;
-	u = (uint32_t *) malloc((n + 1) * sizeof (uint32_t));
+	u = (uint32_t *) alloc_mem((n + 1) * sizeof (uint32_t));
 	if (u == NULL) {
 		trace();
 		exit(1);
 	}
-	ec_alloc_count++;
 	u[0] = n;
 	return u + 1;
 }
@@ -1646,10 +1643,8 @@ ec_new(int n)
 void
 ec_free(uint32_t *u)
 {
-	if (u) {
-		free(u - 1);
-		ec_alloc_count--;
-	}
+	if (u)
+		free_mem(u - 1);
 }
 
 uint32_t *
@@ -1757,6 +1752,4 @@ ec_init(void)
 
 	q256half = ec_dup(q256);
 	ec_shr(q256half);
-
-	ec_alloc_count = 0;
 }

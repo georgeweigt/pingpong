@@ -506,7 +506,7 @@ test_genkey(void)
 		return;
 	}
 
-	if (ec_alloc_count != 0) {
+	if (alloc_count != 0) {
 		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
@@ -799,7 +799,7 @@ test_pubkey(void)
 		return;
 	}
 
-	if (ec_alloc_count != 0) {
+	if (alloc_count != 0) {
 		printf("err memory leak %s line %d\n", __FILE__, __LINE__);
 		return;
 	}
