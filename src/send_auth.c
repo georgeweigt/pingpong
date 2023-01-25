@@ -46,6 +46,8 @@ auth_body(struct node *p)
 	for (i = 0; i < 32; i++)
 		hash[i] = p->static_shared_secret[i] ^ p->auth_nonce[i];
 
+	// auth_public_key is recovered from sig
+
 	ec_sign(sig, sig + 32, hash, p->auth_private_key);
 
 	sig[64] = p->auth_public_key[63] & 1;
