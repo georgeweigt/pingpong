@@ -117,7 +117,6 @@ ec_sign(uint8_t *sig, uint8_t *hash, uint8_t *private_key)
 			// s = k * (h + r * d) mod n
 
 			t = ec_mul(r, d);
-
 			ec_mod(t, q256);
 
 			u = ec_add(h, t);
