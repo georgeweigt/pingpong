@@ -129,7 +129,7 @@ ec_sign(uint8_t *sig, uint8_t *hash, uint8_t *private_key)
 
 			ec_mod(s, q256);
 
-			if (ec_equal(s, 0) || ec_cmp(s, q256half) > -1) {
+			if (ec_equal(s, 0)) {
 				ec_free(k);
 				ec_free(r);
 				ec_free(s);
