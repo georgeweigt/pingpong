@@ -1,6 +1,9 @@
 int
 main(int argc, char *argv[])
 {
+#if 0
+	srandomdev(); // FIXME can't do this, causes comm to fail
+#endif
 	ec_init();
 	aes_init();
 	keccak_init();
