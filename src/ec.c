@@ -1719,7 +1719,7 @@ ec_buf_to_bignum(uint8_t *buf, int len)
 	return u;
 }
 
-uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
+uint32_t *p256, *q256, *q256half, *gx256, *gy256, *a256, *b256;
 
 #if SECP256K1
 
@@ -1754,6 +1754,9 @@ ec_init(void)
 	gy256 = ec_hexstr_to_bignum(STR_GY);
 	a256 = ec_hexstr_to_bignum(STR_A);
 	b256 = ec_hexstr_to_bignum(STR_B);
+
+	q256half = ec_dup(q256);
+	ec_shr(q256half);
 
 	ec_alloc_count = 0;
 }

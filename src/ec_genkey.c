@@ -42,9 +42,7 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 
 	memset(private_key, 0, 32);
 
-	for (i = 0; i < len(d); i++) {
-		if (32 - 4 * i - 4 < 0)
-			break; // err, result greater than 32 bytes
+	for (i = 0; i < len(d) && i < 8; i++) {
 		// bignums are LE, this converts to BE
 		private_key[32 - 4 * i - 4] = d[i] >> 24;
 		private_key[32 - 4 * i - 3] = d[i] >> 16;
@@ -56,9 +54,7 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 
 	memset(public_key, 0, 64);
 
-	for (i = 0; i < len(S.x); i++) {
-		if (32 - 4 * i - 4 < 0)
-			break; // err, result greater than 32 bytes
+	for (i = 0; i < len(S.x) && i < 8; i++) {
 		// bignums are LE, this converts to BE
 		public_key[32 - 4 * i - 4] = S.x[i] >> 24;
 		public_key[32 - 4 * i - 3] = S.x[i] >> 16;
@@ -66,9 +62,7 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 		public_key[32 - 4 * i - 1] = S.x[i];
 	}
 
-	for (i = 0; i < len(S.y); i++) {
-		if (32 - 4 * i - 4 < 0)
-			break; // err, result greater than 32 bytes
+	for (i = 0; i < len(S.y) && i < 8; i++) {
 		// bignums are LE, this converts to BE
 		public_key[64 - 4 * i - 4] = S.y[i] >> 24;
 		public_key[64 - 4 * i - 3] = S.y[i] >> 16;

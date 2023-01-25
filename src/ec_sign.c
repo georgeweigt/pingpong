@@ -1,12 +1,11 @@
-// rbuf		32 bytes (result)
-// sbuf		32 bytes (result)
-// hash		32 bytes typically the sha256 of text or binary data
+// sig		65 bytes (result)
+// hash		32 bytes (typically the sha256 of text or binary data)
 // private_key	32 bytes
 
 void
-ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
+ec_sign(uint8_t *sig, uint8_t *hash, uint8_t *private_key)
 {
-	int err, i;
+	int err, i, v;
 	uint8_t h1[32], V[97], K[32];
 	uint32_t *d, *h, *k, *r, *s, *t, *u;
 	struct point G, R;
@@ -105,6 +104,10 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 				break;
 			}
 
+			// v = R.y mod 2
+
+			v = R.y[0] & 1;
+
 			// k = 1 / k
 
 			t = ec_modinv(k, q256);
@@ -126,7 +129,7 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 			ec_mod(s, q256);
 
-			if (ec_equal(s, 0)) {
+			if (ec_equal(s, 0) || ec_cmp(s, q256half) > -1) {
 				ec_free(k);
 				ec_free(r);
 				ec_free(s);
@@ -136,33 +139,26 @@ ec_sign(uint8_t *rbuf, uint8_t *sbuf, uint8_t *hash, uint8_t *private_key)
 
 			// success
 
-			// save r
+			memset(sig, 0, 64);
 
-			memset(rbuf, 0, 32);
-
-			for (i = 0; i < len(r); i++) {
-				if (32 - 4 * i - 4 < 0)
-					break; // err, result greater than 32 bytes, truncate
+			for (i = 0; i < len(r) && i < 8; i++) {
 				// bignums are LE, this converts to BE
-				rbuf[32 - 4 * i - 4] = r[i] >> 24;
-				rbuf[32 - 4 * i - 3] = r[i] >> 16;
-				rbuf[32 - 4 * i - 2] = r[i] >> 8;
-				rbuf[32 - 4 * i - 1] = r[i];
+				sig[32 - 4 * i - 4] = r[i] >> 24;
+				sig[32 - 4 * i - 3] = r[i] >> 16;
+				sig[32 - 4 * i - 2] = r[i] >> 8;
+				sig[32 - 4 * i - 1] = r[i];
 			}
 
-			// save s
 
-			memset(sbuf, 0, 32);
-
-			for (i = 0; i < len(s); i++) {
-				if (32 - 4 * i - 4 < 0)
-					break; // err, result greater than 32 bytes, truncate
+			for (i = 0; i < len(s) && i < 8; i++) {
 				// bignums are LE, this converts to BE
-				sbuf[32 - 4 * i - 4] = s[i] >> 24;
-				sbuf[32 - 4 * i - 3] = s[i] >> 16;
-				sbuf[32 - 4 * i - 2] = s[i] >> 8;
-				sbuf[32 - 4 * i - 1] = s[i];
+				sig[64 - 4 * i - 4] = s[i] >> 24;
+				sig[64 - 4 * i - 3] = s[i] >> 16;
+				sig[64 - 4 * i - 2] = s[i] >> 8;
+				sig[64 - 4 * i - 1] = s[i];
 			}
+
+			sig[64] = v;
 
 			ec_free(d);
 			ec_free(h);

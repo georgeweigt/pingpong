@@ -28,9 +28,7 @@ ec_ecdh(uint8_t *shared_secret, uint8_t *private_key, uint8_t *public_key)
 
 	memset(shared_secret, 0, 32);
 
-	for (i = 0; i < len(S.x); i++) {
-		if (32 - 4 * i - 4 < 0)
-			break; // err, result greater than 32 bytes, truncate
+	for (i = 0; i < len(S.x) && i < 8; i++) {
 		// bignums are LE, this converts to BE
 		shared_secret[32 - 4 * i - 4] = S.x[i] >> 24;
 		shared_secret[32 - 4 * i - 3] = S.x[i] >> 16;

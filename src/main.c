@@ -1,9 +1,7 @@
 int
 main(int argc, char *argv[])
 {
-#if 0
-	srandomdev(); // FIXME can't do this, causes comm to fail
-#endif
+	srandomdev();
 	ec_init();
 	aes_init();
 	keccak_init();
@@ -20,7 +18,7 @@ main(int argc, char *argv[])
 
 	nib();
 
-	if (alloc_count == 0)
+	if (alloc_count == 0 && ec_alloc_count == 0)
 		printf("ok\n");
 	else
 		printf("memory leak\n");

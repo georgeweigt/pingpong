@@ -8,8 +8,7 @@
 void
 sign(uint8_t *msg, int msglen, uint8_t *private_key, uint8_t *public_key)
 {
-	int v;
-	uint8_t buf[28 + 32], hash[32], r[32], s[32];
+	uint8_t buf[28 + 32], hash[32], sig[65];
 
 	memcpy(buf, ETHSTR, 28); // 28 chars
 
@@ -17,13 +16,11 @@ sign(uint8_t *msg, int msglen, uint8_t *private_key, uint8_t *public_key)
 
 	keccak256(hash, buf, sizeof buf);
 
-	ec_sign(r, s, hash, private_key);
+	ec_sign(sig, hash, private_key);
 
-	v = 27 + (public_key[63] & 1); // 27 even, 28 odd
-
-	push_string(r, 32);
-	push_string(s, 32);
-	push_number(v);
+	push_string(sig, 32);
+	push_string(sig + 32, 32);
+	push_number(sig[64] + 27); // 27 even, 28 odd
 
 	list(3);
 }

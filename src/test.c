@@ -489,7 +489,7 @@ test_genkey(void)
 {
 	int err;
 	uint8_t private_key[32], public_key[64];
-	uint8_t r[32], s[32], hash[32];
+	uint8_t hash[32], sig[65];
 
 	printf("Test genkey ");
 
@@ -497,9 +497,9 @@ test_genkey(void)
 
 	memset(hash, 0xf5, sizeof hash);
 
-	ec_sign(r, s, hash, private_key);
+	ec_sign(sig, hash, private_key);
 
-	err = !ec_verify(hash, r, s, public_key);
+	err = !ec_verify(hash, sig, sig + 32, public_key);
 
 	if (err) {
 		printf("err %s line %d\n", __FILE__, __LINE__);

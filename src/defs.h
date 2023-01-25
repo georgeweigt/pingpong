@@ -85,4 +85,4 @@ extern int tos;
 extern int atom_count;
 extern int alloc_count;
 extern int ec_alloc_count;
-extern uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256;
+extern uint32_t *p256, *q256, *q256half, *gx256, *gy256, *a256, *b256;
