@@ -69,7 +69,7 @@ nib1(struct node *p)
 	ec_genkey(p->auth_private_key, p->auth_public_key);
 
 	for (i = 0; i < 32; i++)
-		p->auth_nonce[i] = random();
+		p->auth_nonce[i] = randf();
 
 	// handshake
 

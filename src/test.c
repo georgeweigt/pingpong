@@ -879,7 +879,7 @@ test_snappy(void)
 	// switch stmt because uniform distribution is incompressible
 
 	for (i = 0; i < sizeof buf; i++) {
-		switch (random() % 10) {
+		switch (randf() % 10) {
 		case 0:
 			buf[i] = ' ';
 			break;

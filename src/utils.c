@@ -42,3 +42,9 @@ free_mem(void *p)
 		alloc_count--;
 	}
 }
+
+uint32_t
+randf(void)
+{
+	return (uint32_t) random();
+}

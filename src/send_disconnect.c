@@ -1,5 +1,3 @@
-// FIXME under construction, needs snappy compression
-
 int
 send_disconnect(struct node *p)
 {

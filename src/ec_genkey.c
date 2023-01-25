@@ -4,7 +4,7 @@
 void
 ec_genkey(uint8_t *private_key, uint8_t *public_key)
 {
-	int i;
+	int err, i;
 	uint32_t *d;
 	struct point R, S;
 
@@ -25,17 +25,18 @@ ec_genkey(uint8_t *private_key, uint8_t *public_key)
 		// generate private key d
 
 		for (i = 0; i < 8; i++)
-			d[i] = random();
+			d[i] = randf();
 
 		ec_norm(d);
 		ec_mod(d, q256);
 
-	} while (ec_equal(d, 0));
+		if (ec_equal(d, 0))
+			continue;
 
-	// generate public key
+		ec_mult(&S, d, &R, p256);
+		err = ec_affinify(&S, p256);
 
-	ec_mult(&S, d, &R, p256);
-	ec_affinify(&S, p256);
+	} while (err);
 
 	// save private key
 

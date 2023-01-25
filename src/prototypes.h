@@ -169,3 +169,4 @@ void printmem(uint8_t *mem, int n);
 void hextobin(uint8_t *buf, int len, char *str);
 void * alloc_mem(int len);
 void free_mem(void *p);
+uint32_t randf(void);

@@ -46,7 +46,7 @@ encap(uint8_t *buf, int len, uint8_t *far_public_key)
 	// iv
 
 	for (i = 0; i < 16; i++)
-		buf[ENCAP_IV + i] = random();
+		buf[ENCAP_IV + i] = randf();
 
 	// encrypt the message
 

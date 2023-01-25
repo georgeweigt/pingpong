@@ -31,10 +31,10 @@ sim(void)
 	ec_genkey(B.ack_private_key, B.ack_public_key);
 
 	for (i = 0; i < 32; i++) {
-		A.auth_nonce[i] = random();
-		A.ack_nonce[i] = random();
-		B.auth_nonce[i] = random();
-		B.ack_nonce[i] = random();
+		A.auth_nonce[i] = randf();
+		A.ack_nonce[i] = randf();
+		B.auth_nonce[i] = randf();
+		B.ack_nonce[i] = randf();
 	}
 
 	// establish connection

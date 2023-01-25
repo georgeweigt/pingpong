@@ -9,7 +9,7 @@ send_ack(struct node *p)
 
 	msglen = rlength(q);
 
-	n = 100 + random() % 100; // random pad length, at least 100
+	n = 100 + randf() % 100; // random pad length, at least 100
 
 	len = msglen + n + ENCAP_OVERHEAD; // ENCAP_OVERHEAD == 2 + 65 + 16 + 32
 
