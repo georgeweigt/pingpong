@@ -53,19 +53,19 @@ brew install ethereum
 To run `geth`
 
 ```
-geth --goerli --nodiscover --verbosity 5
+geth --nodiscover
 ```
 
 `geth` prints its public key on start up
 
 ```
-self="enode://1ecbbdb04f54b68d99a9fb0d60786d29164ffe9776bad9118ec896f2764ec9f711ec2e6f8e0e21c1f0f9abe4515c45949e6bf776d84b54d08f7c32de60e8c480@127.0.0.1:30303?discport=0"
+self="enode://1016734b1f701f642218ed503a96b18d972a9519e639901c659424b42febbffb62e165e63d78f2b8ab3d138e37e5f5c49d909073b085a81e7b390fb189825dba@127.0.0.1:30303?discport=0"
 ```
 
 In `src/defs.h` set `GETH_PUBLIC_KEY` accordingly and run `make`
 
 ```
-#define GETH_PUBLIC_KEY "1ecbbdb04f54b68d99a9fb0d60786d29164ffe9776bad9118ec896f2764ec9f711ec2e6f8e0e21c1f0f9abe4515c45949e6bf776d84b54d08f7c32de60e8c480"
+#define GETH_PUBLIC_KEY "1016734b1f701f642218ed503a96b18d972a9519e639901c659424b42febbffb62e165e63d78f2b8ab3d138e37e5f5c49d909073b085a81e7b390fb189825dba"
 ```
 
 #
