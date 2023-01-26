@@ -14,7 +14,6 @@
 
 #define trace() printf("trace: %s line %d\n", __FILE__, __LINE__)
 #define TIMEOUT 3000 // comm timeout in milliseconds
-#define SECP256K1 1 // set to 0 for secp256r1
 #define ENCAP_R 2
 #define ENCAP_IV (2 + 65)
 #define ENCAP_C (2 + 65 + 16)
