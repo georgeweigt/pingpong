@@ -18,7 +18,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	nib();
+	pingpong();
 
 	if (alloc_count == 0)
 		printf("ok\n");
@@ -27,7 +27,7 @@ main(int argc, char *argv[])
 }
 
 void
-nib(void)
+pingpong(void)
 {
 	struct node *p;
 
@@ -47,7 +47,7 @@ nib(void)
 		return;
 	}
 
-	nib1(p);
+	pingpong_nib(p);
 
 	close(p->fd);
 
@@ -57,7 +57,7 @@ nib(void)
 }
 
 void
-nib1(struct node *p)
+pingpong_nib(struct node *p)
 {
 	int err, i;
 

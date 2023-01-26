@@ -1,4 +1,4 @@
-// sig		65 bytes (result)
+// sig		65 bytes (result r,s,v)
 // hash		32 bytes (typically the sha256 of text or binary data)
 // private_key	32 bytes
 
@@ -62,13 +62,13 @@ ec_sign(uint8_t *sig, uint8_t *hash, uint8_t *private_key)
 
 	V[32] = 0x00;
 
-	for (;;) { // loop until return r, s
+	for (;;) { // loop until return r,s,v
 
 		// V = HMAC_K(V)
 
 		hmac_sha256(K, 32, V, 32, V);
 
-		// for this V, attempt to derive r, s
+		// for this V, attempt to derive r,s,v
 
 		for (;;) { // doesn't actually loop, code will either break or return
 
