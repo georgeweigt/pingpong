@@ -15,14 +15,12 @@ main(int argc, char *argv[])
 			sim();
 		else
 			printf("usage: pingpong | pinpong test | pingpong sim\n");
-		exit(1);
+		return 0;
 	}
 
 	pingpong();
 
-	if (alloc_count == 0)
-		printf("ok\n");
-	else
+	if (alloc_count)
 		printf("memory leak\n");
 }
 
@@ -34,7 +32,7 @@ pingpong(void)
 	p = alloc_mem(sizeof (struct node));
 
 	if (p == NULL)
-		exit(1);
+		return;
 
 	memset(p, 0, sizeof (struct node));
 
