@@ -103,7 +103,7 @@ Note that `recipient-ephemeral-pubk` is shown but there is no `initiator-ephemer
 Of course, both are required to establish a shared secret from which session keys are derived.
 It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
-5. The recovery identifier `v` for signature `sig` above is computed as `v = y mod 2` (see `src/ec_sign.c`)
+5. The recovery identifier `v` for signature `sig` is computed as `v = y mod 2` (see `src/ec_sign.c`)
 
 6. MAC encryption uses AES-ECB, not AES-CTR.
 
