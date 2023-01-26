@@ -1714,9 +1714,7 @@ ec_buf_to_bignum(uint8_t *buf, int len)
 	return u;
 }
 
-uint32_t *p256, *q256, *q256half, *gx256, *gy256, *a256, *b256;
-
-#if SECP256K1
+uint32_t *p256, *q256, *gx256, *gy256, *a256, *b256, *lower_s;
 
 // secp256k1
 
@@ -1727,18 +1725,9 @@ uint32_t *p256, *q256, *q256half, *gx256, *gy256, *a256, *b256;
 #define STR_A "0"
 #define STR_B "7"
 
-#else
+// see go-ethereum-master/crypto/secp256k1/libsecp256k1/include/secp256k1.h
 
-// secp256r1
-
-#define STR_P "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff"
-#define STR_Q "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"
-#define STR_GX "6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"
-#define STR_GY "4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5"
-#define STR_A "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC"
-#define STR_B "5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B"
-
-#endif
+#define STR_LOWER_S "7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0"
 
 void
 ec_init(void)
@@ -1749,7 +1738,5 @@ ec_init(void)
 	gy256 = ec_hexstr_to_bignum(STR_GY);
 	a256 = ec_hexstr_to_bignum(STR_A);
 	b256 = ec_hexstr_to_bignum(STR_B);
-
-	q256half = ec_dup(q256);
-	ec_shr(q256half);
+	lower_s = ec_hexstr_to_bignum(STR_LOWER_S);
 }
