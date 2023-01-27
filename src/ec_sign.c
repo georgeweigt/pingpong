@@ -5,7 +5,7 @@
 void
 ec_sign(uint8_t *sig, uint8_t *hash, uint8_t *private_key)
 {
-	int err, i, v;
+	int i, v;
 	uint8_t h1[32], V[97], K[32];
 	uint32_t *d, *h, *k, *r, *s, *t, *u;
 	struct point G, R;
@@ -84,13 +84,7 @@ ec_sign(uint8_t *sig, uint8_t *hash, uint8_t *private_key)
 			// R = k * G
 
 			ec_mult(&R, k, &G, p256);
-			err = ec_affinify(&R, p256);
-
-			if (err) {
-				ec_free(k);
-				ec_free_xyz(&R);
-				break;
-			}
+			ec_affinify(&R, p256);
 
 			// r = R.x mod n
 

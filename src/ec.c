@@ -242,8 +242,10 @@ ec_affinify(struct point *S, uint32_t *p)
 {
 	uint32_t *lambda, *lambda2, *lambda3, *x, *y;
 
-	if (ec_equal(S->z, 0))
+	if (ec_equal(S->z, 0)) {
+		trace();
 		return -1;
+	}
 
 	lambda = ec_modinv(S->z, p);
 
