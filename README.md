@@ -109,7 +109,7 @@ It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
 5. The recovery identifier `v` for signature `sig` is computed as `v = y mod 2` in source file `src/ec_sign.c`
 
-6. MAC encryption uses AES256-ECB, not AES256-CTR.
+6. MAC encryption uses AES-256-ECB, not AES-256-CTR.
 
 #
 
