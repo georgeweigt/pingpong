@@ -1,7 +1,7 @@
 int
 main(int argc, char *argv[])
 {
-	srandomdev();
+	srandom(time(NULL));
 	ec_init();
 	aes_init();
 	keccak_init();
