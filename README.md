@@ -113,4 +113,4 @@ It turns out that `initiator-ephemeral-pubk` is recovered from `sig`.
 
 #
 
-[Documentation](https://georgeweigt.github.io/pingpong.pdf)
+[pingpong.pdf](https://georgeweigt.github.io/pingpong.pdf)
