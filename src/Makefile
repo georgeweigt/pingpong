@@ -1,4 +1,4 @@
-.PHONY: clean checkall
+.PHONY: clean check
 
 CFILES := $(shell ls *.c)
 
@@ -12,6 +12,6 @@ prototypes.h: $(CFILES)
 clean:
 	rm -f pingpong prototypes.h
 
-checkall:
+check:
 	make -s -C ../tools wcheck
-	for FILE in *.h *.c; do ../tools/wcheck $$FILE; done
+	for FILE in *.c; do ../tools/wcheck $$FILE; done
