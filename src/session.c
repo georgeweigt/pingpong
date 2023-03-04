@@ -6,7 +6,7 @@ session_setup(struct node *p, int initiator)
 	int i;
 	uint8_t ephemeral_secret[32];
 	uint8_t shared_secret[32];
-	uint8_t buf[64], iv[16];
+	uint8_t buf[64];
 	struct mac_state_t *u, *v;
 
 	// ephemeral_secret = ephemeral private_key * ephemeral public_key
@@ -43,13 +43,11 @@ session_setup(struct node *p, int initiator)
 
 	// setup aes
 
-	memset(iv, 0, 16);
+	aes256ctr_setup(p->encrypt_state, p->aes_secret, NULL);
+	aes256ctr_setup(p->decrypt_state, p->aes_secret, NULL);
 
-	aes256ctr_setup(p->encrypt_state, p->aes_secret, iv);
-	aes256ctr_setup(p->decrypt_state, p->aes_secret, iv);
-
-	aes256ctr_setup(p->ingress_mac.expanded_key, p->mac_secret, iv);
-	aes256ctr_setup(p->egress_mac.expanded_key, p->mac_secret, iv);
+	aes256ctr_setup(p->ingress_mac.expanded_key, p->mac_secret, NULL);
+	aes256ctr_setup(p->egress_mac.expanded_key, p->mac_secret, NULL);
 
 	// macs
 
