@@ -1,3 +1,7 @@
+void aes128ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
+void aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
+void aes256ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
+void aes256ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
 int mul(int a, int b);
 void aes_init();
 void aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v);
@@ -8,10 +12,6 @@ void aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out);
 void aes256_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out);
 void test_aes128(void);
 void test_aes256(void);
-void aes128ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
-void aes128ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
-void aes256ctr_setup(uint32_t *expanded_key, uint8_t *key, uint8_t *iv);
-void aes256ctr_encrypt(uint32_t *expanded_key, uint8_t *buf, int len);
 int compress(uint8_t *outbuf, int outmax, uint8_t *inbuf, int inlength);
 void compress_emit_literal(struct compress_state_t *p);
 void compress_match(struct compress_state_t *p);
