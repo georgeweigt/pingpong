@@ -219,6 +219,10 @@ aes_init()
 	}
 }
 
+// key	16 bytes
+// w	44 uint32
+// v	44 uint32
+
 void
 aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
 {
@@ -255,6 +259,10 @@ aes128_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
 }
 
 // encrypt one block (16 bytes)
+
+// w	44 uint32
+// in	16 bytes
+// out	16 bytes
 
 void
 aes128_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
@@ -318,6 +326,10 @@ aes128_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 
 // decrypt one block (16 bytes)
 
+// v	44 uint32
+// in	16 bytes
+// out	16 bytes
+
 void
 aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
 {
@@ -378,6 +390,10 @@ aes128_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
 	out[15] = s3 >> 24;
 }
 
+// key	32 bytes
+// w	60 uint32
+// v	60 uint32
+
 void
 aes256_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
 {
@@ -421,6 +437,10 @@ aes256_expand_key(uint8_t *key, uint32_t *w, uint32_t *v)
 }
 
 // encrypt one block (16 bytes)
+
+// w	60 uint32
+// in	16 bytes
+// out	16 bytes
 
 void
 aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
@@ -483,6 +503,10 @@ aes256_encrypt_block(uint32_t *w, uint8_t *in, uint8_t *out)
 }
 
 // decrypt one block (16 bytes)
+
+// v	60 uint32
+// in	16 bytes
+// out	16 bytes
 
 void
 aes256_decrypt_block(uint32_t *v, uint8_t *in, uint8_t *out)
@@ -553,7 +577,7 @@ test_aes128(void)
 {
 	int err;
 	uint8_t k[16], p[16], c[16], out[16];
-	uint32_t w[44], v[44]; // 44 words = 176 bytes
+	uint32_t w[44], v[44];
 
 	printf("Test aes128 ");
 
@@ -593,7 +617,7 @@ test_aes256(void)
 {
 	int err;
 	uint8_t k[32], p[16], c[16], out[16];
-	uint32_t w[60], v[60]; // 60 words = 240 bytes
+	uint32_t w[60], v[60];
 
 	printf("Test aes256 ");
 
