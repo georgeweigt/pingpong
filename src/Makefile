@@ -1,13 +1,11 @@
 .PHONY: clean check
 
-CFILES := $(shell ls *.c)
+pingpong: defs.h prototypes.h *.c
+	gcc -Wall -O0 -o pingpong -include defs.h -include prototypes.h *.c
 
-pingpong: defs.h prototypes.h $(CFILES)
-	gcc -Wall -O0 -o pingpong -include defs.h -include prototypes.h $(CFILES)
-
-prototypes.h: $(CFILES)
+prototypes.h: *.c
 	make -s -C ../tools make-prototypes
-	../tools/make-prototypes . > prototypes.h
+	../tools/make-prototypes *.c > prototypes.h
 
 clean:
 	rm -f pingpong prototypes.h
